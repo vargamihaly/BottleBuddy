@@ -1,0 +1,21 @@
+# Frontend Development Dockerfile
+
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Copy package files from frontend folder
+# Build context is now root (..)
+COPY frontend/package*.json ./
+
+# Install dependencies
+RUN npm install --legacy-peer-deps
+
+# Copy source code from frontend folder
+COPY frontend/ .
+
+# Expose Vite dev server port
+EXPOSE 8080
+
+# Start development server
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]

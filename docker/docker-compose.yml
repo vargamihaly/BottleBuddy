@@ -1,0 +1,112 @@
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: bottlebuddy-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: bottlebuddy
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-mysecretpassword}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - bottlebuddy-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Jaeger (OpenTelemetry tracing backend)
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: bottlebuddy-jaeger
+    restart: unless-stopped
+    ports:
+      - "16686:16686"  # Jaeger UI
+      - "4317:4317"    # OTLP gRPC receiver
+      - "4318:4318"    # OTLP HTTP receiver
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+    networks:
+      - bottlebuddy-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:16686/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend API (.NET 8)
+  api:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    container_name: bottlebuddy-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      jaeger:
+        condition: service_healthy
+    environment:
+      # Database connection
+      ConnectionStrings__DefaultConnection: "Host=postgres;Database=bottlebuddy;Username=postgres;Password=${DB_PASSWORD:-mysecretpassword}"
+
+      # JWT Configuration
+      Jwt__Key: ${JWT_SECRET:-your-super-secret-jwt-key-at-least-32-characters-long-for-security}
+      Jwt__Issuer: "BottleBuddy"
+      Jwt__Audience: "BottleBuddyUsers"
+
+      # Google OAuth
+      Authentication__Google__ClientId: ${GOOGLE_CLIENT_ID:-}
+      Authentication__Google__ClientSecret: ${GOOGLE_CLIENT_SECRET:-}
+
+      # OpenTelemetry / Jaeger
+      OpenTelemetry__Endpoint: "http://jaeger:4317"
+
+      # ASP.NET Core
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
+      ASPNETCORE_URLS: "http://+:3668"
+    ports:
+      - "3668:3668"
+    networks:
+      - bottlebuddy-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3668/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Frontend (React + Vite + Nginx)
+  frontend:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        # Empty VITE_API_URL for production - uses Nginx reverse proxy
+        VITE_API_URL: ""
+    container_name: bottlebuddy-frontend
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - "8080:80"
+    networks:
+      - bottlebuddy-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  bottlebuddy-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
