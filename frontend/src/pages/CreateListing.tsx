@@ -10,8 +10,20 @@ import { Slider } from "@/components/ui/slider";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Calendar, Info, Coins, Wallet } from "lucide-react";
-import { apiClient } from "@/lib/apiClient";
+import { apiClient, ApiRequestError } from "@/lib/apiClient";
 import { LocationPicker } from "@/components/LocationPicker";
+
+interface CreateListingRequest {
+  title?: string;
+  bottleCount: number;
+  locationAddress: string;
+  description?: string;
+  latitude?: number;
+  longitude?: number;
+  estimatedRefund: number;
+  splitPercentage: number;
+  pickupDeadline?: string;
+}
 
 const CreateListing = () => {
   const navigate = useNavigate();
@@ -82,11 +94,11 @@ const CreateListing = () => {
     setLoading(true);
 
     try {
-      const requestBody: any = {
-        bottleCount: bottleCount,
+      const requestBody: CreateListingRequest = {
+        bottleCount,
         locationAddress: formData.locationAddress,
-        estimatedRefund: estimatedRefund,
-        splitPercentage: splitPercentage,
+        estimatedRefund,
+        splitPercentage,
       };
 
       // Add optional fields if provided
@@ -106,11 +118,16 @@ const CreateListing = () => {
       });
 
       navigate("/");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to create listing:", error);
       toast({
         title: "Error",
-        description: error.message || "Failed to create listing. Please try again.",
+        description:
+          error instanceof ApiRequestError
+            ? error.getUserMessage()
+            : error instanceof Error
+            ? error.message
+            : "Failed to create listing. Please try again.",
         variant: "destructive",
       });
     } finally {

@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Star } from "lucide-react";
-import { apiClient } from "@/lib/apiClient";
+import { apiClient, ApiRequestError } from "@/lib/apiClient";
 import { useToast } from "@/hooks/use-toast";
 import { CreateRating, Transaction } from "@/types";
 
@@ -45,10 +45,13 @@ export const RatingDialog = ({ open, onOpenChange, transaction, otherPartyName }
       setRating(0);
       setComment("");
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const description = error instanceof ApiRequestError
+        ? error.getUserMessage()
+        : "Failed to submit rating. Please try again.";
       toast({
         title: "Error",
-        description: error.response?.data?.error || "Failed to submit rating. Please try again.",
+        description,
         variant: "destructive",
       });
     },

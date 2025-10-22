@@ -1,5 +1,5 @@
-import config from '@/config';
-import type { ApiError } from '@/types';
+import config from "@/config";
+import type { ApiError } from "@/types";
 
 const API_BASE_URL = config.api.baseUrl;
 
@@ -11,15 +11,19 @@ export class ApiRequestError extends Error {
     public errors?: Record<string, string[]>
   ) {
     super(message);
-    this.name = 'ApiRequestError';
+    this.name = "ApiRequestError";
   }
 
-  public static fromResponse(response: Response, body?: any): ApiRequestError {
-    const message = body?.message || body?.error || `Request failed with status ${response.status}`;
-    const code = body?.code;
-    const errors = body?.errors;
+  public static fromResponse(response: Response, body?: unknown): ApiRequestError {
+    const data = (typeof body === "object" && body !== null)
+      ? (body as Partial<ApiError>)
+      : undefined;
 
-    return new ApiRequestError(message, response.status, code, errors);
+    const message = data?.message || (data as { error?: string })?.error || `Request failed with status ${response.status}`;
+    const code = data?.code;
+    const errors = data?.errors;
+
+    return new ApiRequestError(message ?? "Request failed", response.status, code, errors);
   }
 
   public getUserMessage(): string {
@@ -75,9 +79,9 @@ async function request<T>(
     });
 
     // Try to parse response body
-    let body: any;
-    const contentType = response.headers.get('content-type');
-    if (contentType?.includes('application/json')) {
+    let body: unknown;
+    const contentType = response.headers.get("content-type");
+    if (contentType?.includes("application/json")) {
       body = await response.json();
     } else {
       const text = await response.text();
@@ -85,7 +89,7 @@ async function request<T>(
         try {
           body = JSON.parse(text);
         } catch {
-          body = { message: text };
+          body = { message: text } satisfies Partial<ApiError>;
         }
       }
     }
@@ -101,11 +105,15 @@ async function request<T>(
     }
 
     // Network error or other non-HTTP errors
-    if (error instanceof TypeError && error.message.includes('fetch')) {
-      throw new ApiRequestError('Network error. Please check your internet connection.');
+    if (error instanceof TypeError && error.message.includes("fetch")) {
+      throw new ApiRequestError("Network error. Please check your internet connection.");
     }
 
-    throw new ApiRequestError('An unexpected error occurred. Please try again.');
+    if (error instanceof Error) {
+      throw new ApiRequestError(error.message);
+    }
+
+    throw new ApiRequestError("An unexpected error occurred. Please try again.");
   }
 }
 
@@ -144,37 +152,37 @@ async function requestWithRetry<T>(
 // Convenience methods
 export const apiClient = {
   get: <T>(endpoint: string, options?: RequestOptions) =>
-    requestWithRetry<T>(endpoint, { ...options, method: 'GET' }),
+    requestWithRetry<T>(endpoint, { ...options, method: "GET" }),
 
-  post: <T>(endpoint: string, data?: any, options?: RequestOptions) =>
+  post: <T>(endpoint: string, data?: unknown, options?: RequestOptions) =>
     requestWithRetry<T>(endpoint, {
       ...options,
-      method: 'POST',
+      method: "POST",
       body: data ? JSON.stringify(data) : undefined,
     }),
 
-  put: <T>(endpoint: string, data?: any, options?: RequestOptions) =>
+  put: <T>(endpoint: string, data?: unknown, options?: RequestOptions) =>
     requestWithRetry<T>(endpoint, {
       ...options,
-      method: 'PUT',
+      method: "PUT",
       body: data ? JSON.stringify(data) : undefined,
     }),
 
-  patch: <T>(endpoint: string, data?: any, options?: RequestOptions) =>
+  patch: <T>(endpoint: string, data?: unknown, options?: RequestOptions) =>
     requestWithRetry<T>(endpoint, {
       ...options,
-      method: 'PATCH',
+      method: "PATCH",
       body: data ? JSON.stringify(data) : undefined,
     }),
 
   delete: <T>(endpoint: string, options?: RequestOptions) =>
-    requestWithRetry<T>(endpoint, { ...options, method: 'DELETE' }),
+    requestWithRetry<T>(endpoint, { ...options, method: "DELETE" }),
 
   // Non-retrying versions for specific cases
-  postNoRetry: <T>(endpoint: string, data?: any, options?: RequestOptions) =>
+  postNoRetry: <T>(endpoint: string, data?: unknown, options?: RequestOptions) =>
     request<T>(endpoint, {
       ...options,
-      method: 'POST',
+      method: "POST",
       body: data ? JSON.stringify(data) : undefined,
     }),
 };

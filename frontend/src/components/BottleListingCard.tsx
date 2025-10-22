@@ -2,9 +2,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { MapPin, Star, Clock, Users, Trash2, CheckCircle, XCircle, ChevronDown, ChevronUp } from "lucide-react";
-import { BottleListing, CreatePickupRequest, PickupRequest, Transaction } from "@/types";
+import { BottleListing, CreatePickupRequest, PickupRequest, Transaction, Rating } from "@/types";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
-import { apiClient } from "@/lib/apiClient";
+import { apiClient, ApiRequestError } from "@/lib/apiClient";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useMemo } from "react";
 import { Separator } from "@/components/ui/separator";
@@ -26,7 +26,7 @@ const CompletedRequestRating = ({
   volunteerName: string;
   onOpenRatingDialog: (transaction: Transaction) => void;
 }) => {
-  const { data: transaction } = useQuery({
+  const { data: transaction } = useQuery<Transaction>({
     queryKey: ["transaction", requestId],
     queryFn: async () => {
       const response = await apiClient.get<Transaction>(`/api/transactions/pickup-request/${requestId}`);
@@ -34,15 +34,15 @@ const CompletedRequestRating = ({
     },
   });
 
-  const { data: myRating } = useQuery({
+  const { data: myRating } = useQuery<Rating | null>({
     queryKey: ["rating", transaction?.id],
     queryFn: async () => {
       if (!transaction) return null;
       try {
-        const response = await apiClient.get(`/api/ratings/transaction/${transaction.id}`);
+        const response = await apiClient.get<Rating>(`/api/ratings/transaction/${transaction.id}`);
         return response;
-      } catch (error: any) {
-        if (error.response?.status === 404) {
+      } catch (error: unknown) {
+        if (error instanceof ApiRequestError && error.statusCode === 404) {
           return null;
         }
         throw error;
@@ -102,7 +102,7 @@ export const BottleListingCard = ({ listing, isOwnListing = false, myPickupReque
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
 
   // Fetch pickup requests for this listing if it's the user's own listing
-  const { data: pickupRequests = [], isLoading: isLoadingRequests } = useQuery({
+  const { data: pickupRequests = [], isLoading: isLoadingRequests } = useQuery<PickupRequest[]>({
     queryKey: ["pickupRequests", listing.id],
     queryFn: async () => {
       const response = await apiClient.get<PickupRequest[]>(`/api/pickuprequests/listing/${listing.id}`);
@@ -129,7 +129,7 @@ export const BottleListingCard = ({ listing, isOwnListing = false, myPickupReque
   const hasActivePickupRequest = !!myPickupRequest;
 
   // Fetch transaction for completed pickup request
-  const { data: transaction } = useQuery({
+  const { data: transaction } = useQuery<Transaction | null>({
     queryKey: ["transaction", myCompletedPickupRequest?.id],
     queryFn: async () => {
       if (!myCompletedPickupRequest) return null;
@@ -142,15 +142,15 @@ export const BottleListingCard = ({ listing, isOwnListing = false, myPickupReque
   });
 
   // Check if user has already rated this transaction
-  const { data: myRating } = useQuery({
+  const { data: myRating } = useQuery<Rating | null>({
     queryKey: ["rating", transaction?.id],
     queryFn: async () => {
       if (!transaction) return null;
       try {
-        const response = await apiClient.get(`/api/ratings/transaction/${transaction.id}`);
+        const response = await apiClient.get<Rating>(`/api/ratings/transaction/${transaction.id}`);
         return response;
-      } catch (error: any) {
-        if (error.response?.status === 404) {
+      } catch (error: unknown) {
+        if (error instanceof ApiRequestError && error.statusCode === 404) {
           return null; // No rating yet
         }
         throw error;
@@ -194,10 +194,13 @@ export const BottleListingCard = ({ listing, isOwnListing = false, myPickupReque
       });
       setIsDeleting(false);
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const description = error instanceof ApiRequestError
+        ? error.getUserMessage()
+        : "Failed to delete listing. Please try again.";
       toast({
         title: "Error",
-        description: error.response?.data?.error || "Failed to delete listing. Please try again.",
+        description,
         variant: "destructive",
       });
       setIsDeleting(false);
@@ -214,8 +217,8 @@ export const BottleListingCard = ({ listing, isOwnListing = false, myPickupReque
   // Pickup request mutation
   const pickupRequestMutation = useMutation({
     mutationFn: async (data: CreatePickupRequest) => {
-      const response = await apiClient.post('/api/pickuprequests', data);
-      return response.data;
+      const response = await apiClient.post<PickupRequest>('/api/pickuprequests', data);
+      return response;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["bottleListings"] });
@@ -226,10 +229,13 @@ export const BottleListingCard = ({ listing, isOwnListing = false, myPickupReque
       });
       setIsOfferingPickup(false);
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const description = error instanceof ApiRequestError
+        ? error.getUserMessage()
+        : "Failed to send pickup request. Please try again.";
       toast({
         title: "Error",
-        description: error.response?.data?.error || "Failed to send pickup request. Please try again.",
+        description,
         variant: "destructive",
       });
       setIsOfferingPickup(false);
@@ -260,10 +266,13 @@ export const BottleListingCard = ({ listing, isOwnListing = false, myPickupReque
         description: "The pickup request has been updated successfully.",
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const description = error instanceof ApiRequestError
+        ? error.getUserMessage()
+        : "Failed to update pickup request.";
       toast({
         title: "Error",
-        description: error.response?.data?.error || "Failed to update pickup request.",
+        description,
         variant: "destructive",
       });
     },
