@@ -7,8 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, MapPin, Calendar, DollarSign, Percent } from "lucide-react";
+import { ArrowLeft, Calendar, DollarSign, Percent } from "lucide-react";
 import { apiClient } from "@/lib/apiClient";
+import { LocationPicker } from "@/components/LocationPicker";
 
 const CreateListing = () => {
   const navigate = useNavigate();
@@ -21,16 +22,32 @@ const CreateListing = () => {
     bottleCount: "",
     locationAddress: "",
     description: "",
-    latitude: "",
-    longitude: "",
+    latitude: 0,
+    longitude: 0,
     estimatedRefund: "",
     pickupDeadline: "",
     splitPercentage: "50",
   });
 
+  const [hasLocation, setHasLocation] = useState(false);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleLocationSelect = (location: {
+    address: string;
+    latitude: number;
+    longitude: number;
+  }) => {
+    setFormData((prev) => ({
+      ...prev,
+      locationAddress: location.address,
+      latitude: location.latitude,
+      longitude: location.longitude,
+    }));
+    setHasLocation(true);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -46,6 +63,15 @@ const CreateListing = () => {
       return;
     }
 
+    if (!hasLocation || !formData.locationAddress) {
+      toast({
+        title: "Location required",
+        description: "Please select a location on the map",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -58,8 +84,10 @@ const CreateListing = () => {
       // Add optional fields if provided
       if (formData.title) requestBody.title = formData.title;
       if (formData.description) requestBody.description = formData.description;
-      if (formData.latitude) requestBody.latitude = parseFloat(formData.latitude);
-      if (formData.longitude) requestBody.longitude = parseFloat(formData.longitude);
+      if (hasLocation) {
+        requestBody.latitude = formData.latitude;
+        requestBody.longitude = formData.longitude;
+      }
       if (formData.pickupDeadline) requestBody.pickupDeadline = new Date(formData.pickupDeadline).toISOString();
       if (formData.splitPercentage) requestBody.splitPercentage = parseFloat(formData.splitPercentage);
 
@@ -138,50 +166,19 @@ const CreateListing = () => {
                 />
               </div>
 
-              {/* Location Address (Required) */}
-              <div className="space-y-2">
-                <Label htmlFor="locationAddress">
-                  <MapPin className="w-4 h-4 inline mr-1" />
-                  Location Address <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  id="locationAddress"
-                  name="locationAddress"
-                  placeholder="e.g., District V, Budapest"
-                  value={formData.locationAddress}
-                  onChange={handleInputChange}
-                  required
-                  minLength={3}
-                />
-              </div>
-
-              {/* Coordinates (Optional) */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="latitude">Latitude (Optional)</Label>
-                  <Input
-                    id="latitude"
-                    name="latitude"
-                    type="number"
-                    step="any"
-                    placeholder="47.4979"
-                    value={formData.latitude}
-                    onChange={handleInputChange}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="longitude">Longitude (Optional)</Label>
-                  <Input
-                    id="longitude"
-                    name="longitude"
-                    type="number"
-                    step="any"
-                    placeholder="19.0402"
-                    value={formData.longitude}
-                    onChange={handleInputChange}
-                  />
-                </div>
-              </div>
+              {/* Location Picker (Required) */}
+              <LocationPicker
+                onLocationSelect={handleLocationSelect}
+                initialLocation={
+                  hasLocation
+                    ? {
+                        address: formData.locationAddress,
+                        latitude: formData.latitude,
+                        longitude: formData.longitude,
+                      }
+                    : undefined
+                }
+              />
 
               {/* Description (Optional) */}
               <div className="space-y-2">

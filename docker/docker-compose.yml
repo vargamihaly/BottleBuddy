@@ -82,26 +82,26 @@ services:
       start_period: 40s
 
   # Frontend (React + Vite + Nginx)
-  frontend:
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile
-      args:
-        # Empty VITE_API_URL for production - uses Nginx reverse proxy
-        VITE_API_URL: ""
-    container_name: bottlebuddy-frontend
-    restart: unless-stopped
-    depends_on:
-      - api
-    ports:
-      - "8080:80"
-    networks:
-      - bottlebuddy-network
-    healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+#  frontend:
+#    build:
+#      context: ..
+#      dockerfile: docker/Dockerfile
+#      args:
+#        # Empty VITE_API_URL for production - uses Nginx reverse proxy
+#        VITE_API_URL: ""
+#    container_name: bottlebuddy-frontend
+#    restart: unless-stopped
+#    depends_on:
+#      - api
+#    ports:
+#      - "8080:80"
+#    networks:
+#      - bottlebuddy-network
+#    healthcheck:
+#      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+#      interval: 30s
+#      timeout: 10s
+#      retries: 3
 
 networks:
   bottlebuddy-network:
