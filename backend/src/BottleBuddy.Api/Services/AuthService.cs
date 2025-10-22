@@ -4,9 +4,11 @@ using System.Text;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using BottleBuddy.Api.Dtos;
 using BottleBuddy.Api.Models;
 using BottleBuddy.Api.Data;
+using System.Linq;
 
 namespace BottleBuddy.Api.Services;
 
@@ -14,14 +16,17 @@ public class AuthService(
     UserManager<ApplicationUser> userManager,
     SignInManager<ApplicationUser> signInManager,
     IConfiguration configuration,
-    ApplicationDbContext context) : IAuthService
+    ApplicationDbContext context,
+    ILogger<AuthService> logger) : IAuthService
 {
 
     public async Task<AuthResponseDto> RegisterAsync(RegisterRequest request)
     {
+        logger.LogInformation("Registering new user with email {Email}", request.Email);
         var existingUser = await userManager.FindByEmailAsync(request.Email);
         if (existingUser != null)
         {
+            logger.LogWarning("Registration failed: user with email {Email} already exists", request.Email);
             throw new InvalidOperationException("A user with this email already exists.");
         }
 
@@ -32,6 +37,7 @@ public class AuthService(
                 .FirstOrDefaultAsync(p => p.Username == request.Username);
             if (existingProfile != null)
             {
+                logger.LogWarning("Registration failed: username {Username} already taken", request.Username);
                 throw new InvalidOperationException("This username is already taken.");
             }
         }
@@ -47,6 +53,7 @@ public class AuthService(
         if (!result.Succeeded)
         {
             var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+            logger.LogWarning("Registration failed for email {Email} with errors: {Errors}", request.Email, errors);
             throw new InvalidOperationException(errors);
         }
 
@@ -67,6 +74,7 @@ public class AuthService(
         await context.SaveChangesAsync();
 
         var token = GenerateJwtToken(user);
+        logger.LogInformation("Registration succeeded for email {Email}", request.Email);
         return new AuthResponseDto { Token = token };
     }
 
@@ -90,9 +98,11 @@ public class AuthService(
 
     public async Task<AuthResponseDto> LoginAsync(LoginRequest request)
     {
+        logger.LogInformation("Login attempt for email {Email}", request.Email);
         var user = await userManager.FindByEmailAsync(request.Email);
         if (user == null)
         {
+            logger.LogWarning("Login failed: user with email {Email} not found", request.Email);
             throw new UnauthorizedAccessException("Invalid credentials. Please check your email and password.");
         }
 
@@ -106,23 +116,28 @@ public class AuthService(
         {
             if (result.IsLockedOut)
             {
+                logger.LogWarning("Login failed: account locked for email {Email}", request.Email);
                 throw new UnauthorizedAccessException("Account locked. Please try again later.");
             }
+            logger.LogWarning("Login failed: invalid credentials for email {Email}", request.Email);
             throw new UnauthorizedAccessException("Invalid credentials. Please check your email and password.");
         }
 
         var token = GenerateJwtToken(user);
+        logger.LogInformation("Login succeeded for email {Email}", request.Email);
         return new AuthResponseDto { Token = token };
     }
 
     public async Task<UserResponseDto> GetCurrentUserAsync(string userId)
     {
+        logger.LogInformation("Retrieving current user profile for user {UserId}", userId);
         var user = await userManager.Users
             .Include(u => u.Profile)
             .FirstOrDefaultAsync(u => u.Id == userId);
 
         if (user == null)
         {
+            logger.LogWarning("User {UserId} not found while retrieving profile", userId);
             throw new KeyNotFoundException("User not found.");
         }
 
@@ -145,6 +160,7 @@ public class AuthService(
 
     public string GenerateJwtToken(ApplicationUser user)
     {
+        logger.LogInformation("Generating JWT token for user {UserId}", user.Id);
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]!));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
@@ -163,6 +179,7 @@ public class AuthService(
             expires: DateTime.UtcNow.AddHours(1),
             signingCredentials: creds);
 
+        logger.LogInformation("JWT token generated for user {UserId} with expiration {Expiration}", user.Id, token.ValidTo);
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 }
