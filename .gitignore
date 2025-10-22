@@ -263,3 +263,16 @@ temp-uploads/
 *.key
 *.crt
 *.cer
+
+# Temporary development files
+*SUMMARY*.md
+*FIXES*.md
+*IMPROVEMENTS*.md
+*GUIDE*.md
+
+# IDE user-specific files
+*.csproj.user
+*.vbproj.user
+
+# Windows artifacts
+nul
