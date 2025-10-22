@@ -3,12 +3,16 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using BottleBuddy.Api.Dtos;
 using BottleBuddy.Api.Services;
+using Microsoft.Extensions.Logging;
+using System.Linq;
 
 namespace BottleBuddy.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class BottleListingsController(IBottleListingService bottleListingService) : ControllerBase
+public class BottleListingsController(
+    IBottleListingService bottleListingService,
+    ILogger<BottleListingsController> logger) : ControllerBase
 {
     /// <summary>
     /// Get paginated list of bottle listings
@@ -23,7 +27,18 @@ public class BottleListingsController(IBottleListingService bottleListingService
         [FromQuery] int pageSize = 50,
         [FromQuery] string? status = null)
     {
+        logger.LogInformation(
+            "Fetching bottle listings for page {Page} with size {PageSize} and status {Status}",
+            page,
+            pageSize,
+            status ?? "any");
+
         var (listings, metadata) = await bottleListingService.GetListingsAsync(page, pageSize, status);
+
+        logger.LogInformation(
+            "Retrieved {ListingCount} listings for page {Page}",
+            listings.Count(),
+            metadata.Page);
 
         return Ok(new
         {
@@ -45,16 +60,20 @@ public class BottleListingsController(IBottleListingService bottleListingService
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId))
         {
+            logger.LogWarning("Create listing attempted without authenticated user");
             return Unauthorized();
         }
 
         try
         {
+            logger.LogInformation("Creating bottle listing for user {UserId}", userId);
             var listing = await bottleListingService.CreateListingAsync(userId, request);
+            logger.LogInformation("Bottle listing {ListingId} created for user {UserId}", listing.Id, userId);
             return CreatedAtAction(nameof(GetListings), new { id = listing.Id }, listing);
         }
         catch (UnauthorizedAccessException ex)
         {
+            logger.LogWarning(ex, "Unauthorized attempt to create listing for user {UserId}", userId);
             return Unauthorized(new { error = ex.Message });
         }
     }
@@ -74,20 +93,25 @@ public class BottleListingsController(IBottleListingService bottleListingService
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId))
         {
+            logger.LogWarning("Delete listing attempted without authenticated user");
             return Unauthorized();
         }
 
         try
         {
+            logger.LogInformation("Deleting bottle listing {ListingId} for user {UserId}", id, userId);
             await bottleListingService.DeleteListingAsync(userId, id);
+            logger.LogInformation("Bottle listing {ListingId} deleted for user {UserId}", id, userId);
             return NoContent();
         }
         catch (KeyNotFoundException ex)
         {
+            logger.LogWarning(ex, "Bottle listing {ListingId} not found for user {UserId}", id, userId);
             return NotFound(new { error = ex.Message });
         }
         catch (UnauthorizedAccessException ex)
         {
+            logger.LogWarning(ex, "User {UserId} forbidden from deleting listing {ListingId}", userId, id);
             return Forbid();
         }
     }

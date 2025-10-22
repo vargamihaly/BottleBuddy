@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
-using System.Diagnostics;
+using Microsoft.Extensions.Logging;
+using System.Linq;
 using BottleBuddy.Api.Data;
 using BottleBuddy.Api.Dtos;
 using BottleBuddy.Api.Models;
@@ -9,13 +10,20 @@ namespace BottleBuddy.Api.Services;
 
 public class BottleListingService(
     ApplicationDbContext context,
-    UserManager<ApplicationUser> userManager) : IBottleListingService
+    UserManager<ApplicationUser> userManager,
+    ILogger<BottleListingService> logger) : IBottleListingService
 {
     public async Task<(IEnumerable<BottleListingResponseDto> Listings, PaginationMetadata Metadata)> GetListingsAsync(
         int page,
         int pageSize,
         string? status)
     {
+        logger.LogInformation(
+            "Listing retrieval requested for page {Page} with size {PageSize} and status {Status}",
+            page,
+            pageSize,
+            status ?? "any");
+
         // Validate pagination parameters
         if (page < 1) page = 1;
         if (pageSize < 1 || pageSize > 100) pageSize = 50;
@@ -66,14 +74,26 @@ public class BottleListingService(
             HasPrevious = page > 1
         };
 
+        logger.LogInformation(
+            "Returning {ListingCount} listings for page {Page} of {TotalPages}",
+            listings.Count,
+            metadata.Page,
+            metadata.TotalPages);
+
         return (listings, metadata);
     }
 
     public async Task<BottleListingResponseDto> CreateListingAsync(string userId, CreateBottleListingRequest request)
     {
+        logger.LogInformation(
+            "Creating listing for user {UserId} with title {Title}",
+            userId,
+            request.Title ?? string.Empty);
+
         var user = await userManager.FindByIdAsync(userId);
         if (user == null)
         {
+            logger.LogWarning("User {UserId} not found while attempting to create listing", userId);
             throw new UnauthorizedAccessException("User not found.");
         }
 
@@ -100,6 +120,11 @@ public class BottleListingService(
 
         await context.SaveChangesAsync();
 
+        logger.LogInformation(
+            "Listing {ListingId} created for user {UserId}",
+            listing.Id,
+            userId);
+
         return new BottleListingResponseDto
         {
             Id = listing.Id,
@@ -123,21 +148,40 @@ public class BottleListingService(
 
     public async Task DeleteListingAsync(string userId, Guid listingId)
     {
+        logger.LogInformation(
+            "Deleting listing {ListingId} for user {UserId}",
+            listingId,
+            userId);
+
         var listing = await context.BottleListings.FindAsync(listingId);
 
         if (listing == null)
         {
+            logger.LogWarning(
+                "Listing {ListingId} not found while user {UserId} attempted delete",
+                listingId,
+                userId);
             throw new KeyNotFoundException($"Listing with ID {listingId} not found.");
         }
 
         // Verify that the user owns this listing
         if (listing.UserId != userId)
         {
+            logger.LogWarning(
+                "User {UserId} attempted to delete listing {ListingId} owned by {OwnerId}",
+                userId,
+                listingId,
+                listing.UserId);
             throw new UnauthorizedAccessException("You can only delete your own listings.");
         }
 
         context.BottleListings.Remove(listing);
 
         await context.SaveChangesAsync();
+
+        logger.LogInformation(
+            "Listing {ListingId} deleted for user {UserId}",
+            listingId,
+            userId);
     }
 }

@@ -30,11 +30,14 @@ public class AuthController(
     {
         try
         {
+            logger.LogInformation("Register endpoint invoked for email {Email}", request.Email);
             var response = await authService.RegisterAsync(request);
+            logger.LogInformation("Registration succeeded for email {Email}", request.Email);
             return Ok(response);
         }
         catch (InvalidOperationException ex)
         {
+            logger.LogWarning(ex, "Registration failed for email {Email}", request.Email);
             return BadRequest(new { error = ex.Message });
         }
     }
@@ -49,11 +52,14 @@ public class AuthController(
     {
         try
         {
+            logger.LogInformation("Login endpoint invoked for email {Email}", request.Email);
             var response = await authService.LoginAsync(request);
+            logger.LogInformation("Login succeeded for email {Email}", request.Email);
             return Ok(response);
         }
         catch (UnauthorizedAccessException ex)
         {
+            logger.LogWarning(ex, "Login failed for email {Email}", request.Email);
             return BadRequest(new { error = ex.Message });
         }
     }
@@ -71,16 +77,20 @@ public class AuthController(
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId))
         {
+            logger.LogWarning("Get current user invoked without authenticated user");
             return Unauthorized();
         }
 
         try
         {
+            logger.LogInformation("Retrieving current user profile for user {UserId}", userId);
             var user = await authService.GetCurrentUserAsync(userId);
+            logger.LogInformation("Retrieved current user profile for user {UserId}", userId);
             return Ok(user);
         }
         catch (KeyNotFoundException ex)
         {
+            logger.LogWarning(ex, "User {UserId} not found while retrieving profile", userId);
             return NotFound(new { error = ex.Message });
         }
     }
