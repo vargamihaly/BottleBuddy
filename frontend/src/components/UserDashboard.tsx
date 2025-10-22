@@ -4,19 +4,37 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { ArrowUp, Star, MapPin, Users, Plus, ArrowLeft, TrendingUp, Recycle } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface UserDashboardProps {
   onBackToHome: () => void;
 }
 
 export const UserDashboard = ({ onBackToHome }: UserDashboardProps) => {
+  const { user } = useAuth();
+
+  // Placeholder stats - these would come from API in the future
   const userStats = {
     totalBottles: 156,
     totalEarnings: 3900,
     completedExchanges: 23,
-    rating: 4.8,
+    rating: user?.rating ?? 0,
+    totalRatings: user?.totalRatings ?? 0,
     level: "Eco Champion"
   };
+
+  // Get user initials for avatar
+  const getInitials = (name?: string) => {
+    if (!name) return "U";
+    const parts = name.split(" ");
+    if (parts.length >= 2) {
+      return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
+  };
+
+  // Display name priority: fullName > username > email
+  const displayName = user?.fullName || user?.username || user?.email || "User";
 
   const recentActivity = [
     {
@@ -79,15 +97,28 @@ export const UserDashboard = ({ onBackToHome }: UserDashboardProps) => {
         <Card className="mb-8 border-green-200">
           <CardHeader>
             <div className="flex items-center space-x-4">
-              <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">
-                JD
-              </div>
+              {user?.avatarUrl ? (
+                <img
+                  src={user.avatarUrl}
+                  alt={displayName}
+                  className="w-16 h-16 rounded-full object-cover"
+                />
+              ) : (
+                <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">
+                  {getInitials(user?.fullName || user?.username)}
+                </div>
+              )}
               <div>
-                <CardTitle className="text-2xl">János Dáma</CardTitle>
+                <CardTitle className="text-2xl">{displayName}</CardTitle>
                 <CardDescription className="flex items-center space-x-2">
-                  <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                  <span>{userStats.rating} rating</span>
-                  <span>•</span>
+                  {userStats.rating > 0 && (
+                    <>
+                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                      <span>{userStats.rating.toFixed(1)} rating</span>
+                      <span className="text-xs">({userStats.totalRatings} reviews)</span>
+                      <span>•</span>
+                    </>
+                  )}
                   <span>{userStats.completedExchanges} completed exchanges</span>
                 </CardDescription>
               </div>

@@ -3,12 +3,15 @@
 export interface User {
   id: string;
   email: string;
-  userName?: string;
+  emailConfirmed?: boolean;
+  username?: string;  // Maps to Username from backend (case-insensitive JSON)
   fullName?: string;
+  phone?: string;
   avatarUrl?: string;
   rating?: number;
   totalRatings?: number;
-  createdAt?: string;
+  profileCreatedAt?: string;
+  createdAt?: string;  // Keep for backward compatibility
 }
 
 export interface BottleListing {
