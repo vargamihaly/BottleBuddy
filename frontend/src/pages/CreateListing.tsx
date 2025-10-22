@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -6,8 +6,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Slider } from "@/components/ui/slider";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Calendar, DollarSign, Percent } from "lucide-react";
+import { ArrowLeft, Calendar, Info, Coins, Wallet } from "lucide-react";
 import { apiClient } from "@/lib/apiClient";
 import { LocationPicker } from "@/components/LocationPicker";
 
@@ -24,12 +26,17 @@ const CreateListing = () => {
     description: "",
     latitude: 0,
     longitude: 0,
-    estimatedRefund: "",
     pickupDeadline: "",
-    splitPercentage: "50",
   });
 
   const [hasLocation, setHasLocation] = useState(false);
+  const [splitPercentage, setSplitPercentage] = useState(50);
+
+  // Auto-calculate estimated refund (bottles × 50 HUF)
+  const bottleCount = parseInt(formData.bottleCount) || 0;
+  const estimatedRefund = bottleCount * 50;
+  const yourShare = Math.round((estimatedRefund * splitPercentage) / 100);
+  const volunteerShare = estimatedRefund - yourShare;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -76,9 +83,10 @@ const CreateListing = () => {
 
     try {
       const requestBody: any = {
-        bottleCount: parseInt(formData.bottleCount),
+        bottleCount: bottleCount,
         locationAddress: formData.locationAddress,
-        estimatedRefund: parseFloat(formData.estimatedRefund),
+        estimatedRefund: estimatedRefund,
+        splitPercentage: splitPercentage,
       };
 
       // Add optional fields if provided
@@ -89,7 +97,6 @@ const CreateListing = () => {
         requestBody.longitude = formData.longitude;
       }
       if (formData.pickupDeadline) requestBody.pickupDeadline = new Date(formData.pickupDeadline).toISOString();
-      if (formData.splitPercentage) requestBody.splitPercentage = parseFloat(formData.splitPercentage);
 
       await apiClient.post("/api/bottlelistings", requestBody);
 
@@ -194,47 +201,80 @@ const CreateListing = () => {
                 />
               </div>
 
-              {/* Estimated Refund (Required) */}
+              {/* How It Works Information */}
+              <Alert className="bg-blue-50 border-blue-200">
+                <Info className="h-4 w-4 text-blue-600" />
+                <AlertDescription className="text-sm text-blue-900">
+                  <strong>How payment works:</strong> The volunteer who picks up your bottles will return them to a collection point and receive the full refund.
+                  They will then pay you your agreed share in cash when picking up the bottles. You both benefit from recycling together!
+                </AlertDescription>
+              </Alert>
+
+              {/* Estimated Refund (Auto-calculated) */}
               <div className="space-y-2">
-                <Label htmlFor="estimatedRefund">
-                  <DollarSign className="w-4 h-4 inline mr-1" />
-                  Estimated Refund (HUF) <span className="text-red-500">*</span>
+                <Label>
+                  <Coins className="w-4 h-4 inline mr-1" />
+                  Total Bottle Refund
                 </Label>
-                <Input
-                  id="estimatedRefund"
-                  name="estimatedRefund"
-                  type="number"
-                  step="0.01"
-                  placeholder="e.g., 1250 (50 HUF × 25 bottles)"
-                  value={formData.estimatedRefund}
-                  onChange={handleInputChange}
-                  required
-                  min={0}
-                />
+                <div className="flex items-center space-x-2">
+                  <Input
+                    value={`${estimatedRefund} HUF`}
+                    readOnly
+                    className="bg-gray-50 font-semibold text-lg"
+                  />
+                  <span className="text-sm text-gray-500 whitespace-nowrap">
+                    ({bottleCount} × 50 HUF)
+                  </span>
+                </div>
                 <p className="text-xs text-gray-500">
-                  In Hungary, each bottle refund is typically 50 HUF
+                  Automatically calculated: Each bottle refund is 50 HUF in Hungary
                 </p>
               </div>
 
-              {/* Split Percentage (Optional) */}
-              <div className="space-y-2">
-                <Label htmlFor="splitPercentage">
-                  <Percent className="w-4 h-4 inline mr-1" />
-                  Your Share (%) (Optional)
-                </Label>
-                <Input
-                  id="splitPercentage"
-                  name="splitPercentage"
-                  type="number"
-                  step="1"
-                  placeholder="50"
-                  value={formData.splitPercentage}
-                  onChange={handleInputChange}
-                  min={0}
-                  max={100}
-                />
-                <p className="text-xs text-gray-500">
-                  Default is 50% - you and the volunteer split the refund equally
+              {/* Split Percentage Slider */}
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label>
+                    <Wallet className="w-4 h-4 inline mr-1" />
+                    Your Share: {splitPercentage}%
+                  </Label>
+                  <Slider
+                    value={[splitPercentage]}
+                    onValueChange={(value) => setSplitPercentage(value[0])}
+                    min={0}
+                    max={100}
+                    step={5}
+                    className="w-full"
+                  />
+                  <div className="flex justify-between text-xs text-gray-500">
+                    <span>0%</span>
+                    <span>25%</span>
+                    <span>50%</span>
+                    <span>75%</span>
+                    <span>100%</span>
+                  </div>
+                </div>
+
+                {/* Payment Breakdown */}
+                <div className="grid grid-cols-2 gap-4">
+                  <Card className="bg-green-50 border-green-200">
+                    <CardContent className="pt-4">
+                      <p className="text-xs text-gray-600 mb-1">You receive (cash)</p>
+                      <p className="text-2xl font-bold text-green-700">{yourShare} HUF</p>
+                      <p className="text-xs text-gray-500 mt-1">{splitPercentage}% of total</p>
+                    </CardContent>
+                  </Card>
+                  <Card className="bg-blue-50 border-blue-200">
+                    <CardContent className="pt-4">
+                      <p className="text-xs text-gray-600 mb-1">Volunteer keeps</p>
+                      <p className="text-2xl font-bold text-blue-700">{volunteerShare} HUF</p>
+                      <p className="text-xs text-gray-500 mt-1">{100 - splitPercentage}% of total</p>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <p className="text-xs text-center text-gray-600 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                  💡 <strong>Tip:</strong> Most users choose 50/50 split. Adjust to attract more volunteers or get a bigger share!
                 </p>
               </div>
 
