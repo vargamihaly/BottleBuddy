@@ -11,15 +11,36 @@ interface UserDashboardProps {
 }
 
 export const UserDashboard = ({ onBackToHome }: UserDashboardProps) => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+
+  // Debug: Log user data
+  console.log('[UserDashboard] User data:', user);
+
+  // If still loading, show loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // If no user, redirect to home
+  if (!user) {
+    onBackToHome();
+    return null;
+  }
 
   // Placeholder stats - these would come from API in the future
   const userStats = {
     totalBottles: 156,
     totalEarnings: 3900,
     completedExchanges: 23,
-    rating: user?.rating ?? 0,
-    totalRatings: user?.totalRatings ?? 0,
+    rating: user.rating ?? null,
+    totalRatings: user.totalRatings ?? 0,
     level: "Eco Champion"
   };
 
@@ -34,7 +55,7 @@ export const UserDashboard = ({ onBackToHome }: UserDashboardProps) => {
   };
 
   // Display name priority: fullName > username > email
-  const displayName = user?.fullName || user?.username || user?.email || "User";
+  const displayName = user.fullName || user.username || user.email || "User";
 
   const recentActivity = [
     {
@@ -97,7 +118,7 @@ export const UserDashboard = ({ onBackToHome }: UserDashboardProps) => {
         <Card className="mb-8 border-green-200">
           <CardHeader>
             <div className="flex items-center space-x-4">
-              {user?.avatarUrl ? (
+              {user.avatarUrl ? (
                 <img
                   src={user.avatarUrl}
                   alt={displayName}
@@ -105,17 +126,23 @@ export const UserDashboard = ({ onBackToHome }: UserDashboardProps) => {
                 />
               ) : (
                 <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">
-                  {getInitials(user?.fullName || user?.username)}
+                  {getInitials(user.fullName || user.username)}
                 </div>
               )}
               <div>
                 <CardTitle className="text-2xl">{displayName}</CardTitle>
                 <CardDescription className="flex items-center space-x-2">
-                  {userStats.rating > 0 && (
+                  {userStats.rating !== null && userStats.rating > 0 && (
                     <>
                       <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
                       <span>{userStats.rating.toFixed(1)} rating</span>
                       <span className="text-xs">({userStats.totalRatings} reviews)</span>
+                      <span>•</span>
+                    </>
+                  )}
+                  {userStats.totalRatings === 0 && (
+                    <>
+                      <span className="text-xs text-gray-500">No ratings yet</span>
                       <span>•</span>
                     </>
                   )}
