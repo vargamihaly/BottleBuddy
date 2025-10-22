@@ -1,0 +1,26 @@
+# Backend API Development Dockerfile
+
+FROM mcr.microsoft.com/dotnet/sdk:8.0
+
+WORKDIR /app
+
+# Install dotnet-ef tools
+RUN dotnet tool install --global dotnet-ef
+ENV PATH="${PATH}:/root/.dotnet/tools"
+
+# Copy project file only (skip solution to avoid docker-compose.dcproj reference issue)
+COPY src/BottleBuddy.Api/BottleBuddy.Api.csproj ./src/BottleBuddy.Api/
+
+# Restore dependencies for the specific project
+RUN dotnet restore ./src/BottleBuddy.Api/BottleBuddy.Api.csproj
+
+# Copy source code
+COPY . .
+
+WORKDIR /app/src/BottleBuddy.Api
+
+# Expose port
+EXPOSE 3668
+
+# Start the application with hot reload
+CMD ["dotnet", "watch", "run", "--urls", "http://0.0.0.0:3668"]
