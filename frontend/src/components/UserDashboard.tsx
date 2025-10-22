@@ -57,7 +57,7 @@ export const UserDashboard = ({ onBackToHome }: UserDashboardProps) => {
   };
 
   // Display name priority: fullName > username > email
-  const displayName = user.fullName || user.userName || user.email || "User";
+  const displayName = user.fullName || user.username || user.email || "User";
 
   const recentActivity = [
     {
@@ -128,7 +128,7 @@ export const UserDashboard = ({ onBackToHome }: UserDashboardProps) => {
                 />
               ) : (
                 <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">
-                  {getInitials(user.fullName || user.userName)}
+                  {getInitials(user.fullName || user.username)}
                 </div>
               )}
               <div>

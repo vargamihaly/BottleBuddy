@@ -1,8 +1,12 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { MapPin, Star, Clock, Users } from "lucide-react";
+import { MapPin, Star, Clock, Users, Trash2 } from "lucide-react";
 import { BottleListing } from "@/types";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiClient } from "@/lib/apiClient";
+import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 
 interface BottleListingCardProps {
   listing: BottleListing;
@@ -10,6 +14,10 @@ interface BottleListingCardProps {
 }
 
 export const BottleListingCard = ({ listing, isOwnListing = false }: BottleListingCardProps) => {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [isDeleting, setIsDeleting] = useState(false);
+
   // Format created date if available
   const timePosted = listing.createdAt
     ? new Date(listing.createdAt).toLocaleDateString('en-US', {
@@ -17,6 +25,50 @@ export const BottleListingCard = ({ listing, isOwnListing = false }: BottleListi
         day: 'numeric'
       })
     : 'Recently';
+
+  // Calculate share amounts based on splitPercentage
+  // splitPercentage is the owner's (lister's) percentage
+  // Default to 50/50 if not specified
+  const ownerPercentage = listing.splitPercentage ?? 50;
+  const volunteerPercentage = 100 - ownerPercentage;
+
+  // Calculate actual amounts
+  const ownerShare = (listing.estimatedRefund * ownerPercentage) / 100;
+  const volunteerShare = (listing.estimatedRefund * volunteerPercentage) / 100;
+
+  // Determine which share to display based on whether it's the user's own listing
+  const userShare = isOwnListing ? ownerShare : volunteerShare;
+  const userPercentage = isOwnListing ? ownerPercentage : volunteerPercentage;
+
+  // Delete mutation
+  const deleteMutation = useMutation({
+    mutationFn: async (listingId: string) => {
+      await apiClient.delete(`/api/bottlelistings/${listingId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["bottleListings"] });
+      toast({
+        title: "Listing deleted",
+        description: "Your bottle listing has been successfully deleted.",
+      });
+      setIsDeleting(false);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.response?.data?.error || "Failed to delete listing. Please try again.",
+        variant: "destructive",
+      });
+      setIsDeleting(false);
+    },
+  });
+
+  const handleDelete = () => {
+    if (window.confirm("Are you sure you want to delete this listing?")) {
+      setIsDeleting(true);
+      deleteMutation.mutate(listing.id);
+    }
+  };
 
   return (
     <Card className="hover:shadow-lg transition-all duration-300 border-green-100 hover:border-green-300 hover:scale-105">
@@ -66,18 +118,20 @@ export const BottleListingCard = ({ listing, isOwnListing = false }: BottleListi
             <span className="font-bold text-green-800">{listing.estimatedRefund} HUF</span>
           </div>
           <div className="flex items-center justify-between mt-1">
-            <span className="text-xs text-green-600">Your share (50%):</span>
-            <span className="text-sm font-semibold text-green-700">{listing.estimatedRefund / 2} HUF</span>
+            <span className="text-xs text-green-600">Your share ({userPercentage}%):</span>
+            <span className="text-sm font-semibold text-green-700">{userShare.toFixed(0)} HUF</span>
           </div>
         </div>
 
         {isOwnListing ? (
           <Button
-            className="w-full bg-blue-600 hover:bg-blue-700"
-            variant="secondary"
-            disabled
+            className="w-full bg-red-600 hover:bg-red-700 text-white"
+            variant="destructive"
+            onClick={handleDelete}
+            disabled={isDeleting}
           >
-            Your Listing
+            <Trash2 className="w-4 h-4 mr-2" />
+            {isDeleting ? 'Deleting...' : 'Delete Listing'}
           </Button>
         ) : (
           <Button
@@ -85,7 +139,6 @@ export const BottleListingCard = ({ listing, isOwnListing = false }: BottleListi
             disabled={listing.status !== 'open'}
           >
             {listing.status === 'open' ? 'Offer to Pick Up' : `Status: ${listing.status}`}
-              {/*mine:*/}
           </Button>
         )}
       </CardContent>

@@ -27,8 +27,9 @@ export interface BottleListing {
     splitPercentage?: number;
     status: 'open' | 'claimed' | 'completed' | 'cancelled';
     userId: string;
-    createdByUserName: string;
-    createdByUserEmail: string;
+    createdByUserRating?: number;
+    createdByUserName?: string;
+    createdByUserEmail?: string;
     user?: User;
     createdAt?: string;
     updatedAt?: string;
@@ -46,6 +47,7 @@ export interface PickupRequest {
     pickupTime?: string;
     status: 'pending' | 'accepted' | 'rejected' | 'completed' | 'cancelled';
     createdAt?: string;
+    updatedAt?: string;
 }
 
 export interface Transaction {
@@ -55,7 +57,7 @@ export interface Transaction {
     volunteerAmount: number;
     ownerAmount: number;
     totalRefund: number;
-    status: 'pending' | 'completed' | 'cancelled';
+    status?: 'pending' | 'completed' | 'cancelled';
     createdAt?: string;
     completedAt?: string;
 }
@@ -66,7 +68,7 @@ export interface Rating {
     rater?: User;
     ratedUserId: string;
     ratedUser?: User;
-    transactionId?: string;
+    transactionId: string;
     value: number; // 1-5
     comment?: string;
     createdAt?: string;

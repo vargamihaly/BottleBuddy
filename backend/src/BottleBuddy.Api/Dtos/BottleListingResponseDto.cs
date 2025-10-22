@@ -10,8 +10,10 @@ public class BottleListingResponseDto
     public double? Latitude { get; set; }
     public double? Longitude { get; set; }
     public decimal EstimatedRefund { get; set; }
+    public decimal? SplitPercentage { get; set; }
     public string Status { get; set; } = "open";
     public DateTime? PickupDeadline { get; set; }
+    public string UserId { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
 
