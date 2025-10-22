@@ -78,7 +78,7 @@ const Index = () => {
   );
 
   const otherListings = bottleListings.filter(
-    listing => listing.createdByUserEmail !== user?.email && !acceptedListingIds.includes(listing.id)
+    listing => listing.createdByUserEmail !== user?.email && !acceptedListingIds.includes(listing.id) && listing.status !== 'completed',
   );
 
   if (activeTab === "dashboard") {

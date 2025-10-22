@@ -3,7 +3,13 @@ import { toast } from '@/hooks/use-toast';
 import { apiClient, ApiRequestError } from '@/lib/apiClient';
 import { isValidToken, getUserIdFromToken } from '@/lib/tokenUtils';
 import type { User, AuthResponse } from '@/types';
-import config from '@/config';
+type RegisterRequestBody = {
+  email: string;
+  password: string;
+  fullName?: string;
+  username?: string;
+  phone?: string;
+};
 
 interface AuthContextType {
   token: string | null;
@@ -86,10 +92,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signIn = async (email: string, password: string) => {
     try {
-      const data = await apiClient.postNoRetry<AuthResponse>('/api/auth/login', {
-        email,
-        password,
-      }, { skipAuth: true });
+      const data = await apiClient.postNoRetry<AuthResponse>(
+        '/api/auth/login',
+        {
+          email,
+          password,
+        },
+        { skipAuth: true }
+      );
 
       localStorage.setItem('token', data.token);
       setToken(data.token);
@@ -113,7 +123,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     phone?: string
   ) => {
     try {
-      const requestBody: any = {
+      const requestBody: RegisterRequestBody = {
         email,
         password,
       };

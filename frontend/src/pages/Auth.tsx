@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { GoogleLogin, CredentialResponse } from '@react-oauth/google';
+import { GoogleLogin, CredentialResponse } from "@react-oauth/google";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -13,6 +13,7 @@ import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Loader2, Recycle, Sparkles } from "lucide-react";
+import config from "@/config";
 
 // Validation schemas
 const signInSchema = z.object({
@@ -57,6 +58,13 @@ const signUpSchema = z.object({
 
 type SignInFormData = z.infer<typeof signInSchema>;
 type SignUpFormData = z.infer<typeof signUpSchema>;
+
+const getErrorMessage = (error: unknown, fallback: string): string => {
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+  return fallback;
+};
 
 const Auth = () => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -106,7 +114,7 @@ const Auth = () => {
       const checkAuth = async () => {
         try {
           // The cookie will be sent automatically with this request
-          const response = await fetch(`${require('@/config').default.api.baseUrl}/api/auth/me`, {
+          const response = await fetch(`${config.api.baseUrl}/api/auth/me`, {
             credentials: 'include' // Important: include cookies
           });
 
@@ -140,7 +148,7 @@ const Auth = () => {
   useEffect(() => {
     signInForm.reset();
     signUpForm.reset();
-  }, [isSignUp]);
+  }, [isSignUp, signInForm, signUpForm]);
 
   const onSignInSubmit = async (data: SignInFormData) => {
     setLoading(true);
@@ -152,10 +160,10 @@ const Auth = () => {
         description: "You have successfully signed in.",
       });
       navigate("/");
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Sign In Failed",
-        description: error.message || "An unexpected error occurred. Please try again.",
+        description: getErrorMessage(error, "An unexpected error occurred. Please try again."),
         variant: "destructive",
       });
     } finally {
@@ -179,10 +187,10 @@ const Auth = () => {
         description: "Welcome to BottleShare!",
       });
       navigate("/");
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Sign Up Failed",
-        description: error.message || "An unexpected error occurred. Please try again.",
+        description: getErrorMessage(error, "An unexpected error occurred. Please try again."),
         variant: "destructive",
       });
     } finally {
@@ -208,10 +216,10 @@ const Auth = () => {
         description: "Successfully signed in with Google",
       });
       navigate("/");
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Google Sign-In Failed",
-        description: error.message || "Failed to sign in with Google",
+        description: getErrorMessage(error, "Failed to sign in with Google"),
         variant: "destructive",
       });
     } finally {
