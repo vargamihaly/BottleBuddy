@@ -2,7 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { MapPin, Star, Clock, Users, Trash2 } from "lucide-react";
-import { BottleListing } from "@/types";
+import { BottleListing, CreatePickupRequest } from "@/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/apiClient";
 import { useToast } from "@/hooks/use-toast";
@@ -17,6 +17,7 @@ export const BottleListingCard = ({ listing, isOwnListing = false }: BottleListi
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isOfferingPickup, setIsOfferingPickup] = useState(false);
 
   // Format created date if available
   const timePosted = listing.createdAt
@@ -67,6 +68,39 @@ export const BottleListingCard = ({ listing, isOwnListing = false }: BottleListi
     if (window.confirm("Are you sure you want to delete this listing?")) {
       setIsDeleting(true);
       deleteMutation.mutate(listing.id);
+    }
+  };
+
+  // Pickup request mutation
+  const pickupRequestMutation = useMutation({
+    mutationFn: async (data: CreatePickupRequest) => {
+      const response = await apiClient.post('/api/pickuprequests', data);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["bottleListings"] });
+      toast({
+        title: "Pickup request sent!",
+        description: "The listing owner will be notified of your offer.",
+      });
+      setIsOfferingPickup(false);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.response?.data?.error || "Failed to send pickup request. Please try again.",
+        variant: "destructive",
+      });
+      setIsOfferingPickup(false);
+    },
+  });
+
+  const handleOfferPickup = () => {
+    if (window.confirm(`Are you sure you want to offer to pick up ${listing.bottleCount} bottles from ${listing.locationAddress}?`)) {
+      setIsOfferingPickup(true);
+      pickupRequestMutation.mutate({
+        listingId: listing.id,
+      });
     }
   };
 
@@ -136,9 +170,14 @@ export const BottleListingCard = ({ listing, isOwnListing = false }: BottleListi
         ) : (
           <Button
             className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
-            disabled={listing.status !== 'open'}
+            disabled={listing.status !== 'open' || isOfferingPickup}
+            onClick={handleOfferPickup}
           >
-            {listing.status === 'open' ? 'Offer to Pick Up' : `Status: ${listing.status}`}
+            {isOfferingPickup
+              ? 'Sending request...'
+              : listing.status === 'open'
+              ? 'Offer to Pick Up'
+              : `Status: ${listing.status}`}
           </Button>
         )}
       </CardContent>

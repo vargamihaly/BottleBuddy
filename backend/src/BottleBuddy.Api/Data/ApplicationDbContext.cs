@@ -32,14 +32,14 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             // Username should be unique if not null
             entity.HasIndex(p => p.Username)
                 .IsUnique()
-                .HasFilter("[Username] IS NOT NULL");
+                .HasFilter("\"Username\" IS NOT NULL");
 
             // Set default values
             entity.Property(p => p.TotalRatings)
                 .HasDefaultValue(0);
 
             entity.Property(p => p.CreatedAt)
-                .HasDefaultValueSql("GETUTCDATE()");
+                .HasDefaultValueSql("NOW()");
         });
     }
 }

@@ -32,6 +32,7 @@ builder.Services.AddCors(options =>
 // Register application services
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IBottleListingService, BottleListingService>();
+builder.Services.AddScoped<PickupRequestService>();
 
 // Swagger/OpenAPI
 builder.Services.AddSwaggerDocumentation();

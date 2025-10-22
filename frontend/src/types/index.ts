@@ -43,11 +43,19 @@ export interface PickupRequest {
     listingId: string;
     volunteerId: string;
     volunteer?: User;
+    volunteerName?: string;
+    volunteerEmail?: string;
     message?: string;
     pickupTime?: string;
     status: 'pending' | 'accepted' | 'rejected' | 'completed' | 'cancelled';
     createdAt?: string;
     updatedAt?: string;
+}
+
+export interface CreatePickupRequest {
+    listingId: string;
+    message?: string;
+    pickupTime?: string;
 }
 
 export interface Transaction {
