@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(powershell \"Get-ChildItem ''D:\\Repositories\\bottle-buddy-share\\bottle-buddy-share\\backend\\src\\BottleBuddy.Api'' -File | Select-Object Name\")",
+      "Bash(powershell \"Get-ChildItem ''D:\\Repositories\\bottle-buddy-share\\bottle-buddy-share\\docker'' -File | Select-Object Name\")",
+      "Bash(powershell \"Get-ChildItem ''D:\\Repositories\\bottle-buddy-share\\bottle-buddy-share\\backend\\src\\BottleBuddy.Api\\Controllers'' -File | Select-Object Name\")",
+      "Bash(powershell \"Get-ChildItem ''D:\\Repositories\\bottle-buddy-share\\bottle-buddy-share\\backend\\src\\BottleBuddy.Api\\Services'' -File | Select-Object Name\")",
+      "Bash(powershell \"Get-ChildItem ''D:\\Repositories\\bottle-buddy-share\\bottle-buddy-share\\backend\\src\\BottleBuddy.Api\\Models'' -File | Select-Object Name\")",
+      "Bash(powershell:*)",
+      "Bash(Select-Object Name)",
+      "Bash(docker-compose build:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(docker-compose down:*)",
+      "Bash(docker rm:*)",
+      "Bash(docker-compose up:*)",
+      "Bash(timeout /t 10)",
+      "Bash(docker ps:*)",
+      "Bash(docker-compose:*)",
+      "Bash(docker logs:*)",
+      "WebFetch(domain:blog.logrocket.com)",
+      "Bash(curl:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

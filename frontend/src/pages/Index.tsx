@@ -150,7 +150,7 @@ const Index = () => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             {user ? (
               <>
-                <Button size="lg" className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-8 py-3">
+                <Button size="lg" onClick={() => navigate("/create-listing")} className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-8 py-3">
                   <Plus className="w-5 h-5 mr-2" />
                   List Your Bottles
                 </Button>
@@ -276,10 +276,10 @@ const Index = () => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             {user ? (
               <>
-                <Button size="lg" variant="secondary">
+                <Button size="lg" variant="secondary" onClick={() => navigate("/create-listing")}>
                   List Your Bottles
                 </Button>
-                <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-green-600">
+                <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-green-600" onClick={() => setActiveTab("dashboard")}>
                   View Dashboard
                 </Button>
               </>

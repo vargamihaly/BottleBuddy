@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { ArrowUp, Star, MapPin, Users, Plus, ArrowLeft, TrendingUp, Recycle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 interface UserDashboardProps {
   onBackToHome: () => void;
@@ -12,6 +13,7 @@ interface UserDashboardProps {
 
 export const UserDashboard = ({ onBackToHome }: UserDashboardProps) => {
   const { user, loading } = useAuth();
+  const navigate = useNavigate();
 
   // Debug: Log user data
   console.log('[UserDashboard] User data:', user);
@@ -55,7 +57,7 @@ export const UserDashboard = ({ onBackToHome }: UserDashboardProps) => {
   };
 
   // Display name priority: fullName > username > email
-  const displayName = user.fullName || user.username || user.email || "User";
+  const displayName = user.fullName || user.userName || user.email || "User";
 
   const recentActivity = [
     {
@@ -126,7 +128,7 @@ export const UserDashboard = ({ onBackToHome }: UserDashboardProps) => {
                 />
               ) : (
                 <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">
-                  {getInitials(user.fullName || user.username)}
+                  {getInitials(user.fullName || user.userName)}
                 </div>
               )}
               <div>
@@ -203,11 +205,11 @@ export const UserDashboard = ({ onBackToHome }: UserDashboardProps) => {
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 mb-8">
-          <Button size="lg" className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700">
+          <Button size="lg" onClick={() => navigate("/create-listing")} className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700">
             <Plus className="w-5 h-5 mr-2" />
             List New Bottles
           </Button>
-          <Button size="lg" variant="outline">
+          <Button size="lg" variant="outline" onClick={onBackToHome}>
             <MapPin className="w-5 h-5 mr-2" />
             Find Bottles to Pick Up
           </Button>
