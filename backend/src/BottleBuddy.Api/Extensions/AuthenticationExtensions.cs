@@ -12,9 +12,7 @@ public static class AuthenticationExtensions
     /// <summary>
     /// Adds and configures Identity and JWT authentication
     /// </summary>
-    public static IServiceCollection AddAuthenticationConfiguration(
-        this IServiceCollection services,
-        IConfiguration configuration)
+    public static IServiceCollection AddAuthenticationConfiguration(this IServiceCollection services, IConfiguration configuration)
     {
         // Identity
         services.AddIdentity<ApplicationUser, IdentityRole>()

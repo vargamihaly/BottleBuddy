@@ -4,12 +4,9 @@ namespace BottleBuddy.Api.Services;
 
 public interface IBottleListingService
 {
-    Task<(IEnumerable<BottleListingResponseDto> Listings, PaginationMetadata Metadata)> GetListingsAsync(
-        int page,
-        int pageSize,
-        string? status);
-
+    Task<(IEnumerable<BottleListingResponseDto> Listings, PaginationMetadata Metadata)> GetListingsAsync(int page, int pageSize, string? status);
     Task<BottleListingResponseDto> CreateListingAsync(string userId, CreateBottleListingRequest request);
+    Task DeleteListingAsync(string userId, Guid listingId);
 }
 
 public class PaginationMetadata

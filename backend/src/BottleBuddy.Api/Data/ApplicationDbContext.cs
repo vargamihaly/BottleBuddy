@@ -4,13 +4,9 @@ using BottleBuddy.Api.Models;
 
 namespace BottleBuddy.Api.Data;
 
-public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
+public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+    : IdentityDbContext<ApplicationUser>(options)
 {
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-        : base(options)
-    {
-    }
-
     public DbSet<BottleListing> BottleListings => Set<BottleListing>();
     public DbSet<PickupRequest> PickupRequests => Set<PickupRequest>();
     public DbSet<Profile> Profiles => Set<Profile>();

@@ -33,9 +33,6 @@ builder.Services.AddCors(options =>
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IBottleListingService, BottleListingService>();
 
-// OpenTelemetry
-builder.Services.AddOpenTelemetryConfiguration(builder.Configuration);
-
 // Swagger/OpenAPI
 builder.Services.AddSwaggerDocumentation();
 

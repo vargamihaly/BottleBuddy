@@ -18,6 +18,8 @@ import {
   formatDistance,
 } from "@/lib/mapUtils";
 import type { Map as LeafletMap } from 'leaflet';
+import {useAuth} from "@/contexts/AuthContext.tsx";
+
 
 interface BottleListingWithDistance extends BottleListing {
   distance?: string;
@@ -246,7 +248,8 @@ export const MapView = ({ listings, onBackToHome }: MapViewProps) => {
                           onClick={() => setSelectedListing(listing)}
                           disabled={listing.status !== 'open'}
                         >
-                          {listing.status === 'open' ? 'Offer to Pick Up' : `Status: ${listing.status}`}
+                          {listing.createdByUserEmail === user.email}
+                          {/*{listing.status === 'open' ? 'Offer to Pick Up' : `Status: ${listing.status}`}*/}
                         </Button>
                       )}
                     </div>

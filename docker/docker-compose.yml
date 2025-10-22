@@ -20,25 +20,6 @@ services:
       timeout: 5s
       retries: 5
 
-  # Jaeger (OpenTelemetry tracing backend)
-  jaeger:
-    image: jaegertracing/all-in-one:latest
-    container_name: bottlebuddy-jaeger
-    restart: unless-stopped
-    ports:
-      - "16686:16686"  # Jaeger UI
-      - "4317:4317"    # OTLP gRPC receiver
-      - "4318:4318"    # OTLP HTTP receiver
-    environment:
-      COLLECTOR_OTLP_ENABLED: "true"
-    networks:
-      - bottlebuddy-network
-    healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:16686/"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   # Backend API (.NET 8)
   api:
     build:
@@ -48,8 +29,6 @@ services:
     restart: unless-stopped
     depends_on:
       postgres:
-        condition: service_healthy
-      jaeger:
         condition: service_healthy
     environment:
       # Database connection
@@ -63,9 +42,6 @@ services:
       # Google OAuth
       Authentication__Google__ClientId: ${GOOGLE_CLIENT_ID:-}
       Authentication__Google__ClientSecret: ${GOOGLE_CLIENT_SECRET:-}
-
-      # OpenTelemetry / Jaeger
-      OpenTelemetry__Endpoint: "http://jaeger:4317"
 
       # ASP.NET Core
       ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}

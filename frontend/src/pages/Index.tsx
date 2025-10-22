@@ -49,8 +49,8 @@ const Index = () => {
   } = useQuery({ queryKey: ["bottleListings"], queryFn: fetchBottleListings });
 
   // Separate user's own listings from others
-  const myListings = bottleListings.filter(listing => listing.userId === user?.id);
-  const otherListings = bottleListings.filter(listing => listing.userId !== user?.id);
+  const myListings = bottleListings.filter(listing => listing.createdByUserEmail === user?.email);
+  const otherListings = bottleListings.filter(listing => listing.createdByUserEmail !== user?.email);
 
   if (activeTab === "dashboard") {
     return <UserDashboard onBackToHome={() => setActiveTab("home")} />;

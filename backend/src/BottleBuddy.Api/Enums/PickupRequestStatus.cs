@@ -6,5 +6,5 @@ public enum PickupRequestStatus
     Accepted,
     Rejected,
     Completed,
-    Cancelled
+    Cancelled,
 }

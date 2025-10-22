@@ -85,6 +85,7 @@ export const BottleListingCard = ({ listing, isOwnListing = false }: BottleListi
             disabled={listing.status !== 'open'}
           >
             {listing.status === 'open' ? 'Offer to Pick Up' : `Status: ${listing.status}`}
+              {/*mine:*/}
           </Button>
         )}
       </CardContent>

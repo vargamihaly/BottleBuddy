@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using System.Diagnostics;
 using BottleBuddy.Api.Dtos;
 using BottleBuddy.Api.Services;
 
@@ -9,11 +8,8 @@ namespace BottleBuddy.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class BottleListingsController(IBottleListingService bottleListingService, ActivitySource activitySource) : ControllerBase
+public class BottleListingsController(IBottleListingService bottleListingService) : ControllerBase
 {
-    private readonly IBottleListingService _bottleListingService = bottleListingService;
-    private readonly ActivitySource _activitySource = activitySource;
-
     /// <summary>
     /// Get paginated list of bottle listings
     /// </summary>
@@ -27,17 +23,7 @@ public class BottleListingsController(IBottleListingService bottleListingService
         [FromQuery] int pageSize = 50,
         [FromQuery] string? status = null)
     {
-        using var activity = _activitySource.StartActivity("BottleListingsController.GetListings");
-        activity?.SetTag("pagination.page", page);
-        activity?.SetTag("pagination.pageSize", pageSize);
-        activity?.SetTag("filter.status", status ?? "all");
-
-        activity?.AddEvent(new ActivityEvent("Fetching bottle listings"));
-        var (listings, metadata) = await _bottleListingService.GetListingsAsync(page, pageSize, status);
-
-        activity?.SetTag("result.count", listings.Count());
-        activity?.SetTag("result.totalCount", metadata.TotalCount);
-        activity?.AddEvent(new ActivityEvent("Listings fetched successfully"));
+        var (listings, metadata) = await bottleListingService.GetListingsAsync(page, pageSize, status);
 
         return Ok(new
         {
@@ -56,35 +42,53 @@ public class BottleListingsController(IBottleListingService bottleListingService
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> CreateListing([FromBody] CreateBottleListingRequest request)
     {
-        using var activity = _activitySource.StartActivity("BottleListingsController.CreateListing");
-
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId))
         {
-            activity?.AddEvent(new ActivityEvent("Unauthorized - no user ID"));
-            activity?.SetStatus(ActivityStatusCode.Error, "No user ID found");
             return Unauthorized();
         }
 
-        activity?.SetTag("listing.userId", userId);
-        activity?.SetTag("listing.bottleCount", request.BottleCount);
-        activity?.SetTag("listing.estimatedRefund", request.EstimatedRefund.ToString());
-        activity?.SetTag("listing.location", $"{request.Latitude},{request.Longitude}");
-
         try
         {
-            activity?.AddEvent(new ActivityEvent("Creating new bottle listing"));
-            var listing = await _bottleListingService.CreateListingAsync(userId, request);
-            activity?.SetTag("listing.id", listing.Id);
-            activity?.AddEvent(new ActivityEvent("Bottle listing created successfully"));
+            var listing = await bottleListingService.CreateListingAsync(userId, request);
             return CreatedAtAction(nameof(GetListings), new { id = listing.Id }, listing);
         }
         catch (UnauthorizedAccessException ex)
         {
-            activity?.AddEvent(new ActivityEvent("Listing creation failed - unauthorized"));
-            activity?.SetTag("error.message", ex.Message);
-            activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
             return Unauthorized(new { error = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Delete a bottle listing
+    /// </summary>
+    /// <param name="id">The ID of the listing to delete</param>
+    [HttpDelete("{id}")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> DeleteListing(Guid id)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized();
+        }
+
+        try
+        {
+            await bottleListingService.DeleteListingAsync(userId, id);
+            return NoContent();
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { error = ex.Message });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Forbid();
         }
     }
 }

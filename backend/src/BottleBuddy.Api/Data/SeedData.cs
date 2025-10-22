@@ -1,8 +1,7 @@
-using BottleBuddy.Api.Data;
 using BottleBuddy.Api.Models;
 using Microsoft.AspNetCore.Identity;
 
-namespace BottleBuddy.Api;
+namespace BottleBuddy.Api.Data;
 
 public static class SeedData
 {

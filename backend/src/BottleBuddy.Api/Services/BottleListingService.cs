@@ -9,47 +9,28 @@ namespace BottleBuddy.Api.Services;
 
 public class BottleListingService(
     ApplicationDbContext context,
-    UserManager<ApplicationUser> userManager,
-    ActivitySource activitySource) : IBottleListingService
+    UserManager<ApplicationUser> userManager) : IBottleListingService
 {
-    private readonly ApplicationDbContext _context = context;
-    private readonly UserManager<ApplicationUser> _userManager = userManager;
-    private readonly ActivitySource _activitySource = activitySource;
-
     public async Task<(IEnumerable<BottleListingResponseDto> Listings, PaginationMetadata Metadata)> GetListingsAsync(
         int page,
         int pageSize,
         string? status)
     {
-        using var activity = _activitySource.StartActivity("BottleListingService.GetListingsAsync");
-        activity?.SetTag("service.operation", "listings.query");
-
         // Validate pagination parameters
         if (page < 1) page = 1;
         if (pageSize < 1 || pageSize > 100) pageSize = 50;
 
-        activity?.SetTag("query.page", page);
-        activity?.SetTag("query.pageSize", pageSize);
-        activity?.SetTag("query.statusFilter", status ?? "none");
-
-        activity?.AddEvent(new ActivityEvent("Building query"));
-        var query = _context.BottleListings.Include(l => l.User).AsQueryable();
+        var query = context.BottleListings.Include(l => l.User).AsQueryable();
 
         // Filter by status if provided
         if (!string.IsNullOrEmpty(status))
         {
             query = query.Where(l => l.Status == status);
-            activity?.AddEvent(new ActivityEvent($"Applied status filter: {status}"));
         }
 
-        activity?.AddEvent(new ActivityEvent("Counting total records"));
         var totalCount = await query.CountAsync();
         var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
 
-        activity?.SetTag("query.totalCount", totalCount);
-        activity?.SetTag("query.totalPages", totalPages);
-
-        activity?.AddEvent(new ActivityEvent("Fetching listings from database"));
         var listings = await query
             .OrderByDescending(l => l.CreatedAt)
             .Skip((page - 1) * pageSize)
@@ -73,9 +54,6 @@ public class BottleListingService(
             })
             .ToListAsync();
 
-        activity?.SetTag("query.returnedCount", listings.Count());
-        activity?.AddEvent(new ActivityEvent($"Retrieved {listings.Count()} listings"));
-
         var metadata = new PaginationMetadata
         {
             Page = page,
@@ -91,23 +69,13 @@ public class BottleListingService(
 
     public async Task<BottleListingResponseDto> CreateListingAsync(string userId, CreateBottleListingRequest request)
     {
-        using var activity = _activitySource.StartActivity("BottleListingService.CreateListingAsync");
-        activity?.SetTag("service.operation", "listing.create");
-        activity?.SetTag("listing.userId", userId);
-
-        activity?.AddEvent(new ActivityEvent("Validating user"));
-        var user = await _userManager.FindByIdAsync(userId);
+        var user = await userManager.FindByIdAsync(userId);
         if (user == null)
         {
-            activity?.AddEvent(new ActivityEvent("User not found"));
-            activity?.SetStatus(ActivityStatusCode.Error, "User not found");
             throw new UnauthorizedAccessException("User not found.");
         }
 
         var listingId = Guid.NewGuid();
-        activity?.SetTag("listing.id", listingId.ToString());
-        activity?.SetTag("listing.bottleCount", request.BottleCount);
-        activity?.SetTag("listing.location", request.LocationAddress);
 
         var listing = new BottleListing
         {
@@ -126,13 +94,9 @@ public class BottleListingService(
             CreatedAt = DateTime.UtcNow
         };
 
-        activity?.AddEvent(new ActivityEvent("Adding listing to database"));
-        _context.BottleListings.Add(listing);
+        context.BottleListings.Add(listing);
 
-        activity?.AddEvent(new ActivityEvent("Saving changes to database"));
-        await _context.SaveChangesAsync();
-
-        activity?.AddEvent(new ActivityEvent("Listing created successfully"));
+        await context.SaveChangesAsync();
 
         return new BottleListingResponseDto
         {
@@ -151,5 +115,25 @@ public class BottleListingService(
             CreatedByUserName = user.UserName,
             CreatedByUserEmail = user.Email
         };
+    }
+
+    public async Task DeleteListingAsync(string userId, Guid listingId)
+    {
+        var listing = await context.BottleListings.FindAsync(listingId);
+
+        if (listing == null)
+        {
+            throw new KeyNotFoundException($"Listing with ID {listingId} not found.");
+        }
+
+        // Verify that the user owns this listing
+        if (listing.UserId != userId)
+        {
+            throw new UnauthorizedAccessException("You can only delete your own listings.");
+        }
+
+        context.BottleListings.Remove(listing);
+
+        await context.SaveChangesAsync();
     }
 }

@@ -22,25 +22,6 @@ services:
       timeout: 5s
       retries: 5
 
-  # Jaeger (OpenTelemetry tracing backend)
-  jaeger:
-    image: jaegertracing/all-in-one:latest
-    container_name: bottlebuddy-jaeger-dev
-    restart: unless-stopped
-    ports:
-      - "16686:16686"  # Jaeger UI
-      - "4317:4317"    # OTLP gRPC receiver
-      - "4318:4318"    # OTLP HTTP receiver
-    environment:
-      COLLECTOR_OTLP_ENABLED: "true"
-    networks:
-      - bottlebuddy-dev-network
-    healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:16686/"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   # Backend API (.NET 8) - Development mode with hot reload
   api:
     build:
@@ -50,8 +31,6 @@ services:
     restart: unless-stopped
     depends_on:
       postgres:
-        condition: service_healthy
-      jaeger:
         condition: service_healthy
     environment:
       # Database connection
@@ -66,9 +45,6 @@ services:
       Authentication__Google__ClientId: ${GOOGLE_CLIENT_ID:-}
       Authentication__Google__ClientSecret: ${GOOGLE_CLIENT_SECRET:-}
 
-      # OpenTelemetry / Jaeger
-      OpenTelemetry__Endpoint: "http://jaeger:4317"
-
       # ASP.NET Core
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: "http://+:3668"
@@ -82,25 +58,25 @@ services:
       - bottlebuddy-dev-network
 
   # Frontend (React + Vite) - Development mode with hot reload
-  frontend:
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile.dev
-    container_name: bottlebuddy-frontend-dev
-    restart: unless-stopped
-    depends_on:
-      - api
-    environment:
-      VITE_API_URL: http://localhost:3668
-    ports:
-      - "8080:8080"
-    volumes:
-      - ../frontend:/app
-      - /app/node_modules
-    networks:
-      - bottlebuddy-dev-network
-    stdin_open: true
-    tty: true
+#  frontend:
+#    build:
+#      context: ..
+#      dockerfile: docker/Dockerfile.dev
+#    container_name: bottlebuddy-frontend-dev
+#    restart: unless-stopped
+#    depends_on:
+#      - api
+#    environment:
+#      VITE_API_URL: http://localhost:3668
+#    ports:
+#      - "8080:8080"
+#    volumes:
+#      - ../frontend:/app
+#      - /app/node_modules
+#    networks:
+#      - bottlebuddy-dev-network
+#    stdin_open: true
+#    tty: true
 
 networks:
   bottlebuddy-dev-network:
