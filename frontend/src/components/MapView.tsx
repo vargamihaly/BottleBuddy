@@ -55,6 +55,7 @@ interface MapViewProps {
 }
 
 export const MapView = ({ listings, onBackToHome }: MapViewProps) => {
+  const { user } = useAuth();
   const [selectedListing, setSelectedListing] = useState<BottleListingWithDistance | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [mapCenter, setMapCenter] = useState<[number, number]>(DEFAULT_CENTER);
@@ -229,14 +230,25 @@ export const MapView = ({ listings, onBackToHome }: MapViewProps) => {
                           {Math.round(listing.estimatedRefund / 2)} HUF
                         </span>
                       </div>
-                      <Button
-                        size="sm"
-                        className="w-full bg-gradient-to-r from-green-600 to-emerald-600"
-                        onClick={() => setSelectedListing(listing)}
-                        disabled={listing.status !== 'open'}
-                      >
-                        {listing.status === 'open' ? 'Offer to Pick Up' : `Status: ${listing.status}`}
-                      </Button>
+                      {listing.userId === user?.id ? (
+                        <Button
+                          size="sm"
+                          className="w-full bg-blue-600"
+                          variant="secondary"
+                          disabled
+                        >
+                          Your Listing
+                        </Button>
+                      ) : (
+                        <Button
+                          size="sm"
+                          className="w-full bg-gradient-to-r from-green-600 to-emerald-600"
+                          onClick={() => setSelectedListing(listing)}
+                          disabled={listing.status !== 'open'}
+                        >
+                          {listing.status === 'open' ? 'Offer to Pick Up' : `Status: ${listing.status}`}
+                        </Button>
+                      )}
                     </div>
                   </Popup>
                 </Marker>
@@ -335,13 +347,24 @@ export const MapView = ({ listings, onBackToHome }: MapViewProps) => {
 
                         {selectedListing?.id === listing.id && (
                           <div className="mt-3 pt-3 border-t border-gray-100">
-                            <Button
-                              size="sm"
-                              className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
-                              disabled={listing.status !== 'open'}
-                            >
-                              {listing.status === 'open' ? 'Offer to Pick Up' : `Status: ${listing.status}`}
-                            </Button>
+                            {listing.userId === user?.id ? (
+                              <Button
+                                size="sm"
+                                className="w-full bg-blue-600"
+                                variant="secondary"
+                                disabled
+                              >
+                                Your Listing
+                              </Button>
+                            ) : (
+                              <Button
+                                size="sm"
+                                className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+                                disabled={listing.status !== 'open'}
+                              >
+                                {listing.status === 'open' ? 'Offer to Pick Up' : `Status: ${listing.status}`}
+                              </Button>
+                            )}
                           </div>
                         )}
                       </CardContent>

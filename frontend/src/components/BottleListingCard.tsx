@@ -6,9 +6,10 @@ import { BottleListing } from "@/types";
 
 interface BottleListingCardProps {
   listing: BottleListing;
+  isOwnListing?: boolean;
 }
 
-export const BottleListingCard = ({ listing }: BottleListingCardProps) => {
+export const BottleListingCard = ({ listing, isOwnListing = false }: BottleListingCardProps) => {
   // Format created date if available
   const timePosted = listing.createdAt
     ? new Date(listing.createdAt).toLocaleDateString('en-US', {
@@ -70,12 +71,22 @@ export const BottleListingCard = ({ listing }: BottleListingCardProps) => {
           </div>
         </div>
 
-        <Button
-          className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
-          disabled={listing.status !== 'open'}
-        >
-          {listing.status === 'open' ? 'Offer to Pick Up' : `Status: ${listing.status}`}
-        </Button>
+        {isOwnListing ? (
+          <Button
+            className="w-full bg-blue-600 hover:bg-blue-700"
+            variant="secondary"
+            disabled
+          >
+            Your Listing
+          </Button>
+        ) : (
+          <Button
+            className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+            disabled={listing.status !== 'open'}
+          >
+            {listing.status === 'open' ? 'Offer to Pick Up' : `Status: ${listing.status}`}
+          </Button>
+        )}
       </CardContent>
     </Card>
   );

@@ -48,6 +48,10 @@ const Index = () => {
     isError,
   } = useQuery({ queryKey: ["bottleListings"], queryFn: fetchBottleListings });
 
+  // Separate user's own listings from others
+  const myListings = bottleListings.filter(listing => listing.userId === user?.id);
+  const otherListings = bottleListings.filter(listing => listing.userId !== user?.id);
+
   if (activeTab === "dashboard") {
     return <UserDashboard onBackToHome={() => setActiveTab("home")} />;
   }
@@ -237,11 +241,46 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Active Listings */}
+      {/* My Listings Section (only show if user has listings) */}
+      {user && myListings.length > 0 && (
+        <section className="py-12 px-4 bg-blue-50/60 backdrop-blur-sm">
+          <div className="max-w-6xl mx-auto">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h3 className="text-2xl font-bold text-gray-900">My Active Listings</h3>
+                <p className="text-sm text-gray-600 mt-1">Your bottles available for pickup</p>
+              </div>
+              <Badge variant="secondary" className="bg-blue-100 text-blue-700">
+                {myListings.length} {myListings.length === 1 ? 'listing' : 'listings'}
+              </Badge>
+            </div>
+            {isLoading ? (
+              <BottleListingsGridSkeleton count={3} />
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {myListings.map((listing) => (
+                  <BottleListingCard key={listing.id} listing={listing} isOwnListing={true} />
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* Other Active Listings */}
       <section className="py-20 px-4 bg-white/60 backdrop-blur-sm">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between mb-12">
-            <h3 className="text-3xl font-bold text-gray-900">Active Bottle Listings</h3>
+            <div>
+              <h3 className="text-3xl font-bold text-gray-900">
+                {user ? 'Available Bottles to Pick Up' : 'Active Bottle Listings'}
+              </h3>
+              <p className="text-sm text-gray-600 mt-2">
+                {user
+                  ? 'Help others by picking up and returning their bottles'
+                  : 'Sign in to start picking up bottles and earning'}
+              </p>
+            </div>
             <Button variant="outline" onClick={() => setActiveTab("map")}>
               View on Map
               <ArrowRight className="w-4 h-4 ml-2" />
@@ -256,10 +295,31 @@ const Index = () => {
                 Try Again
               </Button>
             </div>
+          ) : otherListings.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <MapPin className="w-10 h-10 text-gray-400" />
+              </div>
+              <h4 className="text-xl font-semibold text-gray-700 mb-2">No listings available</h4>
+              <p className="text-gray-500">
+                {user
+                  ? 'Be the first to list your bottles!'
+                  : 'Sign in to see available bottle listings'}
+              </p>
+              {user && (
+                <Button
+                  className="mt-4 bg-gradient-to-r from-green-600 to-emerald-600"
+                  onClick={() => navigate("/create-listing")}
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  List Your Bottles
+                </Button>
+              )}
+            </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {bottleListings.map((listing) => (
-                <BottleListingCard key={listing.id} listing={listing} />
+              {otherListings.map((listing) => (
+                <BottleListingCard key={listing.id} listing={listing} isOwnListing={false} />
               ))}
             </div>
           )}
