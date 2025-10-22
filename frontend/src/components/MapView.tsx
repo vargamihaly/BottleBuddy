@@ -86,8 +86,11 @@ export const MapView = ({ listings, onBackToHome }: MapViewProps) => {
       });
   }, [toast]);
 
+  // Exclude completed listings from the map view
+  const activeListings = listings.filter(listing => listing.status !== 'completed');
+
   // Calculate distances for listings with coordinates
-  const listingsWithDistance: BottleListingWithDistance[] = listings
+  const listingsWithDistance: BottleListingWithDistance[] = activeListings
     .filter(listing => listing.latitude && listing.longitude)
     .map(listing => {
       if (userLocation && listing.latitude && listing.longitude) {
