@@ -11,6 +11,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import About from "./pages/About";
 import CreateListing from "./pages/CreateListing";
+import MyListings from "./pages/MyListings";
 import NotFound from "./pages/NotFound";
 
 // Configure React Query with better defaults
@@ -39,6 +40,7 @@ const App = () => (
               <Route path="/auth/success" element={<Auth />} />
               <Route path="/about" element={<About />} />
               <Route path="/create-listing" element={<CreateListing />} />
+              <Route path="/my-listings" element={<MyListings />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

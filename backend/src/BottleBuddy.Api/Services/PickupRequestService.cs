@@ -8,10 +8,12 @@ namespace BottleBuddy.Api.Services;
 public class PickupRequestService
 {
     private readonly ApplicationDbContext _context;
+    private readonly ITransactionService _transactionService;
 
-    public PickupRequestService(ApplicationDbContext context)
+    public PickupRequestService(ApplicationDbContext context, ITransactionService transactionService)
     {
         _context = context;
+        _transactionService = transactionService;
     }
 
     public async Task<PickupRequestResponseDto> CreatePickupRequestAsync(CreatePickupRequestDto dto, string volunteerId)
@@ -148,9 +150,19 @@ public class PickupRequestService
         }
 
         // Only the listing owner can accept/reject requests
-        if (pickupRequest.Listing?.UserId != userId)
+        // Both the listing owner and volunteer can mark as completed
+        var isOwner = pickupRequest.Listing?.UserId == userId;
+        var isVolunteer = pickupRequest.VolunteerId == userId;
+
+        if (!isOwner && !isVolunteer)
         {
             throw new UnauthorizedAccessException("You do not have permission to update this pickup request");
+        }
+
+        // Only owner can accept/reject, both can complete
+        if ((status == "accepted" || status == "rejected") && !isOwner)
+        {
+            throw new UnauthorizedAccessException("Only the listing owner can accept or reject pickup requests");
         }
 
         pickupRequest.Status = status;
@@ -175,7 +187,27 @@ public class PickupRequestService
             }
         }
 
+        // If marking this request as completed, update the listing status to completed
+        if (status == "completed" && pickupRequest.Listing != null)
+        {
+            pickupRequest.Listing.Status = "completed";
+        }
+
         await _context.SaveChangesAsync();
+
+        // If completed, automatically create a transaction
+        if (status == "completed")
+        {
+            try
+            {
+                await _transactionService.CreateTransactionAsync(requestId, userId);
+            }
+            catch (Exception)
+            {
+                // Transaction might already exist or fail for other reasons
+                // Don't fail the status update if transaction creation fails
+            }
+        }
 
         return new PickupRequestResponseDto
         {

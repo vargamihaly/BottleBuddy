@@ -68,6 +68,10 @@ export interface Transaction {
     status?: 'pending' | 'completed' | 'cancelled';
     createdAt?: string;
     completedAt?: string;
+    volunteerName?: string;
+    ownerName?: string;
+    bottleCount?: number;
+    listingTitle?: string;
 }
 
 export interface Rating {
@@ -80,6 +84,14 @@ export interface Rating {
     value: number; // 1-5
     comment?: string;
     createdAt?: string;
+    raterName?: string;
+    ratedUserName?: string;
+}
+
+export interface CreateRating {
+    transactionId: string;
+    value: number;
+    comment?: string;
 }
 
 // API Response types

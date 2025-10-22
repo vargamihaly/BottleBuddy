@@ -1,23 +1,163 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { MapPin, Star, Clock, Users, Trash2 } from "lucide-react";
-import { BottleListing, CreatePickupRequest } from "@/types";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { MapPin, Star, Clock, Users, Trash2, CheckCircle, XCircle, ChevronDown, ChevronUp } from "lucide-react";
+import { BottleListing, CreatePickupRequest, PickupRequest, Transaction } from "@/types";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { apiClient } from "@/lib/apiClient";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { Separator } from "@/components/ui/separator";
+import { RatingDialog } from "@/components/RatingDialog";
 
 interface BottleListingCardProps {
   listing: BottleListing;
   isOwnListing?: boolean;
+  myPickupRequests?: PickupRequest[];
 }
 
-export const BottleListingCard = ({ listing, isOwnListing = false }: BottleListingCardProps) => {
+// Helper component for completed request rating in owner's view
+const CompletedRequestRating = ({
+  requestId,
+  volunteerName,
+  onOpenRatingDialog,
+}: {
+  requestId: string;
+  volunteerName: string;
+  onOpenRatingDialog: (transaction: Transaction) => void;
+}) => {
+  const { data: transaction } = useQuery({
+    queryKey: ["transaction", requestId],
+    queryFn: async () => {
+      const response = await apiClient.get<Transaction>(`/api/transactions/pickup-request/${requestId}`);
+      return response;
+    },
+  });
+
+  const { data: myRating } = useQuery({
+    queryKey: ["rating", transaction?.id],
+    queryFn: async () => {
+      if (!transaction) return null;
+      try {
+        const response = await apiClient.get(`/api/ratings/transaction/${transaction.id}`);
+        return response;
+      } catch (error: any) {
+        if (error.response?.status === 404) {
+          return null;
+        }
+        throw error;
+      }
+    },
+    enabled: !!transaction,
+  });
+
+  if (!transaction) {
+    return <div className="text-xs text-gray-500">Loading transaction...</div>;
+  }
+
+  return (
+    <div className="space-y-2">
+      <div className="bg-emerald-50 rounded-lg p-2">
+        <p className="text-xs text-emerald-700 font-medium">Completed</p>
+        <div className="flex justify-between text-xs mt-1">
+          <span className="text-gray-600">Your share:</span>
+          <span className="font-semibold text-emerald-700">{transaction.ownerAmount} HUF</span>
+        </div>
+      </div>
+      {!myRating ? (
+        <Button
+          size="sm"
+          className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600"
+          onClick={() => onOpenRatingDialog(transaction)}
+        >
+          <Star className="w-3 h-3 mr-1" />
+          Rate {volunteerName}
+        </Button>
+      ) : (
+        <div className="bg-gray-50 rounded-lg p-2 text-center">
+          <div className="flex items-center justify-center space-x-1 mb-1">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <Star
+                key={star}
+                className={`w-3 h-3 ${
+                  star <= myRating.value ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
+                }`}
+              />
+            ))}
+          </div>
+          <p className="text-xs text-gray-600">You rated this exchange</p>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export const BottleListingCard = ({ listing, isOwnListing = false, myPickupRequests = [] }: BottleListingCardProps) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isDeleting, setIsDeleting] = useState(false);
   const [isOfferingPickup, setIsOfferingPickup] = useState(false);
+  const [showPickupRequests, setShowPickupRequests] = useState(false);
+  const [showRatingDialog, setShowRatingDialog] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+
+  // Fetch pickup requests for this listing if it's the user's own listing
+  const { data: pickupRequests = [], isLoading: isLoadingRequests } = useQuery({
+    queryKey: ["pickupRequests", listing.id],
+    queryFn: async () => {
+      const response = await apiClient.get<PickupRequest[]>(`/api/pickuprequests/listing/${listing.id}`);
+      return response;
+    },
+    enabled: isOwnListing && showPickupRequests,
+  });
+
+  // Check if user already has an active pickup request for this listing
+  const myPickupRequest = useMemo(() => {
+    return myPickupRequests.find(
+      request => request.listingId === listing.id &&
+      (request.status === 'pending' || request.status === 'accepted')
+    );
+  }, [myPickupRequests, listing.id]);
+
+  // Check if user has a completed pickup request for this listing
+  const myCompletedPickupRequest = useMemo(() => {
+    return myPickupRequests.find(
+      request => request.listingId === listing.id && request.status === 'completed'
+    );
+  }, [myPickupRequests, listing.id]);
+
+  const hasActivePickupRequest = !!myPickupRequest;
+
+  // Fetch transaction for completed pickup request
+  const { data: transaction } = useQuery({
+    queryKey: ["transaction", myCompletedPickupRequest?.id],
+    queryFn: async () => {
+      if (!myCompletedPickupRequest) return null;
+      const response = await apiClient.get<Transaction>(
+        `/api/transactions/pickup-request/${myCompletedPickupRequest.id}`
+      );
+      return response;
+    },
+    enabled: !!myCompletedPickupRequest && listing.status === 'completed',
+  });
+
+  // Check if user has already rated this transaction
+  const { data: myRating } = useQuery({
+    queryKey: ["rating", transaction?.id],
+    queryFn: async () => {
+      if (!transaction) return null;
+      try {
+        const response = await apiClient.get(`/api/ratings/transaction/${transaction.id}`);
+        return response;
+      } catch (error: any) {
+        if (error.response?.status === 404) {
+          return null; // No rating yet
+        }
+        throw error;
+      }
+    },
+    enabled: !!transaction,
+  });
 
   // Format created date if available
   const timePosted = listing.createdAt
@@ -79,6 +219,7 @@ export const BottleListingCard = ({ listing, isOwnListing = false }: BottleListi
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["bottleListings"] });
+      queryClient.invalidateQueries({ queryKey: ["myPickupRequests"] });
       toast({
         title: "Pickup request sent!",
         description: "The listing owner will be notified of your offer.",
@@ -101,6 +242,55 @@ export const BottleListingCard = ({ listing, isOwnListing = false }: BottleListi
       pickupRequestMutation.mutate({
         listingId: listing.id,
       });
+    }
+  };
+
+  // Update pickup request status mutation
+  const updatePickupRequestStatusMutation = useMutation({
+    mutationFn: async ({ requestId, status }: { requestId: string; status: string }) => {
+      const response = await apiClient.patch(`/api/pickuprequests/${requestId}/status`, { Status: status });
+      return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["pickupRequests", listing.id] });
+      queryClient.invalidateQueries({ queryKey: ["bottleListings"] });
+      queryClient.invalidateQueries({ queryKey: ["myPickupRequests"] });
+      toast({
+        title: "Request updated",
+        description: "The pickup request has been updated successfully.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.response?.data?.error || "Failed to update pickup request.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleAcceptRequest = (requestId: string) => {
+    if (window.confirm("Accept this pickup request? This will mark the listing as claimed.")) {
+      updatePickupRequestStatusMutation.mutate({ requestId, status: "accepted" });
+    }
+  };
+
+  const handleRejectRequest = (requestId: string) => {
+    if (window.confirm("Reject this pickup request?")) {
+      updatePickupRequestStatusMutation.mutate({ requestId, status: "rejected" });
+    }
+  };
+
+  const handleCompletePickup = (requestId: string) => {
+    if (window.confirm("Mark this pickup as completed? This confirms the bottles were successfully exchanged.")) {
+      updatePickupRequestStatusMutation.mutate({ requestId, status: "completed" });
+    }
+  };
+
+  const handleOpenRatingDialog = () => {
+    if (transaction) {
+      setSelectedTransaction(transaction);
+      setShowRatingDialog(true);
     }
   };
 
@@ -158,29 +348,214 @@ export const BottleListingCard = ({ listing, isOwnListing = false }: BottleListi
         </div>
 
         {isOwnListing ? (
-          <Button
-            className="w-full bg-red-600 hover:bg-red-700 text-white"
-            variant="destructive"
-            onClick={handleDelete}
-            disabled={isDeleting}
-          >
-            <Trash2 className="w-4 h-4 mr-2" />
-            {isDeleting ? 'Deleting...' : 'Delete Listing'}
-          </Button>
+          <>
+            <Button
+              className="w-full"
+              variant="outline"
+              onClick={() => setShowPickupRequests(!showPickupRequests)}
+            >
+              {showPickupRequests ? (
+                <>
+                  <ChevronUp className="w-4 h-4 mr-2" />
+                  Hide Pickup Requests
+                </>
+              ) : (
+                <>
+                  <ChevronDown className="w-4 h-4 mr-2" />
+                  View Pickup Requests
+                </>
+              )}
+            </Button>
+
+            {showPickupRequests && (
+              <div className="space-y-2">
+                {isLoadingRequests ? (
+                  <div className="text-center py-4 text-sm text-gray-500">
+                    Loading requests...
+                  </div>
+                ) : pickupRequests.length === 0 ? (
+                  <div className="text-center py-4 text-sm text-gray-500">
+                    No pickup requests yet
+                  </div>
+                ) : (
+                  <>
+                    <Separator />
+                    <div className="space-y-3 max-h-64 overflow-y-auto">
+                      {pickupRequests.map((request) => (
+                        <div
+                          key={request.id}
+                          className="bg-gray-50 rounded-lg p-3 space-y-2"
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-2">
+                              <Users className="w-4 h-4 text-gray-500" />
+                              <span className="text-sm font-medium text-gray-900">
+                                {request.volunteerName || request.volunteerEmail}
+                              </span>
+                            </div>
+                            <Badge
+                              variant={
+                                request.status === 'pending'
+                                  ? 'default'
+                                  : request.status === 'accepted'
+                                  ? 'secondary'
+                                  : 'outline'
+                              }
+                              className={
+                                request.status === 'pending'
+                                  ? 'bg-yellow-100 text-yellow-800'
+                                  : request.status === 'accepted'
+                                  ? 'bg-green-100 text-green-800'
+                                  : 'bg-red-100 text-red-800'
+                              }
+                            >
+                              {request.status}
+                            </Badge>
+                          </div>
+                          {request.message && (
+                            <p className="text-xs text-gray-600">{request.message}</p>
+                          )}
+                          {request.status === 'pending' && (
+                            <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                className="flex-1 bg-green-600 hover:bg-green-700"
+                                onClick={() => handleAcceptRequest(request.id)}
+                                disabled={updatePickupRequestStatusMutation.isPending}
+                              >
+                                <CheckCircle className="w-3 h-3 mr-1" />
+                                Accept
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="flex-1 border-red-300 text-red-700 hover:bg-red-50"
+                                onClick={() => handleRejectRequest(request.id)}
+                                disabled={updatePickupRequestStatusMutation.isPending}
+                              >
+                                <XCircle className="w-3 h-3 mr-1" />
+                                Reject
+                              </Button>
+                            </div>
+                          )}
+                          {request.status === 'accepted' && (
+                            <Button
+                              size="sm"
+                              className="w-full bg-blue-600 hover:bg-blue-700"
+                              onClick={() => handleCompletePickup(request.id)}
+                              disabled={updatePickupRequestStatusMutation.isPending}
+                            >
+                              <CheckCircle className="w-3 h-3 mr-1" />
+                              Mark as Completed
+                            </Button>
+                          )}
+                          {request.status === 'completed' && (
+                            <CompletedRequestRating
+                              requestId={request.id}
+                              volunteerName={request.volunteerName || request.volunteerEmail || 'Volunteer'}
+                              onOpenRatingDialog={(txn) => {
+                                setSelectedTransaction(txn);
+                                setShowRatingDialog(true);
+                              }}
+                            />
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+
+            <Button
+              className="w-full bg-red-600 hover:bg-red-700 text-white"
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={isDeleting}
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              {isDeleting ? 'Deleting...' : 'Delete Listing'}
+            </Button>
+          </>
         ) : (
-          <Button
-            className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
-            disabled={listing.status !== 'open' || isOfferingPickup}
-            onClick={handleOfferPickup}
-          >
-            {isOfferingPickup
-              ? 'Sending request...'
-              : listing.status === 'open'
-              ? 'Offer to Pick Up'
-              : `Status: ${listing.status}`}
-          </Button>
+          <>
+            {myPickupRequest?.status === 'accepted' ? (
+              <Button
+                className="w-full bg-blue-600 hover:bg-blue-700"
+                onClick={() => handleCompletePickup(myPickupRequest.id)}
+                disabled={updatePickupRequestStatusMutation.isPending}
+              >
+                <CheckCircle className="w-4 h-4 mr-2" />
+                Mark as Completed
+              </Button>
+            ) : myCompletedPickupRequest && listing.status === 'completed' ? (
+              <div className="space-y-2">
+                {transaction && (
+                  <div className="bg-emerald-50 rounded-lg p-3 space-y-1">
+                    <p className="text-xs text-emerald-700 font-medium">Transaction Completed</p>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Your share:</span>
+                      <span className="font-semibold text-emerald-700">
+                        {transaction.volunteerAmount} HUF
+                      </span>
+                    </div>
+                  </div>
+                )}
+                {!myRating ? (
+                  <Button
+                    className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600"
+                    onClick={handleOpenRatingDialog}
+                    disabled={!transaction}
+                  >
+                    <Star className="w-4 h-4 mr-2" />
+                    Rate This Exchange
+                  </Button>
+                ) : (
+                  <div className="bg-gray-50 rounded-lg p-3 text-center">
+                    <div className="flex items-center justify-center space-x-1 mb-1">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <Star
+                          key={star}
+                          className={`w-4 h-4 ${
+                            star <= myRating.value
+                              ? "fill-yellow-400 text-yellow-400"
+                              : "text-gray-300"
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    <p className="text-xs text-gray-600">You rated this exchange</p>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Button
+                className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+                disabled={listing.status !== 'open' || isOfferingPickup || hasActivePickupRequest}
+                onClick={handleOfferPickup}
+              >
+                {isOfferingPickup
+                  ? 'Sending request...'
+                  : myPickupRequest?.status === 'pending'
+                  ? 'Request Pending...'
+                  : listing.status === 'open'
+                  ? 'Offer to Pick Up'
+                  : `Status: ${listing.status}`}
+              </Button>
+            )}
+          </>
         )}
       </CardContent>
+
+      {/* Rating Dialog */}
+      {selectedTransaction && (
+        <RatingDialog
+          open={showRatingDialog}
+          onOpenChange={setShowRatingDialog}
+          transaction={selectedTransaction}
+          otherPartyName={listing.createdByUserName || listing.createdByUserEmail}
+        />
+      )}
     </Card>
   );
 };

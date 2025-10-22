@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace BottleBuddy.Api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251022182356_AddAuditFieldsToPickupRequest")]
-    partial class AddAuditFieldsToPickupRequest
+    [Migration("20251022202926_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -194,7 +194,7 @@ namespace BottleBuddy.Api.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasDefaultValueSql("NOW()");
 
                     b.Property<string>("FullName")
                         .HasColumnType("text");
@@ -220,7 +220,7 @@ namespace BottleBuddy.Api.Migrations
 
                     b.HasIndex("Username")
                         .IsUnique()
-                        .HasFilter("[Username] IS NOT NULL");
+                        .HasFilter("\"Username\" IS NOT NULL");
 
                     b.ToTable("Profiles");
                 });

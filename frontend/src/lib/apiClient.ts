@@ -160,6 +160,13 @@ export const apiClient = {
       body: data ? JSON.stringify(data) : undefined,
     }),
 
+  patch: <T>(endpoint: string, data?: any, options?: RequestOptions) =>
+    requestWithRetry<T>(endpoint, {
+      ...options,
+      method: 'PATCH',
+      body: data ? JSON.stringify(data) : undefined,
+    }),
+
   delete: <T>(endpoint: string, options?: RequestOptions) =>
     requestWithRetry<T>(endpoint, { ...options, method: 'DELETE' }),
 

@@ -10,7 +10,7 @@ import { MapView } from "@/components/MapView";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
-import { BottleListing, PaginatedResponse } from "@/types";
+import { BottleListing, PaginatedResponse, PickupRequest } from "@/types";
 import { apiClient } from "@/lib/apiClient";
 import { BottleListingsGridSkeleton } from "@/components/BottleListingSkeleton";
 import { FullPageLoader } from "@/components/LoadingSpinner";
@@ -42,15 +42,44 @@ const Index = () => {
     return response.data; // Extract the data array from the paginated response
   };
 
+  const fetchMyPickupRequests = async (): Promise<PickupRequest[]> => {
+    if (!user) return [];
+    const response = await apiClient.get<PickupRequest[]>('/api/pickuprequests/my-requests');
+    return response;
+  };
+
   const {
     data: bottleListings = [],
     isLoading,
     isError,
   } = useQuery({ queryKey: ["bottleListings"], queryFn: fetchBottleListings });
 
-  // Separate user's own listings from others
-  const myListings = bottleListings.filter(listing => listing.createdByUserEmail === user?.email);
-  const otherListings = bottleListings.filter(listing => listing.createdByUserEmail !== user?.email);
+  const {
+    data: myPickupRequests = [],
+  } = useQuery({
+    queryKey: ["myPickupRequests"],
+    queryFn: fetchMyPickupRequests,
+    enabled: !!user
+  });
+
+  // Separate user's own listings from others (exclude completed ones from homepage)
+  const myListings = bottleListings.filter(
+    listing => listing.createdByUserEmail === user?.email && listing.status !== 'completed'
+  );
+
+  // Get IDs of listings with accepted pickup requests by this user
+  const acceptedListingIds = myPickupRequests
+    .filter(request => request.status === 'accepted')
+    .map(request => request.listingId);
+
+  // Separate other listings into accepted and available
+  const acceptedPickupListings = bottleListings.filter(
+    listing => listing.createdByUserEmail !== user?.email && acceptedListingIds.includes(listing.id)
+  );
+
+  const otherListings = bottleListings.filter(
+    listing => listing.createdByUserEmail !== user?.email && !acceptedListingIds.includes(listing.id)
+  );
 
   if (activeTab === "dashboard") {
     return <UserDashboard onBackToHome={() => setActiveTab("home")} />;
@@ -250,9 +279,15 @@ const Index = () => {
                 <h3 className="text-2xl font-bold text-gray-900">My Active Listings</h3>
                 <p className="text-sm text-gray-600 mt-1">Your bottles available for pickup</p>
               </div>
-              <Badge variant="secondary" className="bg-blue-100 text-blue-700">
-                {myListings.length} {myListings.length === 1 ? 'listing' : 'listings'}
-              </Badge>
+              <div className="flex items-center gap-3">
+                <Badge variant="secondary" className="bg-blue-100 text-blue-700">
+                  {myListings.length} {myListings.length === 1 ? 'listing' : 'listings'}
+                </Badge>
+                <Button variant="outline" size="sm" onClick={() => navigate("/my-listings")}>
+                  View All
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+              </div>
             </div>
             {isLoading ? (
               <BottleListingsGridSkeleton count={3} />
@@ -260,6 +295,37 @@ const Index = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {myListings.map((listing) => (
                   <BottleListingCard key={listing.id} listing={listing} isOwnListing={true} />
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* My Accepted Pickup Tasks Section */}
+      {user && acceptedPickupListings.length > 0 && (
+        <section className="py-12 px-4 bg-emerald-50/60 backdrop-blur-sm">
+          <div className="max-w-6xl mx-auto">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h3 className="text-2xl font-bold text-gray-900">My Accepted Pickup Tasks</h3>
+                <p className="text-sm text-gray-600 mt-1">Bottles you've committed to pick up</p>
+              </div>
+              <Badge variant="secondary" className="bg-emerald-100 text-emerald-700">
+                {acceptedPickupListings.length} {acceptedPickupListings.length === 1 ? 'task' : 'tasks'}
+              </Badge>
+            </div>
+            {isLoading ? (
+              <BottleListingsGridSkeleton count={3} />
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {acceptedPickupListings.map((listing) => (
+                  <BottleListingCard
+                    key={listing.id}
+                    listing={listing}
+                    isOwnListing={false}
+                    myPickupRequests={myPickupRequests}
+                  />
                 ))}
               </div>
             )}
@@ -319,7 +385,12 @@ const Index = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {otherListings.map((listing) => (
-                <BottleListingCard key={listing.id} listing={listing} isOwnListing={false} />
+                <BottleListingCard
+                  key={listing.id}
+                  listing={listing}
+                  isOwnListing={false}
+                  myPickupRequests={myPickupRequests}
+                />
               ))}
             </div>
           )}

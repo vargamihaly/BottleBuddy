@@ -191,7 +191,7 @@ namespace BottleBuddy.Api.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasDefaultValueSql("NOW()");
 
                     b.Property<string>("FullName")
                         .HasColumnType("text");
@@ -217,7 +217,7 @@ namespace BottleBuddy.Api.Migrations
 
                     b.HasIndex("Username")
                         .IsUnique()
-                        .HasFilter("[Username] IS NOT NULL");
+                        .HasFilter("\"Username\" IS NOT NULL");
 
                     b.ToTable("Profiles");
                 });
