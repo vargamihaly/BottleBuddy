@@ -7,7 +7,6 @@ using BottleBuddy.Api.Middleware;
 using BottleBuddy.Api.Services;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
-using Serilog.Enrichers.Activity;
 using Serilog.Formatting.Compact;
 
 Log.Logger = new LoggerConfiguration()
@@ -32,7 +31,6 @@ try
             .Enrich.WithProperty("Environment", context.HostingEnvironment.EnvironmentName)
             .Enrich.WithProcessId()
             .Enrich.WithThreadId()
-            .Enrich.With<ActivityEnricher>()
             .WriteTo.Async(writeTo => writeTo.Console(new RenderedCompactJsonFormatter()));
     });
 
@@ -86,11 +84,6 @@ try
             {
                 diagnosticContext.Set("TraceId", activity.TraceId.ToString());
                 diagnosticContext.Set("SpanId", activity.SpanId.ToString());
-
-                if (activity.ParentSpanId != ActivitySpanId.Empty)
-                {
-                    diagnosticContext.Set("ParentSpanId", activity.ParentSpanId.ToString());
-                }
             }
 
             diagnosticContext.Set("ClientIP", httpContext.Connection.RemoteIpAddress?.ToString());
