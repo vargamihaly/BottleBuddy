@@ -1,3 +1,5 @@
+using BottleBuddy.Api.Enums;
+
 namespace BottleBuddy.Api.Models;
 
 public class Transaction
@@ -12,5 +14,5 @@ public class Transaction
     public decimal TotalRefund { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? CompletedAt { get; set; }
-    public string? Status { get; set; }
+    public TransactionStatus Status { get; set; } = TransactionStatus.Pending;
 }

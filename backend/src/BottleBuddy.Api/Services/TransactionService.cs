@@ -1,6 +1,7 @@
 using BottleBuddy.Api.Data;
 using BottleBuddy.Api.Dtos;
 using BottleBuddy.Api.Models;
+using BottleBuddy.Api.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace BottleBuddy.Api.Services;
@@ -43,7 +44,7 @@ public class TransactionService : ITransactionService
         }
 
         // Check if pickup request is in completed status
-        if (pickupRequest.Status != "completed")
+        if (pickupRequest.Status != PickupRequestStatus.Completed)
         {
             throw new InvalidOperationException("Pickup request must be completed before creating a transaction");
         }
@@ -76,7 +77,7 @@ public class TransactionService : ITransactionService
             VolunteerAmount = volunteerAmount,
             OwnerAmount = ownerAmount,
             TotalRefund = totalRefund,
-            Status = "completed",
+            Status = TransactionStatus.Completed,
             CreatedAt = DateTime.UtcNow,
             CompletedAt = DateTime.UtcNow
         };
@@ -159,7 +160,7 @@ public class TransactionService : ITransactionService
             VolunteerAmount = transaction.VolunteerAmount,
             OwnerAmount = transaction.OwnerAmount,
             TotalRefund = transaction.TotalRefund,
-            Status = transaction.Status,
+            Status = transaction.Status.ToString().ToLower(),
             CreatedAt = transaction.CreatedAt,
             CompletedAt = transaction.CompletedAt,
             VolunteerName = transaction.PickupRequest?.Volunteer?.UserName,

@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace BottleBuddy.Api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251022202926_Initial")]
+    [Migration("20251023100952_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -123,9 +123,8 @@ namespace BottleBuddy.Api.Migrations
                     b.Property<decimal?>("SplitPercentage")
                         .HasColumnType("numeric");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -163,9 +162,8 @@ namespace BottleBuddy.Api.Migrations
                     b.Property<DateTime?>("PickupTime")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -283,8 +281,8 @@ namespace BottleBuddy.Api.Migrations
                     b.Property<Guid>("PickupRequestId")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("Status")
-                        .HasColumnType("text");
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
 
                     b.Property<decimal>("TotalRefund")
                         .HasColumnType("numeric");

@@ -4,6 +4,7 @@ using System.Diagnostics;
 using BottleBuddy.Api.Data;
 using BottleBuddy.Api.Dtos;
 using BottleBuddy.Api.Models;
+using BottleBuddy.Api.Enums;
 
 namespace BottleBuddy.Api.Services;
 
@@ -25,12 +26,16 @@ public class BottleListingService(
         // Filter by status if provided
         if (!string.IsNullOrEmpty(status))
         {
-            query = query.Where(l => l.Status == status);
+            // Parse status string to enum
+            if (Enum.TryParse<ListingStatus>(status, true, out var statusEnum))
+            {
+                query = query.Where(l => l.Status == statusEnum);
+            }
         }
 
         var totalCount = await query.CountAsync();
         var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
-
+     
         var listings = await query
             .OrderByDescending(l => l.CreatedAt)
             .Skip((page - 1) * pageSize)
@@ -46,7 +51,7 @@ public class BottleListingService(
                 Longitude = l.Longitude,
                 EstimatedRefund = l.EstimatedRefund,
                 SplitPercentage = l.SplitPercentage,
-                Status = l.Status,
+                Status = l.Status.ToString().ToLower(),
                 PickupDeadline = l.PickupDeadline,
                 UserId = l.UserId,
                 CreatedAt = l.CreatedAt,
@@ -91,7 +96,7 @@ public class BottleListingService(
             EstimatedRefund = request.EstimatedRefund,
             PickupDeadline = request.PickupDeadline,
             SplitPercentage = request.SplitPercentage,
-            Status = "open",
+            Status = ListingStatus.Open,
             UserId = userId,
             CreatedAt = DateTime.UtcNow
         };
@@ -111,7 +116,7 @@ public class BottleListingService(
             Longitude = listing.Longitude,
             EstimatedRefund = listing.EstimatedRefund,
             SplitPercentage = listing.SplitPercentage,
-            Status = listing.Status,
+            Status = listing.Status.ToString().ToLower(),
             PickupDeadline = listing.PickupDeadline,
             UserId = listing.UserId,
             CreatedAt = listing.CreatedAt,

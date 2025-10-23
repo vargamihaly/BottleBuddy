@@ -1,3 +1,5 @@
+using BottleBuddy.Api.Enums;
+
 namespace BottleBuddy.Api.Models;
 
 public class BottleListing
@@ -11,7 +13,7 @@ public class BottleListing
     public decimal EstimatedRefund { get; set; }
     public DateTime? PickupDeadline { get; set; }
     public decimal? SplitPercentage { get; set; }
-    public string Status { get; set; } = "open";
+    public ListingStatus Status { get; set; } = ListingStatus.Open;
     public string Title { get; set; } = string.Empty;
     public string UserId { get; set; } = string.Empty;
     public ApplicationUser? User { get; set; }

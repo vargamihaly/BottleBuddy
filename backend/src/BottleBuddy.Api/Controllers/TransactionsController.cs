@@ -9,15 +9,8 @@ namespace BottleBuddy.Api.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class TransactionsController : ControllerBase
+public class TransactionsController(ITransactionService transactionService) : ControllerBase
 {
-    private readonly ITransactionService _transactionService;
-
-    public TransactionsController(ITransactionService transactionService)
-    {
-        _transactionService = transactionService;
-    }
-
     /// <summary>
     /// Get all transactions for the current user
     /// </summary>
@@ -30,7 +23,7 @@ public class TransactionsController : ControllerBase
             return Unauthorized(new { error = "User not authenticated" });
         }
 
-        var transactions = await _transactionService.GetMyTransactionsAsync(userId);
+        var transactions = await transactionService.GetMyTransactionsAsync(userId);
         return Ok(transactions);
     }
 
@@ -48,7 +41,7 @@ public class TransactionsController : ControllerBase
 
         try
         {
-            var transaction = await _transactionService.GetTransactionByPickupRequestIdAsync(pickupRequestId, userId);
+            var transaction = await transactionService.GetTransactionByPickupRequestIdAsync(pickupRequestId, userId);
             if (transaction == null)
             {
                 return NotFound(new { error = "Transaction not found" });
@@ -76,7 +69,7 @@ public class TransactionsController : ControllerBase
 
         try
         {
-            var transaction = await _transactionService.CreateTransactionAsync(dto.PickupRequestId, userId);
+            var transaction = await transactionService.CreateTransactionAsync(dto.PickupRequestId, userId);
             return CreatedAtAction(
                 nameof(GetTransactionByPickupRequest),
                 new { pickupRequestId = dto.PickupRequestId },

@@ -1,4 +1,5 @@
 using BottleBuddy.Api.Models;
+using BottleBuddy.Api.Enums;
 using Microsoft.AspNetCore.Identity;
 
 namespace BottleBuddy.Api.Data;
@@ -47,7 +48,7 @@ public static class SeedData
                 Latitude = 47.5030,
                 Longitude = 19.0638,
                 EstimatedRefund = 4500,
-                Status = "open",
+                Status = ListingStatus.Open,
                 UserId = testUser.Id,
                 Description = "Collected from neighbors, easy pickup from building entrance"
             },
@@ -60,7 +61,7 @@ public static class SeedData
                 Latitude = 47.4960,
                 Longitude = 19.0533,
                 EstimatedRefund = 12000,
-                Status = "open",
+                Status = ListingStatus.Open,
                 UserId = testUser.Id,
                 Description = "From weekend party, lots of bottles"
             },
@@ -73,7 +74,7 @@ public static class SeedData
                 Latitude = 47.4980,
                 Longitude = 19.0540,
                 EstimatedRefund = 3000,
-                Status = "open",
+                Status = ListingStatus.Open,
                 UserId = testUser.Id,
                 Description = "Weekly collection from office kitchen"
             },
@@ -86,7 +87,7 @@ public static class SeedData
                 Latitude = 47.5150,
                 Longitude = 19.0770,
                 EstimatedRefund = 8000,
-                Status = "open",
+                Status = ListingStatus.Open,
                 UserId = testUser.Id,
                 Description = "Month's worth of bottles from family"
             },
@@ -99,7 +100,7 @@ public static class SeedData
                 Latitude = 47.4970,
                 Longitude = 19.0550,
                 EstimatedRefund = 20000,
-                Status = "open",
+                Status = ListingStatus.Open,
                 UserId = testUser.Id,
                 Description = "Daily restaurant collection, ready for pickup"
             },
@@ -112,7 +113,7 @@ public static class SeedData
                 Latitude = 47.5055,
                 Longitude = 19.0625,
                 EstimatedRefund = 1500,
-                Status = "open",
+                Status = ListingStatus.Open,
                 UserId = testUser.Id,
                 Description = "Just a few bottles, quick pickup"
             },
@@ -125,7 +126,7 @@ public static class SeedData
                 Latitude = 47.5152,
                 Longitude = 19.0445,
                 EstimatedRefund = 15000,
-                Status = "open",
+                Status = ListingStatus.Open,
                 UserId = testUser.Id,
                 Description = "After outdoor event, many bottles"
             },
@@ -138,7 +139,7 @@ public static class SeedData
                 Latitude = 47.4960,
                 Longitude = 19.0708,
                 EstimatedRefund = 6000,
-                Status = "open",
+                Status = ListingStatus.Open,
                 UserId = testUser.Id,
                 Description = "Collecting for elderly neighbor"
             },
@@ -151,7 +152,7 @@ public static class SeedData
                 Latitude = 47.4880,
                 Longitude = 19.0616,
                 EstimatedRefund = 9500,
-                Status = "open",
+                Status = ListingStatus.Open,
                 UserId = testUser.Id,
                 Description = "Student dorm collection"
             },
@@ -164,7 +165,7 @@ public static class SeedData
                 Latitude = 47.5108,
                 Longitude = 19.0571,
                 EstimatedRefund = 4000,
-                Status = "open",
+                Status = ListingStatus.Open,
                 UserId = testUser.Id,
                 Description = "Weekly collection from fitness center"
             }

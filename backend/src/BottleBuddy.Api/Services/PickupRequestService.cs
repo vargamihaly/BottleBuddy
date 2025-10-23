@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using BottleBuddy.Api.Data;
 using BottleBuddy.Api.Models;
 using BottleBuddy.Api.Dtos;
+using BottleBuddy.Api.Enums;
 
 namespace BottleBuddy.Api.Services;
 
@@ -27,7 +28,7 @@ public class PickupRequestService
             throw new InvalidOperationException("Listing not found");
         }
 
-        if (listing.Status != "open")
+        if (listing.Status != ListingStatus.Open)
         {
             throw new InvalidOperationException("Listing is no longer available");
         }
@@ -42,7 +43,7 @@ public class PickupRequestService
         var existingRequest = await _context.PickupRequests
             .FirstOrDefaultAsync(pr => pr.ListingId == dto.ListingId
                                     && pr.VolunteerId == volunteerId
-                                    && (pr.Status == "pending" || pr.Status == "accepted"));
+                                    && (pr.Status == PickupRequestStatus.Pending || pr.Status == PickupRequestStatus.Accepted));
 
         if (existingRequest != null)
         {
@@ -57,7 +58,7 @@ public class PickupRequestService
             VolunteerId = volunteerId,
             Message = dto.Message,
             PickupTime = dto.PickupTime,
-            Status = "pending",
+            Status = PickupRequestStatus.Pending,
             CreatedAt = DateTime.UtcNow
         };
 
@@ -139,6 +140,12 @@ public class PickupRequestService
 
     public async Task<PickupRequestResponseDto> UpdatePickupRequestStatusAsync(Guid requestId, string status, string userId)
     {
+        // Parse status string to enum
+        if (!Enum.TryParse<PickupRequestStatus>(status, true, out var newStatus))
+        {
+            throw new ArgumentException($"Invalid status value: {status}");
+        }
+
         var pickupRequest = await _context.PickupRequests
             .Include(pr => pr.Listing)
             .Include(pr => pr.Volunteer)
@@ -160,43 +167,43 @@ public class PickupRequestService
         }
 
         // Only owner can accept/reject, both can complete
-        if ((status == "accepted" || status == "rejected") && !isOwner)
+        if ((newStatus == PickupRequestStatus.Accepted || newStatus == PickupRequestStatus.Rejected) && !isOwner)
         {
             throw new UnauthorizedAccessException("Only the listing owner can accept or reject pickup requests");
         }
 
-        pickupRequest.Status = status;
+        pickupRequest.Status = newStatus;
         pickupRequest.UpdatedAt = DateTime.UtcNow;
 
         // If accepting this request, update the listing status to claimed
-        if (status == "accepted" && pickupRequest.Listing != null)
+        if (newStatus == PickupRequestStatus.Accepted && pickupRequest.Listing != null)
         {
-            pickupRequest.Listing.Status = "claimed";
+            pickupRequest.Listing.Status = ListingStatus.Claimed;
 
             // Reject all other pending requests for this listing
             var otherRequests = await _context.PickupRequests
                 .Where(pr => pr.ListingId == pickupRequest.ListingId
                           && pr.Id != requestId
-                          && pr.Status == "pending")
+                          && pr.Status == PickupRequestStatus.Pending)
                 .ToListAsync();
 
             foreach (var request in otherRequests)
             {
-                request.Status = "rejected";
+                request.Status = PickupRequestStatus.Rejected;
                 request.UpdatedAt = DateTime.UtcNow;
             }
         }
 
         // If marking this request as completed, update the listing status to completed
-        if (status == "completed" && pickupRequest.Listing != null)
+        if (newStatus == PickupRequestStatus.Completed && pickupRequest.Listing != null)
         {
-            pickupRequest.Listing.Status = "completed";
+            pickupRequest.Listing.Status = ListingStatus.Completed;
         }
 
         await _context.SaveChangesAsync();
 
         // If completed, automatically create a transaction
-        if (status == "completed")
+        if (newStatus == PickupRequestStatus.Completed)
         {
             try
             {

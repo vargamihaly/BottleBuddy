@@ -1,3 +1,5 @@
+using BottleBuddy.Api.Enums;
+
 namespace BottleBuddy.Api.Dtos;
 
 public class PickupRequestResponseDto
@@ -9,7 +11,7 @@ public class PickupRequestResponseDto
     public string? VolunteerEmail { get; set; }
     public string? Message { get; set; }
     public DateTime? PickupTime { get; set; }
-    public string Status { get; set; } = "pending";
+    public PickupRequestStatus Status { get; set; } = PickupRequestStatus.Pending;
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
 }

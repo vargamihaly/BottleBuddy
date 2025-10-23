@@ -1,3 +1,5 @@
+using BottleBuddy.Api.Enums;
+
 namespace BottleBuddy.Api.Models;
 
 public class PickupRequest
@@ -9,7 +11,7 @@ public class PickupRequest
     public ApplicationUser? Volunteer { get; set; }
     public string? Message { get; set; }
     public DateTime? PickupTime { get; set; }
-    public string Status { get; set; } = "pending";
+    public PickupRequestStatus Status { get; set; } = PickupRequestStatus.Pending;
 
     // Audit fields
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

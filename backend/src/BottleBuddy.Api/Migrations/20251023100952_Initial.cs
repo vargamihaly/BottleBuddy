@@ -170,7 +170,7 @@ namespace BottleBuddy.Api.Migrations
                     EstimatedRefund = table.Column<decimal>(type: "numeric", nullable: false),
                     PickupDeadline = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     SplitPercentage = table.Column<decimal>(type: "numeric", nullable: true),
-                    Status = table.Column<string>(type: "text", nullable: false),
+                    Status = table.Column<int>(type: "integer", nullable: false),
                     Title = table.Column<string>(type: "text", nullable: false),
                     UserId = table.Column<string>(type: "text", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
@@ -221,7 +221,7 @@ namespace BottleBuddy.Api.Migrations
                     VolunteerId = table.Column<string>(type: "text", nullable: false),
                     Message = table.Column<string>(type: "text", nullable: true),
                     PickupTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    Status = table.Column<string>(type: "text", nullable: false),
+                    Status = table.Column<int>(type: "integer", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
@@ -254,7 +254,7 @@ namespace BottleBuddy.Api.Migrations
                     TotalRefund = table.Column<decimal>(type: "numeric", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     CompletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    Status = table.Column<string>(type: "text", nullable: true)
+                    Status = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
