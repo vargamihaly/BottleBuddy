@@ -2,23 +2,36 @@ using BottleBuddy.Api.Data;
 using BottleBuddy.Api.Dtos;
 using BottleBuddy.Api.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using System.Linq;
 
 namespace BottleBuddy.Api.Services;
 
 public class RatingService : IRatingService
 {
     private readonly ApplicationDbContext _context;
+    private readonly ILogger<RatingService> _logger;
 
-    public RatingService(ApplicationDbContext context)
+    public RatingService(ApplicationDbContext context, ILogger<RatingService> logger)
     {
         _context = context;
+        _logger = logger;
     }
 
     public async Task<RatingResponseDto> CreateRatingAsync(CreateRatingDto dto, string raterId)
     {
+        _logger.LogInformation(
+            "User {RaterId} creating rating for transaction {TransactionId}",
+            raterId,
+            dto.TransactionId);
+
         // Validate rating value
         if (dto.Value < 1 || dto.Value > 5)
         {
+            _logger.LogWarning(
+                "Rating creation failed: value {RatingValue} out of bounds for transaction {TransactionId}",
+                dto.Value,
+                dto.TransactionId);
             throw new ArgumentException("Rating value must be between 1 and 5");
         }
 
@@ -30,6 +43,10 @@ public class RatingService : IRatingService
 
         if (transaction == null)
         {
+            _logger.LogWarning(
+                "Rating creation failed: transaction {TransactionId} not found for user {RaterId}",
+                dto.TransactionId,
+                raterId);
             throw new InvalidOperationException("Transaction not found");
         }
 
@@ -39,6 +56,10 @@ public class RatingService : IRatingService
 
         if (!isOwner && !isVolunteer)
         {
+            _logger.LogWarning(
+                "User {RaterId} attempted to rate transaction {TransactionId} without participation",
+                raterId,
+                dto.TransactionId);
             throw new UnauthorizedAccessException("You can only rate transactions you were part of");
         }
 
@@ -53,6 +74,10 @@ public class RatingService : IRatingService
 
         if (existingRating != null)
         {
+            _logger.LogWarning(
+                "User {RaterId} attempted duplicate rating for transaction {TransactionId}",
+                raterId,
+                dto.TransactionId);
             throw new InvalidOperationException("You have already rated this transaction");
         }
 
@@ -75,11 +100,18 @@ public class RatingService : IRatingService
 
         await _context.SaveChangesAsync();
 
+        _logger.LogInformation(
+            "Rating {RatingId} created for transaction {TransactionId} by user {RaterId}",
+            rating.Id,
+            dto.TransactionId,
+            raterId);
+
         return await MapToResponseDto(rating);
     }
 
     public async Task<List<RatingResponseDto>> GetRatingsForUserAsync(string userId)
     {
+        _logger.LogInformation("Retrieving ratings for user {RatedUserId}", userId);
         var ratings = await _context.Ratings
             .Include(r => r.Rater)
             .Include(r => r.RatedUser)
@@ -93,11 +125,20 @@ public class RatingService : IRatingService
             result.Add(await MapToResponseDto(rating));
         }
 
+        _logger.LogInformation(
+            "Retrieved {RatingCount} ratings for user {RatedUserId}",
+            result.Count,
+            userId);
+
         return result;
     }
 
     public async Task<RatingResponseDto?> GetMyRatingForTransactionAsync(Guid transactionId, string raterId)
     {
+        _logger.LogInformation(
+            "User {RaterId} retrieving rating for transaction {TransactionId}",
+            raterId,
+            transactionId);
         var rating = await _context.Ratings
             .Include(r => r.Rater)
             .Include(r => r.RatedUser)
@@ -105,14 +146,24 @@ public class RatingService : IRatingService
 
         if (rating == null)
         {
+            _logger.LogInformation(
+                "No rating found for transaction {TransactionId} by user {RaterId}",
+                transactionId,
+                raterId);
             return null;
         }
 
+        _logger.LogInformation(
+            "Rating {RatingId} retrieved for transaction {TransactionId} by user {RaterId}",
+            rating.Id,
+            transactionId,
+            raterId);
         return await MapToResponseDto(rating);
     }
 
     private async Task UpdateUserRatingAsync(string userId)
     {
+        _logger.LogInformation("Updating aggregate rating for user {UserId}", userId);
         // Calculate average rating for user
         var ratings = await _context.Ratings
             .Where(r => r.RatedUserId == userId)
@@ -120,6 +171,9 @@ public class RatingService : IRatingService
 
         if (ratings.Count == 0)
         {
+            _logger.LogInformation(
+                "No ratings available to update aggregate for user {UserId}",
+                userId);
             return;
         }
 
@@ -132,6 +186,11 @@ public class RatingService : IRatingService
             profile.Rating = averageRating;
             profile.TotalRatings = ratings.Count;
             profile.UpdatedAt = DateTime.UtcNow;
+            _logger.LogInformation(
+                "Updated profile rating for user {UserId} to {AverageRating} based on {RatingCount} ratings",
+                userId,
+                averageRating,
+                ratings.Count);
         }
     }
 
