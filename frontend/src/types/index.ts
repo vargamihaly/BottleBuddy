@@ -131,3 +131,9 @@ export interface AuthResponse {
     token: string;
     user?: User;
 }
+
+export interface Statistics {
+    totalBottlesReturned: number;
+    totalHufShared: number;
+    activeUsers: number;
+}

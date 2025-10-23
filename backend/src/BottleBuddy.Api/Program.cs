@@ -35,7 +35,13 @@ try
     });
 
     // Add services to the container
-    builder.Services.AddControllers();
+    builder.Services.AddControllers()
+        .AddJsonOptions(options =>
+        {
+            options.JsonSerializerOptions.Converters.Add(
+                new System.Text.Json.Serialization.JsonStringEnumConverter(
+                    System.Text.Json.JsonNamingPolicy.CamelCase));
+        });
 
     // Database
     builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -61,6 +67,7 @@ try
     builder.Services.AddScoped<IBottleListingService, BottleListingService>();
     builder.Services.AddScoped<ITransactionService, TransactionService>();
     builder.Services.AddScoped<IRatingService, RatingService>();
+    builder.Services.AddScoped<IStatisticsService, StatisticsService>();
     builder.Services.AddScoped<PickupRequestService>();
 
     // Swagger/OpenAPI
