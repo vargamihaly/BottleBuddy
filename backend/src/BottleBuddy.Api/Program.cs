@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Security.Claims;
 using BottleBuddy.Api;
 using BottleBuddy.Api.Data;
@@ -6,6 +7,7 @@ using BottleBuddy.Api.Middleware;
 using BottleBuddy.Api.Services;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using Serilog.Enrichers.Activity;
 using Serilog.Formatting.Compact;
 
 Log.Logger = new LoggerConfiguration()
@@ -30,6 +32,7 @@ try
             .Enrich.WithProperty("Environment", context.HostingEnvironment.EnvironmentName)
             .Enrich.WithProcessId()
             .Enrich.WithThreadId()
+            .Enrich.With<ActivityEnricher>()
             .WriteTo.Async(writeTo => writeTo.Console(new RenderedCompactJsonFormatter()));
     });
 
@@ -75,11 +78,25 @@ try
 
     app.UseSerilogRequestLogging(options =>
     {
+        options.IncludeQueryInRequestPath = true;
         options.EnrichDiagnosticContext = (diagnosticContext, httpContext) =>
         {
+            var activity = Activity.Current;
+            if (activity is not null)
+            {
+                diagnosticContext.Set("TraceId", activity.TraceId.ToString());
+                diagnosticContext.Set("SpanId", activity.SpanId.ToString());
+
+                if (activity.ParentSpanId != ActivitySpanId.Empty)
+                {
+                    diagnosticContext.Set("ParentSpanId", activity.ParentSpanId.ToString());
+                }
+            }
+
             diagnosticContext.Set("ClientIP", httpContext.Connection.RemoteIpAddress?.ToString());
             diagnosticContext.Set("RequestHost", httpContext.Request.Host.Value);
             diagnosticContext.Set("RequestScheme", httpContext.Request.Scheme);
+            diagnosticContext.Set("RequestPath", httpContext.Request.Path);
             diagnosticContext.Set("CorrelationId", httpContext.TraceIdentifier);
 
             var userId = httpContext.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
