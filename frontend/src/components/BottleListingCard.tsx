@@ -138,7 +138,7 @@ export const BottleListingCard = ({ listing, isOwnListing = false, myPickupReque
       );
       return response;
     },
-    enabled: !!myCompletedPickupRequest && listing.status === 'completed',
+    enabled: !!myCompletedPickupRequest,
   });
 
   // Check if user has already rated this transaction
@@ -497,7 +497,7 @@ export const BottleListingCard = ({ listing, isOwnListing = false, myPickupReque
                 <CheckCircle className="w-4 h-4 mr-2" />
                 Mark as Completed
               </Button>
-            ) : myCompletedPickupRequest && listing.status === 'completed' ? (
+            ) : myCompletedPickupRequest ? (
               <div className="space-y-2">
                 {transaction && (
                   <div className="bg-emerald-50 rounded-lg p-3 space-y-1">

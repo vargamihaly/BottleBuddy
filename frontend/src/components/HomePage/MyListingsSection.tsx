@@ -16,7 +16,7 @@ export const MyListingsSection = ({ listings, isLoading }: MyListingsSectionProp
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  if (!user || listings.length === 0) {
+  if (!user) {
     return null;
   }
 
@@ -40,6 +40,16 @@ export const MyListingsSection = ({ listings, isLoading }: MyListingsSectionProp
         </div>
         {isLoading ? (
           <BottleListingsGridSkeleton count={3} />
+        ) : listings.length === 0 ? (
+          <div className="bg-white/80 rounded-lg p-8 text-center">
+            <p className="text-gray-600 mb-4">You currently don't have any active listings.</p>
+            <Button
+              onClick={() => navigate("/create-listing")}
+              className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+            >
+              Create Your First Listing
+            </Button>
+          </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {listings.map((listing) => (

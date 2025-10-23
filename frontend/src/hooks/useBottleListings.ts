@@ -43,9 +43,19 @@ export const useBottleListings = () => {
     .filter(request => request.status === 'pending' || request.status === 'accepted')
     .map(request => request.listingId);
 
+  // Get IDs of listings with completed pickup requests by this user
+  const completedPickupRequestListingIds = myPickupRequests
+    .filter(request => request.status === 'completed')
+    .map(request => request.listingId);
+
   // Listings where user has active pickup requests (pending or accepted)
   const myPickupTaskListings = bottleListings.filter(
     listing => listing.createdByUserEmail !== user?.email && activePickupRequestListingIds.includes(listing.id)
+  );
+
+  // Listings where user has completed pickup requests
+  const myCompletedPickupTaskListings = bottleListings.filter(
+    listing => listing.createdByUserEmail !== user?.email && completedPickupRequestListingIds.includes(listing.id)
   );
 
   // Available listings (exclude own, exclude with active pickup requests, exclude completed)
@@ -57,6 +67,7 @@ export const useBottleListings = () => {
     bottleListings,
     myListings,
     myPickupTaskListings,
+    myCompletedPickupTaskListings,
     availableListings,
     myPickupRequests,
     isLoading,

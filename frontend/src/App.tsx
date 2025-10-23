@@ -12,6 +12,7 @@ import Auth from "./pages/Auth";
 import About from "./pages/About";
 import CreateListing from "./pages/CreateListing";
 import MyListings from "./pages/MyListings";
+import MyPickupTasks from "./pages/MyPickupTasks";
 import NotFound from "./pages/NotFound";
 
 // Configure React Query with better defaults
@@ -41,6 +42,7 @@ const App = () => (
               <Route path="/about" element={<About />} />
               <Route path="/create-listing" element={<CreateListing />} />
               <Route path="/my-listings" element={<MyListings />} />
+              <Route path="/my-pickup-tasks" element={<MyPickupTasks />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

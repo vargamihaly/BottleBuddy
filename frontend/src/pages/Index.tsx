@@ -23,6 +23,7 @@ const Index = () => {
     bottleListings,
     myListings,
     myPickupTaskListings,
+    myCompletedPickupTaskListings,
     availableListings,
     myPickupRequests,
     isLoading,
@@ -76,7 +77,8 @@ const Index = () => {
       />
 
       <MyPickupTasksSection
-        listings={myPickupTaskListings}
+        activeListings={myPickupTaskListings}
+        completedListings={myCompletedPickupTaskListings}
         pickupRequests={myPickupRequests}
         isLoading={isLoading}
       />
