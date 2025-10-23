@@ -4,6 +4,7 @@ using BottleBuddy.Api.Models;
 using BottleBuddy.Api.Dtos;
 using Microsoft.Extensions.Logging;
 using System.Linq;
+using BottleBuddy.Api.Enums;
 
 namespace BottleBuddy.Api.Services;
 
@@ -232,8 +233,10 @@ public class PickupRequestService
             throw new UnauthorizedAccessException("You do not have permission to update this pickup request");
         }
 
-        // Only owner can accept/reject, both can complete
-        if ((newStatus == PickupRequestStatus.Accepted || newStatus == PickupRequestStatus.Rejected) && !isOwner)
+        Enum.TryParse<PickupRequestStatus>(status, true, out var statusEnum);
+        
+         // Only owner can accept/reject, both can complete
+        if (statusEnum is PickupRequestStatus.Accepted or PickupRequestStatus.Rejected && !isOwner)
         {
             _logger.LogWarning(
                 "Volunteer {UserId} attempted to set status {Status} on pickup request {PickupRequestId}",
@@ -243,11 +246,11 @@ public class PickupRequestService
             throw new UnauthorizedAccessException("Only the listing owner can accept or reject pickup requests");
         }
 
-        pickupRequest.Status = newStatus;
+        pickupRequest.Status = statusEnum;
         pickupRequest.UpdatedAt = DateTime.UtcNow;
 
         // If accepting this request, update the listing status to claimed
-        if (newStatus == PickupRequestStatus.Accepted && pickupRequest.Listing != null)
+        if (statusEnum == PickupRequestStatus.Accepted && pickupRequest.Listing != null)
         {
             pickupRequest.Listing.Status = ListingStatus.Claimed;
 
@@ -266,7 +269,7 @@ public class PickupRequestService
         }
 
         // If marking this request as completed, update the listing status to completed
-        if (newStatus == PickupRequestStatus.Completed && pickupRequest.Listing != null)
+        if (statusEnum == PickupRequestStatus.Completed && pickupRequest.Listing != null)
         {
             pickupRequest.Listing.Status = ListingStatus.Completed;
         }
@@ -280,7 +283,7 @@ public class PickupRequestService
             userId);
 
         // If completed, automatically create a transaction
-        if (newStatus == PickupRequestStatus.Completed)
+        if (statusEnum == PickupRequestStatus.Completed)
         {
             try
             {

@@ -28,7 +28,6 @@ try
             .Enrich.FromLogContext()
             .Enrich.WithProperty("Application", context.HostingEnvironment.ApplicationName)
             .Enrich.WithProperty("Environment", context.HostingEnvironment.EnvironmentName)
-            .Enrich.WithMachineName()
             .Enrich.WithProcessId()
             .Enrich.WithThreadId()
             .WriteTo.Async(writeTo => writeTo.Console(new RenderedCompactJsonFormatter()));

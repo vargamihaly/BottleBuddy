@@ -5,5 +5,4 @@ public enum ListingStatus
     Open,
     Claimed,
     Completed,
-    Cancelled,
 }
