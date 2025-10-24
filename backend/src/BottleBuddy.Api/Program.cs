@@ -45,22 +45,13 @@ try
 
     // Database
     builder.Services.AddDbContext<ApplicationDbContext>(options =>
-        options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
     // Authentication & Authorization
     builder.Services.AddAuthenticationConfiguration(builder.Configuration);
 
     // CORS
-    builder.Services.AddCors(options =>
-    {
-        options.AddDefaultPolicy(policy =>
-        {
-            policy.WithOrigins("http://localhost:8080", "http://localhost:8081")
-                  .AllowAnyMethod()
-                  .AllowAnyHeader()
-                  .AllowCredentials();
-        });
-    });
+    builder.Services.AddCorsConfiguration(builder.Configuration, builder.Environment);
 
     // Register application services
     builder.Services.AddScoped<IAuthService, AuthService>();
@@ -69,6 +60,15 @@ try
     builder.Services.AddScoped<IRatingService, RatingService>();
     builder.Services.AddScoped<IStatisticsService, StatisticsService>();
     builder.Services.AddScoped<PickupRequestService>();
+
+    // Application Insights (Azure monitoring)
+    if (!string.IsNullOrEmpty(builder.Configuration["ApplicationInsights:ConnectionString"]))
+    {
+        builder.Services.AddApplicationInsightsTelemetry(options =>
+        {
+            options.ConnectionString = builder.Configuration["ApplicationInsights:ConnectionString"];
+        });
+    }
 
     // Swagger/OpenAPI
     builder.Services.AddSwaggerDocumentation();

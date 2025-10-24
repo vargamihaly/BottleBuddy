@@ -32,14 +32,85 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             // Username should be unique if not null
             entity.HasIndex(p => p.Username)
                 .IsUnique()
-                .HasFilter("\"Username\" IS NOT NULL");
+                .HasFilter("[Username] IS NOT NULL");
 
             // Set default values
             entity.Property(p => p.TotalRatings)
                 .HasDefaultValue(0);
 
             entity.Property(p => p.CreatedAt)
-                .HasDefaultValueSql("NOW()");
+                .HasDefaultValueSql("GETUTCDATE()");
+        });
+
+        // Configure BottleListing
+        modelBuilder.Entity<BottleListing>(entity =>
+        {
+            entity.HasKey(bl => bl.Id);
+
+            // Relationship with User (Owner)
+            entity.HasOne(bl => bl.User)
+                .WithMany()
+                .HasForeignKey(bl => bl.UserId)
+                .OnDelete(DeleteBehavior.Restrict); // Prevent cascade delete cycle
+        });
+
+        // Configure PickupRequest
+        modelBuilder.Entity<PickupRequest>(entity =>
+        {
+            entity.HasKey(pr => pr.Id);
+
+            // Relationship with BottleListing
+            entity.HasOne(pr => pr.Listing)
+                .WithMany()
+                .HasForeignKey(pr => pr.ListingId)
+                .OnDelete(DeleteBehavior.Cascade); // Can cascade from listing
+
+            // Relationship with Volunteer (ApplicationUser)
+            entity.HasOne(pr => pr.Volunteer)
+                .WithMany()
+                .HasForeignKey(pr => pr.VolunteerId)
+                .OnDelete(DeleteBehavior.Restrict); // Prevent cascade delete cycle
+        });
+
+        // Configure Transaction
+        modelBuilder.Entity<Transaction>(entity =>
+        {
+            entity.HasKey(t => t.Id);
+
+            // Relationships with restricted delete to avoid cycles
+            entity.HasOne<BottleListing>()
+                .WithMany()
+                .HasForeignKey(t => t.ListingId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne<PickupRequest>()
+                .WithMany()
+                .HasForeignKey(t => t.PickupRequestId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // Configure Rating
+        modelBuilder.Entity<Rating>(entity =>
+        {
+            entity.HasKey(r => r.Id);
+
+            // Relationship with Rater (who gives the rating)
+            entity.HasOne<ApplicationUser>()
+                .WithMany()
+                .HasForeignKey(r => r.RaterId)
+                .OnDelete(DeleteBehavior.Restrict); // Prevent cascade delete
+
+            // Relationship with Rated User (who receives the rating)
+            entity.HasOne<ApplicationUser>()
+                .WithMany()
+                .HasForeignKey(r => r.RatedUserId)
+                .OnDelete(DeleteBehavior.Restrict); // Prevent cascade delete
+
+            // Relationship with Transaction
+            entity.HasOne<Transaction>()
+                .WithMany()
+                .HasForeignKey(r => r.TransactionId)
+                .OnDelete(DeleteBehavior.Cascade); // Can cascade from transaction
         });
     }
 }

@@ -251,8 +251,7 @@ export const MapView = ({ listings, onBackToHome }: MapViewProps) => {
                           onClick={() => setSelectedListing(listing)}
                           disabled={listing.status !== 'open'}
                         >
-                          {listing.createdByUserEmail === user.email}
-                          {/*{listing.status === 'open' ? 'Offer to Pick Up' : `Status: ${listing.status}`}*/}
+                          {listing.status === 'open' ? 'Offer to Pick Up' : `Status: ${listing.status}`}
                         </Button>
                       )}
                     </div>
