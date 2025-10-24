@@ -51,7 +51,7 @@ public class RatingService : IRatingService
         }
 
         // Verify user is part of this transaction
-        var isOwner = transaction.Listing?.UserId == raterId;
+        var isOwner = transaction.Listing?.OwnerId == raterId;
         var isVolunteer = transaction.PickupRequest?.VolunteerId == raterId;
 
         if (!isOwner && !isVolunteer)
@@ -66,7 +66,7 @@ public class RatingService : IRatingService
         // Determine who is being rated
         var ratedUserId = isOwner
             ? transaction.PickupRequest!.VolunteerId
-            : transaction.Listing!.UserId;
+            : transaction.Listing!.OwnerId;
 
         // Check if user already rated this transaction
         var existingRating = await _context.Ratings
@@ -90,7 +90,7 @@ public class RatingService : IRatingService
             TransactionId = dto.TransactionId,
             Value = dto.Value,
             Comment = dto.Comment,
-            CreatedAt = DateTime.UtcNow
+            CreatedAtUtc = DateTime.UtcNow
         };
 
         _context.Ratings.Add(rating);
@@ -116,7 +116,7 @@ public class RatingService : IRatingService
             .Include(r => r.Rater)
             .Include(r => r.RatedUser)
             .Where(r => r.RatedUserId == userId)
-            .OrderByDescending(r => r.CreatedAt)
+            .OrderByDescending(r => r.CreatedAtUtc)
             .ToListAsync();
 
         var result = new List<RatingResponseDto>();
@@ -185,7 +185,7 @@ public class RatingService : IRatingService
         {
             profile.Rating = averageRating;
             profile.TotalRatings = ratings.Count;
-            profile.UpdatedAt = DateTime.UtcNow;
+            profile.UpdatedAtUtc = DateTime.UtcNow;
             _logger.LogInformation(
                 "Updated profile rating for user {UserId} to {AverageRating} based on {RatingCount} ratings",
                 userId,
@@ -216,7 +216,7 @@ public class RatingService : IRatingService
             TransactionId = rating.TransactionId,
             Value = rating.Value,
             Comment = rating.Comment,
-            CreatedAt = rating.CreatedAt,
+            CreatedAt = rating.CreatedAtUtc,
             RaterName = rating.Rater?.UserName,
             RatedUserName = rating.RatedUser?.UserName
         };

@@ -15,10 +15,10 @@ public class BottleListing
     public decimal? SplitPercentage { get; set; }
     public ListingStatus Status { get; set; } = ListingStatus.Open;
     public string Title { get; set; } = string.Empty;
-    public string UserId { get; set; } = string.Empty;
-    public ApplicationUser? User { get; set; }
+    public string OwnerId { get; set; } = string.Empty;
+    public User? Owner { get; set; }
 
     // Audit fields
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public DateTime? UpdatedAt { get; set; }
+    public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+    public DateTime? UpdatedAtUtc { get; set; }
 }

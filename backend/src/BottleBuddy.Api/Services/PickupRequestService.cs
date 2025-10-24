@@ -54,7 +54,7 @@ public class PickupRequestService
         }
 
         // Check if user is trying to pick up their own listing
-        if (listing.UserId == volunteerId)
+        if (listing.OwnerId == volunteerId)
         {
             _logger.LogWarning(
                 "Pickup request creation failed: volunteer {VolunteerId} attempted to pick up own listing {ListingId}",
@@ -88,7 +88,7 @@ public class PickupRequestService
             Message = dto.Message,
             PickupTime = dto.PickupTime,
             Status = PickupRequestStatus.Pending,
-            CreatedAt = DateTime.UtcNow
+            CreatedAtUtc = DateTime.UtcNow
         };
 
         _context.PickupRequests.Add(pickupRequest);
@@ -113,8 +113,8 @@ public class PickupRequestService
             Message = pickupRequest.Message,
             PickupTime = pickupRequest.PickupTime,
             Status = pickupRequest.Status,
-            CreatedAt = pickupRequest.CreatedAt,
-            UpdatedAt = pickupRequest.UpdatedAt
+            CreatedAt = pickupRequest.CreatedAtUtc,
+            UpdatedAt = pickupRequest.UpdatedAtUtc
         };
     }
 
@@ -127,7 +127,7 @@ public class PickupRequestService
 
         // Verify that the user owns this listing
         var listing = await _context.BottleListings
-            .FirstOrDefaultAsync(l => l.Id == listingId && l.UserId == userId);
+            .FirstOrDefaultAsync(l => l.Id == listingId && l.OwnerId == userId);
 
         if (listing == null)
         {
@@ -141,7 +141,7 @@ public class PickupRequestService
         var pickupRequests = await _context.PickupRequests
             .Include(pr => pr.Volunteer)
             .Where(pr => pr.ListingId == listingId)
-            .OrderByDescending(pr => pr.CreatedAt)
+            .OrderByDescending(pr => pr.CreatedAtUtc)
             .Select(pr => new PickupRequestResponseDto
             {
                 Id = pr.Id,
@@ -152,8 +152,8 @@ public class PickupRequestService
                 Message = pr.Message,
                 PickupTime = pr.PickupTime,
                 Status = pr.Status,
-                CreatedAt = pr.CreatedAt,
-                UpdatedAt = pr.UpdatedAt
+                CreatedAt = pr.CreatedAtUtc,
+                UpdatedAt = pr.UpdatedAtUtc
             })
             .ToListAsync();
 
@@ -175,7 +175,7 @@ public class PickupRequestService
         var pickupRequests = await _context.PickupRequests
             .Include(pr => pr.Listing)
             .Where(pr => pr.VolunteerId == volunteerId)
-            .OrderByDescending(pr => pr.CreatedAt)
+            .OrderByDescending(pr => pr.CreatedAtUtc)
             .Select(pr => new PickupRequestResponseDto
             {
                 Id = pr.Id,
@@ -184,8 +184,8 @@ public class PickupRequestService
                 Message = pr.Message,
                 PickupTime = pr.PickupTime,
                 Status = pr.Status,
-                CreatedAt = pr.CreatedAt,
-                UpdatedAt = pr.UpdatedAt
+                CreatedAt = pr.CreatedAtUtc,
+                UpdatedAt = pr.UpdatedAtUtc
             })
             .ToListAsync();
 
@@ -221,7 +221,7 @@ public class PickupRequestService
 
         // Only the listing owner can accept/reject requests
         // Both the listing owner and volunteer can mark as completed
-        var isOwner = pickupRequest.Listing?.UserId == userId;
+        var isOwner = pickupRequest.Listing?.OwnerId == userId;
         var isVolunteer = pickupRequest.VolunteerId == userId;
 
         if (!isOwner && !isVolunteer)
@@ -247,7 +247,7 @@ public class PickupRequestService
         }
 
         pickupRequest.Status = statusEnum;
-        pickupRequest.UpdatedAt = DateTime.UtcNow;
+        pickupRequest.UpdatedAtUtc = DateTime.UtcNow;
 
         // If accepting this request, update the listing status to claimed
         if (statusEnum == PickupRequestStatus.Accepted && pickupRequest.Listing != null)
@@ -264,7 +264,7 @@ public class PickupRequestService
             foreach (var request in otherRequests)
             {
                 request.Status = PickupRequestStatus.Rejected;
-                request.UpdatedAt = DateTime.UtcNow;
+                request.UpdatedAtUtc = DateTime.UtcNow;
             }
         }
 
@@ -313,8 +313,8 @@ public class PickupRequestService
             Message = pickupRequest.Message,
             PickupTime = pickupRequest.PickupTime,
             Status = pickupRequest.Status,
-            CreatedAt = pickupRequest.CreatedAt,
-            UpdatedAt = pickupRequest.UpdatedAt
+            CreatedAt = pickupRequest.CreatedAtUtc,
+            UpdatedAt = pickupRequest.UpdatedAtUtc
         };
     }
 }

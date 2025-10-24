@@ -28,7 +28,7 @@ public class TransactionService : ITransactionService
         // Get the pickup request with listing
         var pickupRequest = await _context.PickupRequests
             .Include(pr => pr.Listing)
-            .ThenInclude(l => l!.User)
+            .ThenInclude(l => l!.Owner)
             .Include(pr => pr.Volunteer)
             .FirstOrDefaultAsync(pr => pr.Id == pickupRequestId);
 
@@ -50,7 +50,7 @@ public class TransactionService : ITransactionService
         }
 
         // Verify user is either owner or volunteer
-        var isOwner = pickupRequest.Listing.UserId == userId;
+        var isOwner = pickupRequest.Listing.OwnerId == userId;
         var isVolunteer = pickupRequest.VolunteerId == userId;
 
         if (!isOwner && !isVolunteer)
@@ -105,8 +105,8 @@ public class TransactionService : ITransactionService
             OwnerAmount = ownerAmount,
             TotalRefund = totalRefund,
             Status = TransactionStatus.Completed,
-            CreatedAt = DateTime.UtcNow,
-            CompletedAt = DateTime.UtcNow
+            CreatedAtUtc = DateTime.UtcNow,
+            CompletedAtUtc = DateTime.UtcNow
         };
 
         _context.Transactions.Add(transaction);
@@ -129,7 +129,7 @@ public class TransactionService : ITransactionService
 
         var transaction = await _context.Transactions
             .Include(t => t.Listing)
-            .ThenInclude(l => l!.User)
+            .ThenInclude(l => l!.Owner)
             .Include(t => t.PickupRequest)
             .ThenInclude(pr => pr!.Volunteer)
             .FirstOrDefaultAsync(t => t.PickupRequestId == pickupRequestId);
@@ -143,7 +143,7 @@ public class TransactionService : ITransactionService
         }
 
         // Verify user is either owner or volunteer
-        var isOwner = transaction.Listing?.UserId == userId;
+        var isOwner = transaction.Listing?.OwnerId == userId;
         var isVolunteer = transaction.PickupRequest?.VolunteerId == userId;
 
         if (!isOwner && !isVolunteer)
@@ -168,11 +168,11 @@ public class TransactionService : ITransactionService
         _logger.LogInformation("Retrieving transactions for user {UserId}", userId);
         var transactions = await _context.Transactions
             .Include(t => t.Listing)
-            .ThenInclude(l => l!.User)
+            .ThenInclude(l => l!.Owner)
             .Include(t => t.PickupRequest)
             .ThenInclude(pr => pr!.Volunteer)
-            .Where(t => t.Listing!.UserId == userId || t.PickupRequest!.VolunteerId == userId)
-            .OrderByDescending(t => t.CreatedAt)
+            .Where(t => t.Listing!.OwnerId == userId || t.PickupRequest!.VolunteerId == userId)
+            .OrderByDescending(t => t.CreatedAtUtc)
             .ToListAsync();
 
         var result = new List<TransactionResponseDto>();
@@ -197,7 +197,7 @@ public class TransactionService : ITransactionService
             await _context.Entry(transaction)
                 .Reference(t => t.Listing)
                 .Query()
-                .Include(l => l!.User)
+                .Include(l => l!.Owner)
                 .LoadAsync();
 
             await _context.Entry(transaction)
@@ -216,10 +216,10 @@ public class TransactionService : ITransactionService
             OwnerAmount = transaction.OwnerAmount,
             TotalRefund = transaction.TotalRefund,
             Status = transaction.Status.ToString().ToLower(),
-            CreatedAt = transaction.CreatedAt,
-            CompletedAt = transaction.CompletedAt,
+            CreatedAt = transaction.CreatedAtUtc,
+            CompletedAt = transaction.CompletedAtUtc,
             VolunteerName = transaction.PickupRequest?.Volunteer?.UserName,
-            OwnerName = transaction.Listing?.User?.UserName,
+            OwnerName = transaction.Listing?.Owner?.UserName,
             BottleCount = transaction.Listing?.BottleCount,
             ListingTitle = transaction.Listing?.Title
         };

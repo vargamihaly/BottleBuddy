@@ -15,7 +15,7 @@ public static class AuthenticationExtensions
     public static IServiceCollection AddAuthenticationConfiguration(this IServiceCollection services, IConfiguration configuration)
     {
         // Identity
-        services.AddIdentity<ApplicationUser, IdentityRole>()
+        services.AddIdentity<User, IdentityRole>()
             .AddEntityFrameworkStores<ApplicationDbContext>();
 
         // Authentication

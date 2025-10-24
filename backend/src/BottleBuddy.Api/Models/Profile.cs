@@ -16,9 +16,9 @@ public class Profile
     public int TotalRatings { get; set; } = 0;
 
     // Timestamps
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public DateTime? UpdatedAt { get; set; }
+    public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+    public DateTime? UpdatedAtUtc { get; set; }
 
     // Navigation property - one-to-one relationship with ApplicationUser
-    public ApplicationUser? User { get; set; }
+    public User? User { get; set; }
 }

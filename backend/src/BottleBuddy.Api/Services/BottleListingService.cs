@@ -11,7 +11,7 @@ namespace BottleBuddy.Api.Services;
 
 public class BottleListingService(
     ApplicationDbContext context,
-    UserManager<ApplicationUser> userManager,
+    UserManager<User> userManager,
     ILogger<BottleListingService> logger) : IBottleListingService
 {
     public async Task<(IEnumerable<BottleListingResponseDto> Listings, PaginationMetadata Metadata)> GetListingsAsync(
@@ -29,7 +29,7 @@ public class BottleListingService(
         if (page < 1) page = 1;
         if (pageSize < 1 || pageSize > 100) pageSize = 50;
 
-        var query = context.BottleListings.Include(l => l.User).AsQueryable();
+        var query = context.BottleListings.Include(l => l.Owner).AsQueryable();
 
         // Filter by status if provided
         if (!string.IsNullOrEmpty(status))
@@ -45,7 +45,7 @@ public class BottleListingService(
         var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
      
         var listings = await query
-            .OrderByDescending(l => l.CreatedAt)
+            .OrderByDescending(l => l.CreatedAtUtc)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .Select(l => new BottleListingResponseDto
@@ -61,11 +61,11 @@ public class BottleListingService(
                 SplitPercentage = l.SplitPercentage,
                 Status = l.Status.ToString().ToLower(),
                 PickupDeadline = l.PickupDeadline,
-                UserId = l.UserId,
-                CreatedAt = l.CreatedAt,
-                UpdatedAt = l.UpdatedAt,
-                CreatedByUserName = l.User != null ? l.User.UserName : null,
-                CreatedByUserEmail = l.User != null ? l.User.Email : null
+                UserId = l.OwnerId,
+                CreatedAt = l.CreatedAtUtc,
+                UpdatedAt = l.UpdatedAtUtc,
+                CreatedByUserName = l.Owner != null ? l.Owner.UserName : null,
+                CreatedByUserEmail = l.Owner != null ? l.Owner.Email : null
             })
             .ToListAsync();
 
@@ -117,8 +117,8 @@ public class BottleListingService(
             PickupDeadline = request.PickupDeadline,
             SplitPercentage = request.SplitPercentage,
             Status = ListingStatus.Open,
-            UserId = userId,
-            CreatedAt = DateTime.UtcNow
+            OwnerId = userId,
+            CreatedAtUtc = DateTime.UtcNow
         };
 
         context.BottleListings.Add(listing);
@@ -143,9 +143,9 @@ public class BottleListingService(
             SplitPercentage = listing.SplitPercentage,
             Status = listing.Status.ToString().ToLower(),
             PickupDeadline = listing.PickupDeadline,
-            UserId = listing.UserId,
-            CreatedAt = listing.CreatedAt,
-            UpdatedAt = listing.UpdatedAt,
+            UserId = listing.OwnerId,
+            CreatedAt = listing.CreatedAtUtc,
+            UpdatedAt = listing.UpdatedAtUtc,
             CreatedByUserName = user.UserName,
             CreatedByUserEmail = user.Email
         };
@@ -170,13 +170,13 @@ public class BottleListingService(
         }
 
         // Verify that the user owns this listing
-        if (listing.UserId != userId)
+        if (listing.OwnerId != userId)
         {
             logger.LogWarning(
                 "User {UserId} attempted to delete listing {ListingId} owned by {OwnerId}",
                 userId,
                 listingId,
-                listing.UserId);
+                listing.OwnerId);
             throw new UnauthorizedAccessException("You can only delete your own listings.");
         }
 

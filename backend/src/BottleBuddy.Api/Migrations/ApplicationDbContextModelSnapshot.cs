@@ -22,7 +22,234 @@ namespace BottleBuddy.Api.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("BottleBuddy.Api.Models.ApplicationUser", b =>
+            modelBuilder.Entity("BottleBuddy.Api.Models.BottleListing", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("BottleCount")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("EstimatedRefund")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<double?>("Latitude")
+                        .HasColumnType("float");
+
+                    b.Property<string>("LocationAddress")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double?>("Longitude")
+                        .HasColumnType("float");
+
+                    b.Property<string>("OwnerId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime?>("PickupDeadline")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal?>("SplitPercentage")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("UpdatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OwnerId");
+
+                    b.ToTable("BottleListings");
+                });
+
+            modelBuilder.Entity("BottleBuddy.Api.Models.PickupRequest", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("ListingId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Message")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("PickupTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("VolunteerId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ListingId");
+
+                    b.HasIndex("VolunteerId");
+
+                    b.ToTable("PickupRequests");
+                });
+
+            modelBuilder.Entity("BottleBuddy.Api.Models.Profile", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("AvatarUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("FullName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Phone")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double?>("Rating")
+                        .HasColumnType("float");
+
+                    b.Property<int>("TotalRatings")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.Property<DateTime?>("UpdatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Username")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Username")
+                        .IsUnique()
+                        .HasFilter("[Username] IS NOT NULL");
+
+                    b.ToTable("Profiles");
+                });
+
+            modelBuilder.Entity("BottleBuddy.Api.Models.Rating", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Comment")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("RatedUserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("RatedUserId1")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("RaterId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("RaterId1")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<Guid>("TransactionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("TransactionId1")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Value")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RatedUserId");
+
+                    b.HasIndex("RatedUserId1");
+
+                    b.HasIndex("RaterId");
+
+                    b.HasIndex("RaterId1");
+
+                    b.HasIndex("TransactionId");
+
+                    b.HasIndex("TransactionId1");
+
+                    b.ToTable("Ratings");
+                });
+
+            modelBuilder.Entity("BottleBuddy.Api.Models.Transaction", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("CompletedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("ListingId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("OwnerAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid>("PickupRequestId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("TotalRefund")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("VolunteerAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ListingId")
+                        .IsUnique();
+
+                    b.HasIndex("PickupRequestId")
+                        .IsUnique();
+
+                    b.ToTable("Transactions");
+                });
+
+            modelBuilder.Entity("BottleBuddy.Api.Models.User", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -85,241 +312,6 @@ namespace BottleBuddy.Api.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
-                });
-
-            modelBuilder.Entity("BottleBuddy.Api.Models.BottleListing", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("BottleCount")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("EstimatedRefund")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<double?>("Latitude")
-                        .HasColumnType("float");
-
-                    b.Property<string>("LocationAddress")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<double?>("Longitude")
-                        .HasColumnType("float");
-
-                    b.Property<DateTime?>("PickupDeadline")
-                        .HasColumnType("datetime2");
-
-                    b.Property<decimal?>("SplitPercentage")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("BottleListings");
-                });
-
-            modelBuilder.Entity("BottleBuddy.Api.Models.PickupRequest", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("ListingId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Message")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("PickupTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("VolunteerId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ListingId");
-
-                    b.HasIndex("VolunteerId");
-
-                    b.ToTable("PickupRequests");
-                });
-
-            modelBuilder.Entity("BottleBuddy.Api.Models.Profile", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("AvatarUrl")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<string>("FullName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Phone")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<double?>("Rating")
-                        .HasColumnType("float");
-
-                    b.Property<int>("TotalRatings")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(0);
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Username")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Username")
-                        .IsUnique()
-                        .HasFilter("[Username] IS NOT NULL");
-
-                    b.ToTable("Profiles");
-                });
-
-            modelBuilder.Entity("BottleBuddy.Api.Models.Rating", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Comment")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("RatedUserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("RatedUserId1")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("RaterId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("RaterId1")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<Guid>("TransactionId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("TransactionId1")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("Value")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RatedUserId");
-
-                    b.HasIndex("RatedUserId1");
-
-                    b.HasIndex("RaterId");
-
-                    b.HasIndex("RaterId1");
-
-                    b.HasIndex("TransactionId");
-
-                    b.HasIndex("TransactionId1");
-
-                    b.ToTable("Ratings");
-                });
-
-            modelBuilder.Entity("BottleBuddy.Api.Models.Transaction", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("CompletedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("ListingId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("ListingId1")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<decimal>("OwnerAmount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<Guid>("PickupRequestId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("PickupRequestId1")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("TotalRefund")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("VolunteerAmount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ListingId");
-
-                    b.HasIndex("ListingId1");
-
-                    b.HasIndex("PickupRequestId");
-
-                    b.HasIndex("PickupRequestId1");
-
-                    b.ToTable("Transactions");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -457,13 +449,13 @@ namespace BottleBuddy.Api.Migrations
 
             modelBuilder.Entity("BottleBuddy.Api.Models.BottleListing", b =>
                 {
-                    b.HasOne("BottleBuddy.Api.Models.ApplicationUser", "User")
+                    b.HasOne("BottleBuddy.Api.Models.User", "Owner")
                         .WithMany()
-                        .HasForeignKey("UserId")
+                        .HasForeignKey("OwnerId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("User");
+                    b.Navigation("Owner");
                 });
 
             modelBuilder.Entity("BottleBuddy.Api.Models.PickupRequest", b =>
@@ -474,7 +466,7 @@ namespace BottleBuddy.Api.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("BottleBuddy.Api.Models.ApplicationUser", "Volunteer")
+                    b.HasOne("BottleBuddy.Api.Models.User", "Volunteer")
                         .WithMany()
                         .HasForeignKey("VolunteerId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -487,7 +479,7 @@ namespace BottleBuddy.Api.Migrations
 
             modelBuilder.Entity("BottleBuddy.Api.Models.Profile", b =>
                 {
-                    b.HasOne("BottleBuddy.Api.Models.ApplicationUser", "User")
+                    b.HasOne("BottleBuddy.Api.Models.User", "User")
                         .WithOne("Profile")
                         .HasForeignKey("BottleBuddy.Api.Models.Profile", "Id")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -498,23 +490,23 @@ namespace BottleBuddy.Api.Migrations
 
             modelBuilder.Entity("BottleBuddy.Api.Models.Rating", b =>
                 {
-                    b.HasOne("BottleBuddy.Api.Models.ApplicationUser", null)
+                    b.HasOne("BottleBuddy.Api.Models.User", null)
                         .WithMany()
                         .HasForeignKey("RatedUserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("BottleBuddy.Api.Models.ApplicationUser", "RatedUser")
+                    b.HasOne("BottleBuddy.Api.Models.User", "RatedUser")
                         .WithMany()
                         .HasForeignKey("RatedUserId1");
 
-                    b.HasOne("BottleBuddy.Api.Models.ApplicationUser", null)
+                    b.HasOne("BottleBuddy.Api.Models.User", null)
                         .WithMany()
                         .HasForeignKey("RaterId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("BottleBuddy.Api.Models.ApplicationUser", "Rater")
+                    b.HasOne("BottleBuddy.Api.Models.User", "Rater")
                         .WithMany()
                         .HasForeignKey("RaterId1");
 
@@ -537,25 +529,17 @@ namespace BottleBuddy.Api.Migrations
 
             modelBuilder.Entity("BottleBuddy.Api.Models.Transaction", b =>
                 {
-                    b.HasOne("BottleBuddy.Api.Models.BottleListing", null)
-                        .WithMany()
-                        .HasForeignKey("ListingId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("BottleBuddy.Api.Models.BottleListing", "Listing")
-                        .WithMany()
-                        .HasForeignKey("ListingId1");
-
-                    b.HasOne("BottleBuddy.Api.Models.PickupRequest", null)
-                        .WithMany()
-                        .HasForeignKey("PickupRequestId")
+                        .WithOne()
+                        .HasForeignKey("BottleBuddy.Api.Models.Transaction", "ListingId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("BottleBuddy.Api.Models.PickupRequest", "PickupRequest")
-                        .WithMany()
-                        .HasForeignKey("PickupRequestId1");
+                        .WithOne()
+                        .HasForeignKey("BottleBuddy.Api.Models.Transaction", "PickupRequestId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("Listing");
 
@@ -573,7 +557,7 @@ namespace BottleBuddy.Api.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("BottleBuddy.Api.Models.ApplicationUser", null)
+                    b.HasOne("BottleBuddy.Api.Models.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -582,7 +566,7 @@ namespace BottleBuddy.Api.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("BottleBuddy.Api.Models.ApplicationUser", null)
+                    b.HasOne("BottleBuddy.Api.Models.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -597,7 +581,7 @@ namespace BottleBuddy.Api.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("BottleBuddy.Api.Models.ApplicationUser", null)
+                    b.HasOne("BottleBuddy.Api.Models.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -606,14 +590,14 @@ namespace BottleBuddy.Api.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("BottleBuddy.Api.Models.ApplicationUser", null)
+                    b.HasOne("BottleBuddy.Api.Models.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("BottleBuddy.Api.Models.ApplicationUser", b =>
+            modelBuilder.Entity("BottleBuddy.Api.Models.User", b =>
                 {
                     b.Navigation("Profile");
                 });

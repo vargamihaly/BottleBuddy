@@ -12,7 +12,7 @@ public class Transaction
     public decimal VolunteerAmount { get; set; }
     public decimal OwnerAmount { get; set; }
     public decimal TotalRefund { get; set; }
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public DateTime? CompletedAt { get; set; }
+    public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+    public DateTime? CompletedAtUtc { get; set; }
     public TransactionStatus Status { get; set; } = TransactionStatus.Pending;
 }

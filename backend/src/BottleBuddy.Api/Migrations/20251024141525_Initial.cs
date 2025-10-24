@@ -171,16 +171,16 @@ namespace BottleBuddy.Api.Migrations
                     SplitPercentage = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
                     Status = table.Column<int>(type: "int", nullable: false),
                     Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    OwnerId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    CreatedAtUtc = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAtUtc = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_BottleListings", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_BottleListings_AspNetUsers_UserId",
-                        column: x => x.UserId,
+                        name: "FK_BottleListings_AspNetUsers_OwnerId",
+                        column: x => x.OwnerId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
@@ -197,8 +197,8 @@ namespace BottleBuddy.Api.Migrations
                     AvatarUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Rating = table.Column<double>(type: "float", nullable: true),
                     TotalRatings = table.Column<int>(type: "int", nullable: false, defaultValue: 0),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    CreatedAtUtc = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
+                    UpdatedAtUtc = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -221,8 +221,8 @@ namespace BottleBuddy.Api.Migrations
                     Message = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     PickupTime = table.Column<DateTime>(type: "datetime2", nullable: true),
                     Status = table.Column<int>(type: "int", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    CreatedAtUtc = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAtUtc = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -247,14 +247,12 @@ namespace BottleBuddy.Api.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ListingId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ListingId1 = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     PickupRequestId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    PickupRequestId1 = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     VolunteerAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     OwnerAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     TotalRefund = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CompletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    CreatedAtUtc = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CompletedAtUtc = table.Column<DateTime>(type: "datetime2", nullable: true),
                     Status = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -267,21 +265,11 @@ namespace BottleBuddy.Api.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Transactions_BottleListings_ListingId1",
-                        column: x => x.ListingId1,
-                        principalTable: "BottleListings",
-                        principalColumn: "Id");
-                    table.ForeignKey(
                         name: "FK_Transactions_PickupRequests_PickupRequestId",
                         column: x => x.PickupRequestId,
                         principalTable: "PickupRequests",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Transactions_PickupRequests_PickupRequestId1",
-                        column: x => x.PickupRequestId1,
-                        principalTable: "PickupRequests",
-                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -297,7 +285,7 @@ namespace BottleBuddy.Api.Migrations
                     TransactionId1 = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     Value = table.Column<int>(type: "int", nullable: false),
                     Comment = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    CreatedAtUtc = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -377,9 +365,9 @@ namespace BottleBuddy.Api.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_BottleListings_UserId",
+                name: "IX_BottleListings_OwnerId",
                 table: "BottleListings",
-                column: "UserId");
+                column: "OwnerId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PickupRequests_ListingId",
@@ -431,22 +419,14 @@ namespace BottleBuddy.Api.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Transactions_ListingId",
                 table: "Transactions",
-                column: "ListingId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Transactions_ListingId1",
-                table: "Transactions",
-                column: "ListingId1");
+                column: "ListingId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Transactions_PickupRequestId",
                 table: "Transactions",
-                column: "PickupRequestId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Transactions_PickupRequestId1",
-                table: "Transactions",
-                column: "PickupRequestId1");
+                column: "PickupRequestId",
+                unique: true);
         }
 
         /// <inheritdoc />

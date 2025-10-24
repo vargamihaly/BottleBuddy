@@ -9,7 +9,7 @@ public static class SeedData
     public static async Task Initialize(IServiceProvider serviceProvider)
     {
         var context = serviceProvider.GetRequiredService<ApplicationDbContext>();
-        var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+        var userManager = serviceProvider.GetRequiredService<UserManager<User>>();
 
         // Ensure database is created
         await context.Database.EnsureCreatedAsync();
@@ -21,7 +21,7 @@ public static class SeedData
         }
 
         // Create test user
-        var testUser = new ApplicationUser
+        var testUser = new User
         {
             UserName = "test@bottlebuddy.hu",
             Email = "test@bottlebuddy.hu"
@@ -49,7 +49,7 @@ public static class SeedData
                 Longitude = 19.0638,
                 EstimatedRefund = 4500,
                 Status = ListingStatus.Open,
-                UserId = testUser.Id,
+                OwnerId = testUser.Id,
                 Description = "Collected from neighbors, easy pickup from building entrance"
             },
             new BottleListing
@@ -62,7 +62,7 @@ public static class SeedData
                 Longitude = 19.0533,
                 EstimatedRefund = 12000,
                 Status = ListingStatus.Open,
-                UserId = testUser.Id,
+                OwnerId = testUser.Id,
                 Description = "From weekend party, lots of bottles"
             },
             new BottleListing
@@ -75,7 +75,7 @@ public static class SeedData
                 Longitude = 19.0540,
                 EstimatedRefund = 3000,
                 Status = ListingStatus.Open,
-                UserId = testUser.Id,
+                OwnerId = testUser.Id,
                 Description = "Weekly collection from office kitchen"
             },
             new BottleListing
@@ -88,7 +88,7 @@ public static class SeedData
                 Longitude = 19.0770,
                 EstimatedRefund = 8000,
                 Status = ListingStatus.Open,
-                UserId = testUser.Id,
+                OwnerId = testUser.Id,
                 Description = "Month's worth of bottles from family"
             },
             new BottleListing
@@ -101,7 +101,7 @@ public static class SeedData
                 Longitude = 19.0550,
                 EstimatedRefund = 20000,
                 Status = ListingStatus.Open,
-                UserId = testUser.Id,
+                OwnerId = testUser.Id,
                 Description = "Daily restaurant collection, ready for pickup"
             },
             new BottleListing
@@ -114,7 +114,7 @@ public static class SeedData
                 Longitude = 19.0625,
                 EstimatedRefund = 1500,
                 Status = ListingStatus.Open,
-                UserId = testUser.Id,
+                OwnerId = testUser.Id,
                 Description = "Just a few bottles, quick pickup"
             },
             new BottleListing
@@ -127,7 +127,7 @@ public static class SeedData
                 Longitude = 19.0445,
                 EstimatedRefund = 15000,
                 Status = ListingStatus.Open,
-                UserId = testUser.Id,
+                OwnerId = testUser.Id,
                 Description = "After outdoor event, many bottles"
             },
             new BottleListing
@@ -140,7 +140,7 @@ public static class SeedData
                 Longitude = 19.0708,
                 EstimatedRefund = 6000,
                 Status = ListingStatus.Open,
-                UserId = testUser.Id,
+                OwnerId = testUser.Id,
                 Description = "Collecting for elderly neighbor"
             },
             new BottleListing
@@ -153,7 +153,7 @@ public static class SeedData
                 Longitude = 19.0616,
                 EstimatedRefund = 9500,
                 Status = ListingStatus.Open,
-                UserId = testUser.Id,
+                OwnerId = testUser.Id,
                 Description = "Student dorm collection"
             },
             new BottleListing
@@ -166,7 +166,7 @@ public static class SeedData
                 Longitude = 19.0571,
                 EstimatedRefund = 4000,
                 Status = ListingStatus.Open,
-                UserId = testUser.Id,
+                OwnerId = testUser.Id,
                 Description = "Weekly collection from fitness center"
             }
         };

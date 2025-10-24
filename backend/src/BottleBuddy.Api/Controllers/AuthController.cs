@@ -14,7 +14,7 @@ namespace BottleBuddy.Api.Controllers;
 [Route("api/[controller]")]
 public class AuthController(
     IAuthService authService,
-    UserManager<ApplicationUser> userManager,
+    UserManager<User> userManager,
     ApplicationDbContext dbContext,
     IConfiguration configuration,
     ILogger<AuthController> logger) : ControllerBase
@@ -137,7 +137,7 @@ public class AuthController(
             {
                 logger.LogInformation("User not found. Creating new user...");
 
-                user = new ApplicationUser
+                user = new User
                 {
                     UserName = payload.Email,
                     Email = payload.Email,
@@ -166,7 +166,7 @@ public class AuthController(
                     AvatarUrl = payload.Picture,
                     Rating = null,
                     TotalRatings = 0,
-                    CreatedAt = DateTime.UtcNow
+                    CreatedAtUtc = DateTime.UtcNow
                 };
 
                 logger.LogInformation("Creating Profile for UserId: {UserId}, Username: {Username}, FullName: {FullName}",

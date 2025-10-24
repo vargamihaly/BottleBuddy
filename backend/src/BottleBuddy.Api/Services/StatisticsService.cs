@@ -10,7 +10,7 @@ namespace BottleBuddy.Api.Services;
 
 public class StatisticsService(
     ApplicationDbContext context,
-    UserManager<ApplicationUser> userManager,
+    UserManager<User> userManager,
     ILogger<StatisticsService> logger) : IStatisticsService
 {
     public async Task<StatisticsResponseDto> GetStatisticsAsync()

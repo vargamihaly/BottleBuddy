@@ -5,7 +5,7 @@ using BottleBuddy.Api.Models;
 namespace BottleBuddy.Api.Data;
 
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-    : IdentityDbContext<ApplicationUser>(options)
+    : IdentityDbContext<User>(options)
 {
     public DbSet<BottleListing> BottleListings => Set<BottleListing>();
     public DbSet<PickupRequest> PickupRequests => Set<PickupRequest>();
@@ -18,7 +18,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         base.OnModelCreating(modelBuilder);
 
         // Configure one-to-one relationship between ApplicationUser and Profile
-        modelBuilder.Entity<ApplicationUser>()
+        modelBuilder.Entity<User>()
             .HasOne(u => u.Profile)
             .WithOne(p => p.User)
             .HasForeignKey<Profile>(p => p.Id)
@@ -38,7 +38,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             entity.Property(p => p.TotalRatings)
                 .HasDefaultValue(0);
 
-            entity.Property(p => p.CreatedAt)
+            entity.Property(p => p.CreatedAtUtc)
                 .HasDefaultValueSql("GETUTCDATE()");
         });
 
@@ -48,9 +48,9 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             entity.HasKey(bl => bl.Id);
 
             // Relationship with User (Owner)
-            entity.HasOne(bl => bl.User)
+            entity.HasOne(bl => bl.Owner)
                 .WithMany()
-                .HasForeignKey(bl => bl.UserId)
+                .HasForeignKey(bl => bl.OwnerId)
                 .OnDelete(DeleteBehavior.Restrict); // Prevent cascade delete cycle
         });
 
@@ -77,15 +77,14 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         {
             entity.HasKey(t => t.Id);
 
-            // Relationships with restricted delete to avoid cycles
-            entity.HasOne<BottleListing>()
-                .WithMany()
-                .HasForeignKey(t => t.ListingId)
+            entity.HasOne(t => t.Listing)
+                .WithOne()
+                .HasForeignKey<Transaction>(t => t.ListingId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            entity.HasOne<PickupRequest>()
-                .WithMany()
-                .HasForeignKey(t => t.PickupRequestId)
+            entity.HasOne(t => t.PickupRequest)
+                .WithOne()
+                .HasForeignKey<Transaction>(t => t.PickupRequestId)
                 .OnDelete(DeleteBehavior.Restrict);
         });
 
@@ -95,13 +94,13 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             entity.HasKey(r => r.Id);
 
             // Relationship with Rater (who gives the rating)
-            entity.HasOne<ApplicationUser>()
+            entity.HasOne<User>()
                 .WithMany()
                 .HasForeignKey(r => r.RaterId)
                 .OnDelete(DeleteBehavior.Restrict); // Prevent cascade delete
 
             // Relationship with Rated User (who receives the rating)
-            entity.HasOne<ApplicationUser>()
+            entity.HasOne<User>()
                 .WithMany()
                 .HasForeignKey(r => r.RatedUserId)
                 .OnDelete(DeleteBehavior.Restrict); // Prevent cascade delete

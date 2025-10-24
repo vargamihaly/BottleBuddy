@@ -13,8 +13,8 @@ using System.Linq;
 namespace BottleBuddy.Api.Services;
 
 public class AuthService(
-    UserManager<ApplicationUser> userManager,
-    SignInManager<ApplicationUser> signInManager,
+    UserManager<User> userManager,
+    SignInManager<User> signInManager,
     IConfiguration configuration,
     ApplicationDbContext context,
     ILogger<AuthService> logger) : IAuthService
@@ -42,7 +42,7 @@ public class AuthService(
             }
         }
 
-        var user = new ApplicationUser
+        var user = new User
         {
             UserName = request.Email,
             Email = request.Email,
@@ -67,7 +67,7 @@ public class AuthService(
             AvatarUrl = null, // Can be uploaded later
             Rating = null,
             TotalRatings = 0,
-            CreatedAt = DateTime.UtcNow
+            CreatedAtUtc = DateTime.UtcNow
         };
 
         context.Profiles.Add(profile);
@@ -154,11 +154,11 @@ public class AuthService(
             AvatarUrl = user.Profile?.AvatarUrl,
             Rating = user.Profile?.Rating,
             TotalRatings = user.Profile?.TotalRatings ?? 0,
-            ProfileCreatedAt = user.Profile?.CreatedAt
+            ProfileCreatedAt = user.Profile?.CreatedAtUtc
         };
     }
 
-    public string GenerateJwtToken(ApplicationUser user)
+    public string GenerateJwtToken(User user)
     {
         logger.LogInformation("Generating JWT token for user {UserId}", user.Id);
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]!));
