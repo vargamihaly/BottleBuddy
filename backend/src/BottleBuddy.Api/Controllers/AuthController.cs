@@ -2,11 +2,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
+using BottleBuddy.Application.Data;
+using BottleBuddy.Application.Dtos;
+using BottleBuddy.Application.Models;
+using BottleBuddy.Application.Services;
 using Google.Apis.Auth;
-using BottleBuddy.Api.Dtos;
-using BottleBuddy.Api.Services;
-using BottleBuddy.Api.Models;
-using BottleBuddy.Api.Data;
 
 namespace BottleBuddy.Api.Controllers;
 
@@ -122,7 +122,7 @@ public class AuthController(
 
             var validationSettings = new GoogleJsonWebSignature.ValidationSettings
             {
-                Audience = new[] { clientId! }
+                Audience = [clientId!]
             };
 
             logger.LogInformation("Validating Google token with Google API...");
@@ -133,7 +133,7 @@ public class AuthController(
             logger.LogInformation("Searching for existing user with email: {Email}", payload.Email);
             var user = await userManager.FindByEmailAsync(payload.Email);
 
-            if (user == null)
+            if (user is null)
             {
                 logger.LogInformation("User not found. Creating new user...");
 

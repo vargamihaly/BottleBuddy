@@ -1,18 +1,14 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using BottleBuddy.Api.Dtos;
-using BottleBuddy.Api.Services;
-using Microsoft.Extensions.Logging;
-using System.Linq;
+using BottleBuddy.Application.Dtos;
+using BottleBuddy.Application.Services;
 
 namespace BottleBuddy.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class BottleListingsController(
-    IBottleListingService bottleListingService,
-    ILogger<BottleListingsController> logger) : ControllerBase
+public class BottleListingsController(IBottleListingService bottleListingService, ILogger<BottleListingsController> logger) : ControllerBase
 {
     /// <summary>
     /// Get paginated list of bottle listings
@@ -22,23 +18,13 @@ public class BottleListingsController(
     /// <param name="status">Filter by status (optional)</param>
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetListings(
-        [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 50,
-        [FromQuery] string? status = null)
+    public async Task<IActionResult> GetListings([FromQuery] int page = 1, [FromQuery] int pageSize = 50, [FromQuery] string? status = null)
     {
-        logger.LogInformation(
-            "Fetching bottle listings for page {Page} with size {PageSize} and status {Status}",
-            page,
-            pageSize,
-            status ?? "any");
+        logger.LogInformation("Fetching bottle listings for page {Page} with size {PageSize} and status {Status}", page, pageSize, status ?? "any");
 
         var (listings, metadata) = await bottleListingService.GetListingsAsync(page, pageSize, status);
 
-        logger.LogInformation(
-            "Retrieved {ListingCount} listings for page {Page}",
-            listings.Count(),
-            metadata.Page);
+        logger.LogInformation("Retrieved {ListingCount} listings for page {Page}", listings.Count(), metadata.Page);
 
         return Ok(new
         {

@@ -1,9 +1,8 @@
-using BottleBuddy.Api.Dtos;
-using BottleBuddy.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using System.Security.Claims;
+using BottleBuddy.Application.Dtos;
+using BottleBuddy.Application.Services;
 
 namespace BottleBuddy.Api.Controllers;
 
@@ -27,11 +26,11 @@ public class TransactionsController(ITransactionService transactionService, ILog
         }
 
         logger.LogInformation("Retrieving transactions for user {UserId}", userId);
-        var transactions = await transactionService.GetMyTransactionsAsync(userId);
-        logger.LogInformation(
-            "Retrieved {TransactionCount} transactions for user {UserId}",
-            transactions.Count,
-            userId);
+        
+        var transactions = await transactionService.GetTransactionsForUserAsync(userId);
+        
+        logger.LogInformation("Retrieved {TransactionCount} transactions for user {UserId}", transactions.Count, userId);
+        
         return Ok(transactions);
     }
 
@@ -47,22 +46,19 @@ public class TransactionsController(ITransactionService transactionService, ILog
             logger.LogWarning(
                 "Pickup request transaction retrieval attempted without authenticated user for pickup request {PickupRequestId}",
                 pickupRequestId);
+            
             return Unauthorized(new { error = "User not authenticated" });
         }
 
         try
         {
-            logger.LogInformation(
-                "Retrieving transaction for pickup request {PickupRequestId} by user {UserId}",
-                pickupRequestId,
-                userId);
+            logger.LogInformation("Retrieving transaction for pickup request {PickupRequestId} by user {UserId}", pickupRequestId, userId);
+            
             var transaction = await transactionService.GetTransactionByPickupRequestIdAsync(pickupRequestId, userId);
-            if (transaction == null)
+            if (transaction is null)
             {
-                logger.LogInformation(
-                    "No transaction found for pickup request {PickupRequestId} by user {UserId}",
-                    pickupRequestId,
-                    userId);
+                logger.LogInformation("No transaction found for pickup request {PickupRequestId} by user {UserId}", pickupRequestId, userId);
+                
                 return NotFound(new { error = "Transaction not found" });
             }
 
@@ -71,11 +67,13 @@ public class TransactionsController(ITransactionService transactionService, ILog
                 transaction.Id,
                 pickupRequestId,
                 userId);
+            
             return Ok(transaction);
         }
         catch (UnauthorizedAccessException ex)
         {
             logger.LogWarning(ex, "Unauthorized transaction access attempt for pickup request {PickupRequestId}", pickupRequestId);
+            
             return Forbid(ex.Message);
         }
     }
@@ -86,6 +84,10 @@ public class TransactionsController(ITransactionService transactionService, ILog
     [HttpPost]
     public async Task<ActionResult<TransactionResponseDto>> CreateTransaction([FromBody] CreateTransactionDto dto)
     {
+        //TODO Investigate removing this endpoint entirely.
+        //this endpoint should NOT BE called by the frontend.
+        //Transaction creation happens automatically when the pickuprequest changes to complete state.
+
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrEmpty(userId))
         {
@@ -95,16 +97,11 @@ public class TransactionsController(ITransactionService transactionService, ILog
 
         try
         {
-            logger.LogInformation(
-                "User {UserId} creating transaction for pickup request {PickupRequestId}",
-                userId,
-                dto.PickupRequestId);
+            logger.LogInformation("User {UserId} creating transaction for pickup request {PickupRequestId}", userId, dto.PickupRequestId);
+            
             var transaction = await transactionService.CreateTransactionAsync(dto.PickupRequestId, userId);
-            logger.LogInformation(
-                "Transaction {TransactionId} created for pickup request {PickupRequestId} by user {UserId}",
-                transaction.Id,
-                dto.PickupRequestId,
-                userId);
+            logger.LogInformation("Transaction {TransactionId} created for pickup request {PickupRequestId} by user {UserId}", transaction.Id, dto.PickupRequestId, userId);
+            
             return CreatedAtAction(
                 nameof(GetTransactionByPickupRequest),
                 new { pickupRequestId = dto.PickupRequestId },

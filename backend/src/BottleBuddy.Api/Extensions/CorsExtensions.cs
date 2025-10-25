@@ -4,10 +4,7 @@ namespace BottleBuddy.Api.Extensions;
 
 public static class CorsExtensions
 {
-    public static IServiceCollection AddCorsConfiguration(
-        this IServiceCollection services,
-        IConfiguration configuration,
-        IWebHostEnvironment environment)
+    public static IServiceCollection AddCorsConfiguration(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
     {
         services.AddCors(options =>
         {
@@ -20,10 +17,7 @@ public static class CorsExtensions
         return services;
     }
 
-    private static void ConfigureCorsPolicy(
-        CorsPolicyBuilder policy,
-        IConfiguration configuration,
-        IWebHostEnvironment environment)
+    private static void ConfigureCorsPolicy(CorsPolicyBuilder policy, IConfiguration configuration, IWebHostEnvironment environment)
     {
         if (environment.IsDevelopment())
         {
@@ -43,7 +37,7 @@ public static class CorsExtensions
             // Production/Staging: Allow configured origins
             var allowedOrigins = configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
 
-            if (allowedOrigins != null && allowedOrigins.Length > 0)
+            if (allowedOrigins is { Length: > 0 })
             {
                 policy.WithOrigins(allowedOrigins)
                     .AllowAnyMethod()

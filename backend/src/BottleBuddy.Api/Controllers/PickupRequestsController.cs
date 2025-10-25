@@ -1,18 +1,16 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using BottleBuddy.Api.Dtos;
-using BottleBuddy.Api.Services;
-using Microsoft.Extensions.Logging;
+using BottleBuddy.Application.Dtos;
+using BottleBuddy.Application.Services;
 
 namespace BottleBuddy.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class PickupRequestsController(
-    PickupRequestService pickupRequestService,
-    ILogger<PickupRequestsController> logger) : ControllerBase
+public class PickupRequestsController(PickupRequestService pickupRequestService, ILogger<PickupRequestsController> logger) 
+    : ControllerBase
 {
     // POST: api/pickuprequests
     [HttpPost]
@@ -27,30 +25,28 @@ public class PickupRequestsController(
                 return Unauthorized(new { error = "User not authenticated" });
             }
 
-            logger.LogInformation(
-                "Creating pickup request for listing {ListingId} by volunteer {VolunteerId}",
-                dto.ListingId,
-                userId);
+            logger.LogInformation("Creating pickup request for listing {ListingId} by volunteer {VolunteerId}", dto.ListingId, userId);
+            
             var pickupRequest = await pickupRequestService.CreatePickupRequestAsync(dto, userId);
+            
             logger.LogInformation(
                 "Pickup request {PickupRequestId} created for listing {ListingId} by volunteer {VolunteerId}",
                 pickupRequest.Id,
                 dto.ListingId,
                 userId);
+            
             return CreatedAtAction(nameof(CreatePickupRequest), new { id = pickupRequest.Id }, pickupRequest);
         }
         catch (InvalidOperationException ex)
         {
-            logger.LogWarning(ex, "Validation failed while creating pickup request for listing {ListingId}",
-                dto.ListingId);
+            logger.LogWarning(ex, "Validation failed while creating pickup request for listing {ListingId}", dto.ListingId);
             return BadRequest(new { error = ex.Message });
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Unexpected error while creating pickup request for listing {ListingId}",
-                dto.ListingId);
-            return StatusCode(500,
-                new { error = "An error occurred while creating the pickup request", details = ex.Message });
+            logger.LogError(ex, "Unexpected error while creating pickup request for listing {ListingId}", dto.ListingId);
+            
+            return StatusCode(500, new { error = "An error occurred while creating the pickup request", details = ex.Message });
         }
     }
 
@@ -63,34 +59,33 @@ public class PickupRequestsController(
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userId))
             {
-                logger.LogWarning(
-                    "Listing pickup requests retrieval attempted without authenticated user for listing {ListingId}",
-                    listingId);
+                logger.LogWarning("Listing pickup requests retrieval attempted without authenticated user for listing {ListingId}", listingId);
                 return Unauthorized(new { error = "User not authenticated" });
             }
 
-            logger.LogInformation(
-                "Retrieving pickup requests for listing {ListingId} by user {UserId}",
-                listingId,
-                userId);
+            logger.LogInformation("Retrieving pickup requests for listing {ListingId} by user {UserId}", listingId, userId);
+            
             var pickupRequests = await pickupRequestService.GetPickupRequestsForListingAsync(listingId, userId);
+            
             logger.LogInformation(
                 "Retrieved {PickupRequestCount} pickup requests for listing {ListingId} by user {UserId}",
                 pickupRequests.Count,
                 listingId,
                 userId);
+            
             return Ok(pickupRequests);
         }
         catch (UnauthorizedAccessException ex)
         {
             logger.LogWarning(ex, "Unauthorized access retrieving pickup requests for listing {ListingId}", listingId);
+            
             return Forbid(ex.Message);
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "Unexpected error retrieving pickup requests for listing {ListingId}", listingId);
-            return StatusCode(500,
-                new { error = "An error occurred while retrieving pickup requests", details = ex.Message });
+            
+            return StatusCode(500, new { error = "An error occurred while retrieving pickup requests", details = ex.Message });
         }
     }
 
@@ -107,39 +102,33 @@ public class PickupRequestsController(
                 return Unauthorized(new { error = "User not authenticated" });
             }
 
-            logger.LogInformation(
-                "Retrieving pickup requests for volunteer {VolunteerId}",
-                userId);
+            logger.LogInformation("Retrieving pickup requests for volunteer {VolunteerId}", userId);
+            
             var pickupRequests = await pickupRequestService.GetMyPickupRequestsAsync(userId);
-            logger.LogInformation(
-                "Retrieved {PickupRequestCount} pickup requests for volunteer {VolunteerId}",
-                pickupRequests.Count,
-                userId);
+            
+            logger.LogInformation("Retrieved {PickupRequestCount} pickup requests for volunteer {VolunteerId}", pickupRequests.Count, userId);
             return Ok(pickupRequests);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Unexpected error retrieving pickup requests for volunteer {VolunteerId}",
-                User.FindFirstValue(ClaimTypes.NameIdentifier));
-            return StatusCode(500,
-                new { error = "An error occurred while retrieving your pickup requests", details = ex.Message });
+            logger.LogError(ex, "Unexpected error retrieving pickup requests for volunteer {VolunteerId}", User.FindFirstValue(ClaimTypes.NameIdentifier));
+            
+            return StatusCode(500, new { error = "An error occurred while retrieving your pickup requests", details = ex.Message });
         }
     }
 
     // PATCH: api/pickuprequests/{id}/status
     [HttpPatch("{id}/status")]
-    public async Task<ActionResult<PickupRequestResponseDto>> UpdatePickupRequestStatus(
-        Guid id,
-        [FromBody] UpdatePickupRequestStatusDto dto)
+    public async Task<ActionResult<PickupRequestResponseDto>> UpdatePickupRequestStatus(Guid id, [FromBody] UpdatePickupRequestStatusDto dto)
     {
         try
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            
             if (string.IsNullOrEmpty(userId))
             {
-                logger.LogWarning(
-                    "Pickup request status update attempted without authenticated user for request {PickupRequestId}",
-                    id);
+                logger.LogWarning("Pickup request status update attempted without authenticated user for request {PickupRequestId}", id);
+                
                 return Unauthorized(new { error = "User not authenticated" });
             }
 
@@ -148,29 +137,30 @@ public class PickupRequestsController(
                 id,
                 dto.Status,
                 userId);
+            
             var pickupRequest = await pickupRequestService.UpdatePickupRequestStatusAsync(id, dto.Status, userId);
-            logger.LogInformation(
-                "Pickup request {PickupRequestId} updated to status {Status} by user {UserId}",
-                id,
-                pickupRequest.Status,
-                userId);
+            
+            logger.LogInformation("Pickup request {PickupRequestId} updated to status {Status} by user {UserId}", id, pickupRequest.Status, userId);
+            
             return Ok(pickupRequest);
         }
         catch (InvalidOperationException ex)
         {
             logger.LogWarning(ex, "Invalid state transition for pickup request {PickupRequestId}", id);
+            
             return BadRequest(new { error = ex.Message });
         }
         catch (UnauthorizedAccessException ex)
         {
             logger.LogWarning(ex, "Unauthorized status update attempt for pickup request {PickupRequestId}", id);
+            
             return Forbid(ex.Message);
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "Unexpected error updating pickup request {PickupRequestId}", id);
-            return StatusCode(500,
-                new { error = "An error occurred while updating the pickup request", details = ex.Message });
+            
+            return StatusCode(500, new { error = "An error occurred while updating the pickup request", details = ex.Message });
         }
     }
 }

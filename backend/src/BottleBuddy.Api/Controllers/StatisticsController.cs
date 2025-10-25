@@ -1,15 +1,12 @@
+using BottleBuddy.Application.Dtos;
+using BottleBuddy.Application.Services;
 using Microsoft.AspNetCore.Mvc;
-using BottleBuddy.Api.Dtos;
-using BottleBuddy.Api.Services;
-using Microsoft.Extensions.Logging;
 
 namespace BottleBuddy.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class StatisticsController(
-    IStatisticsService statisticsService,
-    ILogger<StatisticsController> logger) : ControllerBase
+public class StatisticsController(IStatisticsService statisticsService, ILogger<StatisticsController> logger) : ControllerBase
 {
     /// <summary>
     /// Get platform statistics

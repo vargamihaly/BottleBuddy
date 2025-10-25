@@ -1,10 +1,9 @@
 using System.Diagnostics;
 using System.Security.Claims;
-using BottleBuddy.Api;
-using BottleBuddy.Api.Data;
 using BottleBuddy.Api.Extensions;
 using BottleBuddy.Api.Middleware;
-using BottleBuddy.Api.Services;
+using BottleBuddy.Application.Data;
+using BottleBuddy.Application.Services;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Formatting.Compact;
