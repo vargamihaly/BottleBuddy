@@ -1,5 +1,5 @@
-using BottleBuddy.Api.Dtos;
-using BottleBuddy.Api.Services;
+using BottleBuddy.Core.Dtos;
+using BottleBuddy.Core.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;

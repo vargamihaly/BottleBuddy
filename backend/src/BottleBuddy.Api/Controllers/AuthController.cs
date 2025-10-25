@@ -3,10 +3,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
 using Google.Apis.Auth;
-using BottleBuddy.Api.Dtos;
-using BottleBuddy.Api.Services;
-using BottleBuddy.Api.Models;
-using BottleBuddy.Api.Data;
+using BottleBuddy.Core.Dtos;
+using BottleBuddy.Core.Services;
+using BottleBuddy.Core.Models;
+using BottleBuddy.Persistence;
 
 namespace BottleBuddy.Api.Controllers;
 

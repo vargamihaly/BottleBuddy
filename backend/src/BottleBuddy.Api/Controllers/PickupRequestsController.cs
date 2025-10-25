@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using BottleBuddy.Api.Dtos;
-using BottleBuddy.Api.Services;
+using BottleBuddy.Core.Dtos;
+using BottleBuddy.Core.Services;
 using Microsoft.Extensions.Logging;
 
 namespace BottleBuddy.Api.Controllers;

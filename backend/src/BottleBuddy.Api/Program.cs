@@ -1,11 +1,15 @@
+using System.Diagnostics;
 using System.Security.Claims;
 using BottleBuddy.Api;
-using BottleBuddy.Api.Data;
 using BottleBuddy.Api.Extensions;
 using BottleBuddy.Api.Middleware;
-using BottleBuddy.Api.Services;
+using BottleBuddy.Core.Interfaces.Repositories;
+using BottleBuddy.Core.Services;
+using BottleBuddy.Persistence;
+using BottleBuddy.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using Serilog.Enrichers.Activity;
 using Serilog.Formatting.Compact;
 
 Log.Logger = new LoggerConfiguration()
@@ -30,6 +34,7 @@ try
             .Enrich.WithProperty("Environment", context.HostingEnvironment.EnvironmentName)
             .Enrich.WithProcessId()
             .Enrich.WithThreadId()
+            .Enrich.With<ActivityEnricher>()
             .WriteTo.Async(writeTo => writeTo.Console(new RenderedCompactJsonFormatter()));
     });
 
@@ -37,8 +42,16 @@ try
     builder.Services.AddControllers();
 
     // Database
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+        ?? throw new InvalidOperationException("Default database connection string is not configured.");
+    var migrationsAssembly = typeof(Program).Assembly.GetName().Name
+        ?? throw new InvalidOperationException("Unable to resolve migrations assembly name.");
+
     builder.Services.AddDbContext<ApplicationDbContext>(options =>
-        options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+        options.UseNpgsql(
+            connectionString,
+            npgsqlOptions =>
+                npgsqlOptions.MigrationsAssembly(migrationsAssembly)));
 
     // Authentication & Authorization
     builder.Services.AddAuthenticationConfiguration(builder.Configuration);
@@ -62,6 +75,12 @@ try
     builder.Services.AddScoped<IRatingService, RatingService>();
     builder.Services.AddScoped<PickupRequestService>();
 
+    builder.Services.AddScoped<IBottleListingRepository, BottleListingRepository>();
+    builder.Services.AddScoped<IPickupRequestRepository, PickupRequestRepository>();
+    builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
+    builder.Services.AddScoped<IRatingRepository, RatingRepository>();
+    builder.Services.AddScoped<IProfileRepository, ProfileRepository>();
+
     // Swagger/OpenAPI
     builder.Services.AddSwaggerDocumentation();
 
@@ -75,11 +94,25 @@ try
 
     app.UseSerilogRequestLogging(options =>
     {
+        options.IncludeQueryInRequestPath = true;
         options.EnrichDiagnosticContext = (diagnosticContext, httpContext) =>
         {
+            var activity = Activity.Current;
+            if (activity is not null)
+            {
+                diagnosticContext.Set("TraceId", activity.TraceId.ToString());
+                diagnosticContext.Set("SpanId", activity.SpanId.ToString());
+
+                if (activity.ParentSpanId != ActivitySpanId.Empty)
+                {
+                    diagnosticContext.Set("ParentSpanId", activity.ParentSpanId.ToString());
+                }
+            }
+
             diagnosticContext.Set("ClientIP", httpContext.Connection.RemoteIpAddress?.ToString());
             diagnosticContext.Set("RequestHost", httpContext.Request.Host.Value);
             diagnosticContext.Set("RequestScheme", httpContext.Request.Scheme);
+            diagnosticContext.Set("RequestPath", httpContext.Request.Path);
             diagnosticContext.Set("CorrelationId", httpContext.TraceIdentifier);
 
             var userId = httpContext.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;

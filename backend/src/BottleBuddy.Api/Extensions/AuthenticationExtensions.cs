@@ -2,8 +2,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using BottleBuddy.Api.Data;
-using BottleBuddy.Api.Models;
+using BottleBuddy.Persistence;
+using BottleBuddy.Core.Models;
 
 namespace BottleBuddy.Api.Extensions;
 

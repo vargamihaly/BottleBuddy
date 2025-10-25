@@ -5,8 +5,10 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 
 WORKDIR /app
 
-# Copy project file only (skip solution to avoid docker-compose.dcproj reference issue)
+# Copy project files only (skip solution to avoid docker-compose.dcproj reference issue)
 COPY src/BottleBuddy.Api/BottleBuddy.Api.csproj ./src/BottleBuddy.Api/
+COPY src/BottleBuddy.Core/BottleBuddy.Core.csproj ./src/BottleBuddy.Core/
+COPY src/BottleBuddy.Persistence/BottleBuddy.Persistence.csproj ./src/BottleBuddy.Persistence/
 
 # Restore dependencies for the specific project
 RUN dotnet restore ./src/BottleBuddy.Api/BottleBuddy.Api.csproj
