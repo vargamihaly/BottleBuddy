@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { useTotalUnreadCount } from "@/hooks/useMessages";
 import { useTranslation } from "react-i18next";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 interface HeaderProps {
   onMapClick: () => void;
@@ -23,13 +24,13 @@ export const Header = ({ onMapClick, onDashboardClick }: HeaderProps) => {
     try {
       await signOut();
       toast({
-        title: "Sikeres kijelentkezés",
-        description: "Sikeresen kijelentkeztél a BottleBuddy fiókodból.",
+        title: t("auth.signOutSuccess"),
+        description: t("auth.signOutDescription"),
       });
     } catch (error) {
       toast({
         title: t("common.error"),
-        description: "A kijelentkezés nem sikerült. Kérjük, próbáld újra.",
+        description: t("auth.signOutError"),
         variant: "destructive",
       });
     }
@@ -69,6 +70,7 @@ export const Header = ({ onMapClick, onDashboardClick }: HeaderProps) => {
           </nav>
 
           <div className="flex items-center space-x-2">
+            <LanguageSwitcher />
             {user ? (
               <>
                 <Button variant="outline" size="sm" onClick={onDashboardClick} className="hidden sm:flex">
