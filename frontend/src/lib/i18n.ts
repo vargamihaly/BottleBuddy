@@ -20,7 +20,8 @@ const resources = {
         backToHome: "Vissza a főoldalra",
         statisticsUnavailable: "Az adatok átmenetileg nem érhetők el.",
         volunteer: "Önkéntes",
-        mapView: "Térképen megtekintés"
+        mapView: "Térképen megtekintés",
+        notAvailable: "Nincs adat"
       },
       hero: {
         title: "Váltsd palackjaidat közös haszonra",
@@ -30,6 +31,59 @@ const resources = {
         findBottles: "Közeli palackok keresése",
         getStarted: "Kezdd el",
         signIn: "Bejelentkezés"
+      },
+      dashboard: {
+        welcome: {
+          greetings: {
+            morning: "Jó reggelt",
+            afternoon: "Jó napot",
+            evening: "Jó estét"
+          },
+          defaultName: "Barát",
+          cta: "Készen állsz ma változást hozni?"
+        },
+        quickActions: {
+          title: "Gyors műveletek",
+          listBottles: {
+            label: "Palackok meghirdetése",
+            description: "Új hirdetés létrehozása"
+          },
+          findBottles: {
+            label: "Palackok keresése",
+            description: "Elérhető ajánlatok böngészése"
+          },
+          messages: {
+            label: "Üzenetek",
+            description: "Beszélgetések megnyitása"
+          },
+          myListings: {
+            label: "Hirdetéseim",
+            description: "Palackok kezelése"
+          }
+        },
+        impact: {
+          title: "Hatásod",
+          description: "Kövesd az újrahasznosítási utadat",
+          totalEarnings: "Teljes bevétel",
+          earningsValue: "{{amount}} Ft",
+          bottlesReturned: "Visszavitt palackok",
+          completedPickups: "Teljesített átvételek",
+          rating: "Értékelésed"
+        },
+        activePickups: {
+          title: "Aktív átvételek",
+          emptyDescription: "Nincsenek aktív átvételi feladataid",
+          emptyCtaDescription: "Böngéssz a közeli palackok között, hogy elkezdhess keresni!",
+          emptyButton: "Összes átvételi feladat megtekintése",
+          viewAll: "Összes megtekintése",
+          description: "Közelgő palackátvételeid",
+          bottleCount: "{{count}} palack",
+          status: {
+            pending: "Függőben",
+            accepted: "Elfogadva"
+          },
+          noMessage: "Nincs üzenet"
+        }
       }
     }
   }

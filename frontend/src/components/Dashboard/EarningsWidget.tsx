@@ -3,6 +3,7 @@ import { TrendingUp, Coins, Recycle, Star } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { apiClient } from "@/lib/apiClient";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTranslation } from "react-i18next";
 
 interface UserStats {
   totalBottles: number;
@@ -13,6 +14,7 @@ interface UserStats {
 
 export const EarningsWidget = () => {
   const { user } = useAuth();
+  const { t } = useTranslation();
 
   const { data: stats } = useQuery<UserStats>({
     queryKey: ["userStats", user?.id],
@@ -22,12 +24,13 @@ export const EarningsWidget = () => {
 
       // Calculate stats from transactions
       const totalEarnings = transactions.reduce(
-        (sum: number, t: any) => sum + (t.ownerRefundAmount || 0) + (t.volunteerRefundAmount || 0),
+        (sum: number, transaction: any) =>
+          sum + (transaction.ownerRefundAmount || 0) + (transaction.volunteerRefundAmount || 0),
         0
       );
 
       const totalBottles = transactions.reduce(
-        (sum: number, t: any) => sum + (t.bottleCount || 0),
+        (sum: number, transaction: any) => sum + (transaction.bottleCount || 0),
         0
       );
 
@@ -50,29 +53,31 @@ export const EarningsWidget = () => {
   const statCards = [
     {
       icon: Coins,
-      label: "Total Earnings",
-      value: `${stats?.totalEarnings.toLocaleString()} HUF`,
+      label: t("dashboard.impact.totalEarnings"),
+      value: t("dashboard.impact.earningsValue", {
+        amount: stats?.totalEarnings.toLocaleString() ?? "0"
+      }),
       color: "text-green-600",
       bgColor: "bg-green-100"
     },
     {
       icon: Recycle,
-      label: "Bottles Returned",
+      label: t("dashboard.impact.bottlesReturned"),
       value: stats?.totalBottles.toLocaleString() || "0",
       color: "text-blue-600",
       bgColor: "bg-blue-100"
     },
     {
       icon: TrendingUp,
-      label: "Completed Pickups",
+      label: t("dashboard.impact.completedPickups"),
       value: stats?.completedPickups.toLocaleString() || "0",
       color: "text-purple-600",
       bgColor: "bg-purple-100"
     },
     {
       icon: Star,
-      label: "Your Rating",
-      value: stats?.averageRating ? stats.averageRating.toFixed(1) : "N/A",
+      label: t("dashboard.impact.rating"),
+      value: stats?.averageRating ? stats.averageRating.toFixed(1) : t("common.notAvailable"),
       color: "text-yellow-600",
       bgColor: "bg-yellow-100"
     }
@@ -81,8 +86,8 @@ export const EarningsWidget = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg">Your Impact</CardTitle>
-        <CardDescription>Track your recycling journey</CardDescription>
+        <CardTitle className="text-lg">{t("dashboard.impact.title")}</CardTitle>
+        <CardDescription>{t("dashboard.impact.description")}</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
