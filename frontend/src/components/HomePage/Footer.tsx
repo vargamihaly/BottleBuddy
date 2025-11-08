@@ -14,38 +14,38 @@ export const Footer = () => {
               <span className="font-bold text-lg">BottleBuddy</span>
             </div>
             <p className="text-gray-400">
-              Making recycling profitable and community-driven across Hungary.
+              Az újrahasznosítást nyereségessé és közösségivé tesszük Magyarországon.
             </p>
           </div>
           <div>
             <h4 className="font-semibold mb-4">Platform</h4>
             <ul className="space-y-2 text-gray-400">
-              <li className="hover:text-green-400 cursor-pointer transition-colors" onClick={() => navigate("/about")}>About Us</li>
-              <li className="hover:text-green-400 cursor-pointer transition-colors" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>How it Works</li>
-              <li className="hover:text-green-400 cursor-pointer transition-colors">Safety Guidelines</li>
-              <li className="hover:text-green-400 cursor-pointer transition-colors">Pricing</li>
+              <li className="hover:text-green-400 cursor-pointer transition-colors" onClick={() => navigate("/about")}>Rólunk</li>
+              <li className="hover:text-green-400 cursor-pointer transition-colors" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>Működés</li>
+              <li className="hover:text-green-400 cursor-pointer transition-colors">Biztonsági irányelvek</li>
+              <li className="hover:text-green-400 cursor-pointer transition-colors">Árazás</li>
             </ul>
           </div>
           <div>
-            <h4 className="font-semibold mb-4">Community</h4>
+            <h4 className="font-semibold mb-4">Közösség</h4>
             <ul className="space-y-2 text-gray-400">
-              <li className="hover:text-green-400 cursor-pointer transition-colors">User Stories</li>
-              <li className="hover:text-green-400 cursor-pointer transition-colors">Environmental Impact</li>
-              <li className="hover:text-green-400 cursor-pointer transition-colors">Local Partners</li>
+              <li className="hover:text-green-400 cursor-pointer transition-colors">Felhasználói történetek</li>
+              <li className="hover:text-green-400 cursor-pointer transition-colors">Környezeti hatás</li>
+              <li className="hover:text-green-400 cursor-pointer transition-colors">Helyi partnerek</li>
             </ul>
           </div>
           <div>
-            <h4 className="font-semibold mb-4">Support</h4>
+            <h4 className="font-semibold mb-4">Támogatás</h4>
             <ul className="space-y-2 text-gray-400">
               <li className="hover:text-green-400 cursor-pointer transition-colors" onClick={() => navigate("/faq")}>FAQ</li>
-              <li className="hover:text-green-400 cursor-pointer transition-colors">Help Center</li>
-              <li className="hover:text-green-400 cursor-pointer transition-colors">Contact Us</li>
-              <li className="hover:text-green-400 cursor-pointer transition-colors">Terms of Service</li>
+              <li className="hover:text-green-400 cursor-pointer transition-colors">Súgóközpont</li>
+              <li className="hover:text-green-400 cursor-pointer transition-colors">Kapcsolat</li>
+              <li className="hover:text-green-400 cursor-pointer transition-colors">Felhasználási feltételek</li>
             </ul>
           </div>
         </div>
         <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-          <p>&copy; 2024 BottleBuddy. Made with 💚 in Hungary.</p>
+          <p>&copy; 2024 BottleBuddy. Szívvel-lélekkel 💚 Magyarországról.</p>
         </div>
       </div>
     </footer>

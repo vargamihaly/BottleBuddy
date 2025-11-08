@@ -4,9 +4,9 @@ export const HowItWorksSection = () => {
   return (
     <section className="py-20 px-4 bg-gradient-to-b from-white to-green-50">
       <div className="max-w-6xl mx-auto">
-        <h3 className="text-3xl font-bold text-center text-gray-900 mb-4">How BottleBuddy Works</h3>
+        <h3 className="text-3xl font-bold text-center text-gray-900 mb-4">Hogyan működik a BottleBuddy</h3>
         <p className="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
-          Simple, transparent, and convenient - get your share of the refund without the hassle
+          Egyszerű, átlátható és kényelmes – juss hozzá a visszaváltási összeg részedhez felesleges utánajárás nélkül.
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card className="border-green-200 hover:border-green-400 transition-all hover:shadow-lg">
@@ -14,9 +14,9 @@ export const HowItWorksSection = () => {
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl">📦</span>
               </div>
-              <CardTitle className="text-lg">1. List Your Bottles</CardTitle>
+              <CardTitle className="text-lg">1. Hirdesd meg a palackokat</CardTitle>
               <CardDescription className="text-sm">
-                Post how many bottles you have and your location. Set your preferred split arrangement.
+                Add meg, hány palackod van és hol találhatók. Állítsd be, hogyan szeretnéd megosztani a visszajáró összeget.
               </CardDescription>
             </CardHeader>
           </Card>
@@ -26,9 +26,9 @@ export const HowItWorksSection = () => {
               <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl">🤝</span>
               </div>
-              <CardTitle className="text-lg">2. Get Matched</CardTitle>
+              <CardTitle className="text-lg">2. Találj partnert</CardTitle>
               <CardDescription className="text-sm">
-                Nearby volunteers see your listing and send pickup requests. Chat to coordinate the meeting.
+                A közelben lévő önkéntesek látják a hirdetésed és átvételi kérelmet küldenek. Üzenetben egyeztethettek.
               </CardDescription>
             </CardHeader>
           </Card>
@@ -38,9 +38,9 @@ export const HowItWorksSection = () => {
               <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl">💵</span>
               </div>
-              <CardTitle className="text-lg">3. Get Paid Upfront</CardTitle>
+              <CardTitle className="text-lg">3. Azonnali kifizetés</CardTitle>
               <CardDescription className="text-sm">
-                Volunteer pays you your share (e.g., 25 HUF/bottle) during pickup. No need to meet again!
+                Az önkéntes a helyszínen kifizeti a rád eső részt (pl. 25 Ft/palack). Nem kell újra találkoznotok!
               </CardDescription>
             </CardHeader>
           </Card>
@@ -50,9 +50,9 @@ export const HowItWorksSection = () => {
               <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl">♻️</span>
               </div>
-              <CardTitle className="text-lg">4. Bottles Get Returned</CardTitle>
+              <CardTitle className="text-lg">4. A palackok visszaváltva</CardTitle>
               <CardDescription className="text-sm">
-                Volunteer returns bottles to the store, gets the full refund, and keeps their portion. Everyone wins!
+                Az önkéntes visszaviszi a palackokat, felveszi az 50 Ft-ot és megtartja a részét. Mindenki jól jár!
               </CardDescription>
             </CardHeader>
           </Card>
@@ -66,11 +66,11 @@ export const HowItWorksSection = () => {
                 <span className="text-2xl">💡</span>
               </div>
               <div>
-                <h4 className="font-bold text-lg mb-2">Quick & Convenient Payment</h4>
+                <h4 className="font-bold text-lg mb-2">Gyors és kényelmes fizetés</h4>
                 <p className="text-white/90 text-sm leading-relaxed">
-                  <strong>You get paid immediately during pickup</strong> - no waiting, no second meetup needed.
-                  The volunteer pays you your agreed share upfront, then they handle returning the bottles and collect
-                  the full refund from the store. It's that simple!
+                  <strong>A helyszínen azonnal megkapod a részedet</strong> – nincs várakozás és nincs újabb találkozó.
+                  Az önkéntes előre odaadja az egyeztetett összeget, majd ő intézi a visszaváltást és a teljes visszatérítést.
+                  Ennyire egyszerű!
                 </p>
               </div>
             </div>

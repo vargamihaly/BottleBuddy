@@ -5,6 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { useTotalUnreadCount } from "@/hooks/useMessages";
+import { useTranslation } from "react-i18next";
 
 interface HeaderProps {
   onMapClick: () => void;
@@ -16,18 +17,19 @@ export const Header = ({ onMapClick, onDashboardClick }: HeaderProps) => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const totalUnreadCount = useTotalUnreadCount();
+  const { t } = useTranslation();
 
   const handleSignOut = async () => {
     try {
       await signOut();
       toast({
-        title: "Signed out",
-        description: "You have been successfully signed out.",
+        title: "Sikeres kijelentkezés",
+        description: "Sikeresen kijelentkeztél a BottleBuddy fiókodból.",
       });
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to sign out. Please try again.",
+        title: t("common.error"),
+        description: "A kijelentkezés nem sikerült. Kérjük, próbáld újra.",
         variant: "destructive",
       });
     }
@@ -42,27 +44,27 @@ export const Header = ({ onMapClick, onDashboardClick }: HeaderProps) => {
               <Recycle className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">BottleBuddy</h1>
-              <p className="text-xs text-gray-600">Share. Return. Recycle.</p>
+              <h1 className="text-xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">{t("common.brandName")}</h1>
+              <p className="text-xs text-gray-600">{t("common.tagline")}</p>
             </div>
           </div>
 
           {/* Navigation Links */}
           <nav className="hidden md:flex items-center space-x-6">
             <Button variant="ghost" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="text-gray-700 hover:text-green-600">
-              Home
+              {t("common.home")}
             </Button>
             <Button variant="ghost" onClick={onMapClick} className="text-gray-700 hover:text-green-600">
               <MapPin className="w-4 h-4 mr-2" />
-              Explore Map
+              {t("common.exploreMap")}
             </Button>
             <Button variant="ghost" onClick={() => navigate("/about")} className="text-gray-700 hover:text-green-600">
               <Info className="w-4 h-4 mr-2" />
-              About
+              {t("common.about")}
             </Button>
             <Button variant="ghost" onClick={() => navigate("/faq")} className="text-gray-700 hover:text-green-600">
               <HelpCircle className="w-4 h-4 mr-2" />
-              FAQ
+              {t("common.faq")}
             </Button>
           </nav>
 
@@ -71,7 +73,7 @@ export const Header = ({ onMapClick, onDashboardClick }: HeaderProps) => {
               <>
                 <Button variant="outline" size="sm" onClick={onDashboardClick} className="hidden sm:flex">
                   <Users className="w-4 h-4 mr-2" />
-                  Profile
+                  {t("common.profile")}
                 </Button>
                 <Button
                   variant="outline"
@@ -91,7 +93,7 @@ export const Header = ({ onMapClick, onDashboardClick }: HeaderProps) => {
                 </Button>
                 <Button variant="outline" size="sm" onClick={handleSignOut}>
                   <LogOut className="w-4 h-4 sm:mr-2" />
-                  <span className="hidden sm:inline">Sign Out</span>
+                  <span className="hidden sm:inline">{t("common.signOut")}</span>
                 </Button>
               </>
             ) : (
@@ -100,7 +102,7 @@ export const Header = ({ onMapClick, onDashboardClick }: HeaderProps) => {
                   <Info className="w-4 h-4" />
                 </Button>
                 <Button onClick={() => navigate("/auth")} className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-md">
-                  Sign In
+                  {t("common.signIn")}
                 </Button>
               </>
             )}

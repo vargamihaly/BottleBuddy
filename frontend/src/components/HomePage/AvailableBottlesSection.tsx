@@ -30,16 +30,16 @@ export const AvailableBottlesSection = ({
         <div className="flex items-center justify-between mb-12">
           <div>
             <h3 className="text-3xl font-bold text-gray-900">
-              {user ? 'Available Bottles to Pick Up' : 'Active Bottle Listings'}
+              {user ? 'Átvehető palackok' : 'Aktív palack hirdetések'}
             </h3>
             <p className="text-sm text-gray-600 mt-2">
               {user
-                ? 'Help others by picking up and returning their bottles'
-                : 'Sign in to start picking up bottles and earning'}
+                ? 'Segíts másoknak a palackok átvételével és visszaváltásával'
+                : 'Jelentkezz be, hogy palackokat vihess el és kereshess'}
             </p>
           </div>
           <Button variant="outline" onClick={onMapClick}>
-            View on Map
+            Megtekintés térképen
             <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
         </div>
@@ -47,9 +47,9 @@ export const AvailableBottlesSection = ({
           <BottleListingsGridSkeleton count={6} />
         ) : isError ? (
           <div className="text-center py-8">
-            <p className="text-red-600 mb-4">Failed to load bottle listings.</p>
+            <p className="text-red-600 mb-4">A palacklisták betöltése nem sikerült.</p>
             <Button onClick={() => window.location.reload()} variant="outline">
-              Try Again
+              Próbáld újra
             </Button>
           </div>
         ) : listings.length === 0 ? (
@@ -57,11 +57,11 @@ export const AvailableBottlesSection = ({
             <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <MapPin className="w-10 h-10 text-gray-400" />
             </div>
-            <h4 className="text-xl font-semibold text-gray-700 mb-2">No listings available</h4>
+            <h4 className="text-xl font-semibold text-gray-700 mb-2">Nem érhető el hirdetés</h4>
             <p className="text-gray-500">
               {user
-                ? 'Be the first to list your bottles!'
-                : 'Sign in to see available bottle listings'}
+                ? 'Legyél te az első, aki meghirdeti a palackjait!'
+                : 'Jelentkezz be, hogy lásd az elérhető palack hirdetéseket'}
             </p>
             {user && (
               <Button
@@ -69,7 +69,7 @@ export const AvailableBottlesSection = ({
                 onClick={() => navigate("/create-listing")}
               >
                 <Plus className="w-4 h-4 mr-2" />
-                List Your Bottles
+                Palackok meghirdetése
               </Button>
             )}
           </div>

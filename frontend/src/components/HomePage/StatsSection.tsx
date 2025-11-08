@@ -34,24 +34,24 @@ export const StatsSection = () => {
             <div className={`text-4xl font-bold text-green-600 mb-2 ${isLoading ? 'animate-pulse' : ''}`}>
               {formatNumber(displayStats.totalBottlesReturned)}
             </div>
-            <p className="text-gray-600">Bottles Returned</p>
+            <p className="text-gray-600">Visszaváltott palackok</p>
           </div>
           <div className="text-center">
             <div className={`text-4xl font-bold text-green-600 mb-2 ${isLoading ? 'animate-pulse' : ''}`}>
               {formatNumber(displayStats.totalHufShared)}
             </div>
-            <p className="text-gray-600">HUF Shared</p>
+            <p className="text-gray-600">Megosztott forint</p>
           </div>
           <div className="text-center">
             <div className={`text-4xl font-bold text-green-600 mb-2 ${isLoading ? 'animate-pulse' : ''}`}>
               {formatNumber(displayStats.activeUsers)}
             </div>
-            <p className="text-gray-600">Active Users</p>
+            <p className="text-gray-600">Aktív felhasználók</p>
           </div>
         </div>
         {isError && (
           <p className="text-center text-sm text-gray-500 mt-4">
-            Statistics temporarily unavailable
+            A statisztikák átmenetileg nem érhetők el.
           </p>
         )}
       </div>
