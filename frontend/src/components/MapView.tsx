@@ -21,6 +21,7 @@ import type { Map as LeafletMap } from 'leaflet';
 import { useAuth } from "@/contexts/AuthContext.tsx";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient, ApiRequestError } from "@/lib/apiClient";
+import { useTranslation } from "react-i18next";
 
 
 interface BottleListingWithDistance extends BottleListing {
@@ -60,6 +61,7 @@ interface MapViewProps {
 
 export const MapView = ({ listings, onBackToHome }: MapViewProps) => {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [selectedListing, setSelectedListing] = useState<BottleListingWithDistance | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [mapCenter, setMapCenter] = useState<[number, number]>(DEFAULT_CENTER);
@@ -76,19 +78,19 @@ export const MapView = ({ listings, onBackToHome }: MapViewProps) => {
         setUserLocation(location);
         setMapCenter(location);
         toast({
-          title: "Location found",
-          description: "Centered map on your location",
+          title: t("map.locationFound"),
+          description: t("map.locationCentered"),
         });
       })
       .catch((error) => {
         console.error("Error getting user location:", error);
         toast({
-          title: "Location unavailable",
-          description: "Using default location (Budapest)",
+          title: t("map.locationUnavailable"),
+          description: t("map.locationDefault"),
           variant: "destructive",
         });
       });
-  }, [toast]);
+  }, [toast, t]);
 
   // Pickup request mutation
   const pickupRequestMutation = useMutation({
@@ -100,8 +102,8 @@ export const MapView = ({ listings, onBackToHome }: MapViewProps) => {
       queryClient.invalidateQueries({ queryKey: ["bottleListings"] });
       queryClient.invalidateQueries({ queryKey: ["myPickupRequests"] });
       toast({
-        title: "Pickup request sent!",
-        description: "The listing owner will be notified of your offer.",
+        title: t("map.pickupRequestSent"),
+        description: t("map.ownerNotified"),
       });
       setIsOfferingPickup(false);
       setSelectedListing(null);
@@ -109,9 +111,9 @@ export const MapView = ({ listings, onBackToHome }: MapViewProps) => {
     onError: (error: unknown) => {
       const description = error instanceof ApiRequestError
         ? error.getUserMessage()
-        : "Failed to send pickup request. Please try again.";
+        : t("common.error");
       toast({
-        title: "Error",
+        title: t("common.error"),
         description,
         variant: "destructive",
       });
@@ -120,7 +122,7 @@ export const MapView = ({ listings, onBackToHome }: MapViewProps) => {
   });
 
   const handleOfferPickup = (listing: BottleListingWithDistance) => {
-    if (window.confirm(`Are you sure you want to offer to pick up ${listing.bottleCount} bottles from ${listing.locationAddress}?`)) {
+    if (window.confirm(t("map.offerPickupConfirm", { count: listing.bottleCount, location: listing.locationAddress }))) {
       setIsOfferingPickup(true);
       pickupRequestMutation.mutate({
         listingId: listing.id,
@@ -163,7 +165,7 @@ export const MapView = ({ listings, onBackToHome }: MapViewProps) => {
     if (userLocation) {
       setMapCenter(userLocation);
       toast({
-        title: "Centered on your location",
+        title: t("map.locationCentered"),
       });
     } else {
       getUserLocation()
@@ -171,14 +173,14 @@ export const MapView = ({ listings, onBackToHome }: MapViewProps) => {
           setUserLocation(location);
           setMapCenter(location);
           toast({
-            title: "Location found",
-            description: "Centered map on your location",
+            title: t("map.locationFound"),
+            description: t("map.locationCentered"),
           });
         })
         .catch(() => {
           toast({
-            title: "Location unavailable",
-            description: "Please enable location services",
+            title: t("map.locationUnavailable"),
+            description: t("map.locationEnable"),
             variant: "destructive",
           });
         });
@@ -194,19 +196,19 @@ export const MapView = ({ listings, onBackToHome }: MapViewProps) => {
             <div className="flex items-center space-x-3">
               <Button variant="ghost" onClick={onBackToHome}>
                 <ArrowLeft className="w-4 h-4 mr-2" />
-                Back
+                {t("common.backToHome")}
               </Button>
               <div>
-                <h1 className="text-xl font-bold text-gray-900">Bottle Map</h1>
+                <h1 className="text-xl font-bold text-gray-900">{t("map.title")}</h1>
                 <p className="text-sm text-gray-600">
-                  {filteredListings.length} bottle{filteredListings.length !== 1 ? 's' : ''} near you
+                  {t("map.nearYou", { count: filteredListings.length })}
                 </p>
               </div>
             </div>
             <div className="flex items-center space-x-2">
               <Button variant="outline" size="sm" onClick={handleCenterOnUser}>
                 <Navigation className="w-4 h-4 mr-2" />
-                My Location
+                {t("map.myLocation")}
               </Button>
             </div>
           </div>
@@ -234,7 +236,7 @@ export const MapView = ({ listings, onBackToHome }: MapViewProps) => {
               <Marker position={userLocation} icon={createUserLocationIcon()}>
                 <Popup>
                   <div className="text-center">
-                    <p className="font-semibold">Your Location</p>
+                    <p className="font-semibold">{t("map.myLocation")}</p>
                   </div>
                 </Popup>
               </Marker>
@@ -268,11 +270,11 @@ export const MapView = ({ listings, onBackToHome }: MapViewProps) => {
                         {listing.locationAddress}
                       </p>
                       <div className="flex items-center justify-between text-sm mb-2">
-                        <span className="text-gray-500">Distance:</span>
+                        <span className="text-gray-500">{t("map.distance")}:</span>
                         <Badge variant="secondary">{listing.distance}</Badge>
                       </div>
                       <div className="flex items-center justify-between text-sm mb-3">
-                        <span className="text-gray-500">Your share:</span>
+                        <span className="text-gray-500">{t("listing.yourShare")}:</span>
                         <span className="font-semibold text-green-600">
                           {Math.round(listing.estimatedRefund / 2)} HUF
                         </span>
@@ -284,7 +286,7 @@ export const MapView = ({ listings, onBackToHome }: MapViewProps) => {
                           variant="secondary"
                           disabled
                         >
-                          Your Listing
+                          {t("listing.yourListing")}
                         </Button>
                       ) : (
                         <Button
@@ -293,7 +295,7 @@ export const MapView = ({ listings, onBackToHome }: MapViewProps) => {
                           onClick={() => handleOfferPickup(listing)}
                           disabled={listing.status !== 'open' || isOfferingPickup}
                         >
-                          {isOfferingPickup ? 'Sending request...' : listing.status === 'open' ? 'Offer to Pick Up' : `Status: ${listing.status}`}
+                          {isOfferingPickup ? t("map.sendingRequest") : listing.status === 'open' ? t("listing.offerToPickUp") : `${t("common.status")}: ${listing.status}`}
                         </Button>
                       )}
                     </div>
@@ -310,7 +312,7 @@ export const MapView = ({ listings, onBackToHome }: MapViewProps) => {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <Input
-                placeholder="Search by location or title..."
+                placeholder={t("map.searchPlaceholder")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
@@ -320,18 +322,18 @@ export const MapView = ({ listings, onBackToHome }: MapViewProps) => {
 
           <div className="p-4">
             <h3 className="font-semibold text-gray-900 mb-2">
-              Nearby Bottles ({filteredListings.length})
+              {t("map.nearbyBottles")} ({filteredListings.length})
             </h3>
             <p className="text-xs text-gray-500 mb-4">
-              Sorted by distance from your location
+              {t("map.sortedByDistance")}
             </p>
 
             <div className="space-y-3">
               {filteredListings.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">
                   <MapPin className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                  <p className="text-sm">No bottles found nearby</p>
-                  <p className="text-xs mt-1">Try adjusting your search</p>
+                  <p className="text-sm">{t("map.noBottlesFound")}</p>
+                  <p className="text-xs mt-1">{t("map.tryAdjustingSearch")}</p>
                 </div>
               ) : (
                 filteredListings.map((listing) => {
@@ -377,7 +379,7 @@ export const MapView = ({ listings, onBackToHome }: MapViewProps) => {
 
                       <CardContent className="pt-0">
                         <div className="flex items-center justify-between text-xs mb-1">
-                          <span className="text-gray-500">Your share:</span>
+                          <span className="text-gray-500">{t("listing.yourShare")}:</span>
                           <span className="font-medium text-green-600">
                             {Math.round(listing.estimatedRefund / 2)} HUF
                           </span>
@@ -401,7 +403,7 @@ export const MapView = ({ listings, onBackToHome }: MapViewProps) => {
                                 variant="secondary"
                                 disabled
                               >
-                                Your Listing
+                                {t("listing.yourListing")}
                               </Button>
                             ) : (
                               <Button
@@ -410,7 +412,7 @@ export const MapView = ({ listings, onBackToHome }: MapViewProps) => {
                                 onClick={() => handleOfferPickup(listing)}
                                 disabled={listing.status !== 'open' || isOfferingPickup}
                               >
-                                {isOfferingPickup ? 'Sending request...' : listing.status === 'open' ? 'Offer to Pick Up' : `Status: ${listing.status}`}
+                                {isOfferingPickup ? t("map.sendingRequest") : listing.status === 'open' ? t("listing.offerToPickUp") : `${t("common.status")}: ${listing.status}`}
                               </Button>
                             )}
                           </div>

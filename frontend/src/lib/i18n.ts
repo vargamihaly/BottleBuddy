@@ -295,15 +295,79 @@ const resources = {
       },
       about: {
         title: "About BottleBuddy",
+        backToHome: "Back to Home",
+        madeWithLove: "Made with love for the planet",
+        subtitle: "We're on a mission to make bottle recycling easier, more rewarding, and more social. BottleBuddy connects people who have returnable bottles with those willing to return them, creating a win-win situation for everyone involved.",
         mission: "Our Mission",
         missionText: "Making recycling profitable and community-driven across Hungary.",
+        missionDescription: "To create a sustainable future by making bottle recycling accessible, social, and rewarding for everyone. We believe that small actions, when multiplied by millions of people, can transform the world.",
         story: "Our Story",
         storyText: "BottleBuddy was created to solve a simple problem: Many people collect bottles but don't have time to return them. We connect these people with volunteers who are happy to help in exchange for sharing the refund.",
         howWeHelp: "How We Help",
-        feature1: "Community-driven recycling",
-        feature2: "Fair profit sharing",
-        feature3: "Environmental impact",
-        feature4: "Build local connections"
+        whyChoose: "Why Choose BottleBuddy?",
+        whyChooseSubtitle: "We've built the most comprehensive platform for bottle sharing and recycling. Here's what makes us special.",
+        howItWorksTitle: "How It Works",
+        feature1: {
+          title: "Easy Bottle Sharing",
+          description: "List your returnable bottles with just a few taps. Set your location, add details, and you're done!"
+        },
+        feature2: {
+          title: "Community Driven",
+          description: "Connect with neighbors who can pick up your bottles. Build a network of people who care about recycling."
+        },
+        feature3: {
+          title: "Environmental Impact",
+          description: "Every bottle returned is a step towards a cleaner planet. Track your contribution to sustainability."
+        },
+        feature4: {
+          title: "Safe & Secure",
+          description: "User ratings, verified profiles, and secure authentication ensure a trustworthy experience."
+        },
+        feature5: {
+          title: "Fast & Efficient",
+          description: "Real-time listings and notifications help you find bottles nearby instantly."
+        },
+        feature6: {
+          title: "Local Focus",
+          description: "Interactive map view shows bottles in your neighborhood, making collection easy and efficient."
+        },
+        step1: {
+          title: "Create an Account",
+          description: "Sign up with your email or Google account. It takes less than a minute to get started."
+        },
+        step2: {
+          title: "List or Find Bottles",
+          description: "Have bottles? Create a listing with details, location, and your preferred refund split. Looking to collect? Browse the map to find bottles near you and see the earnings potential."
+        },
+        step3: {
+          title: "Get Paid Upfront During Pickup",
+          description: "Coordinate pickup via in-app messaging. When you meet, the volunteer pays you your agreed share immediately (e.g., 25 HUF per bottle). No waiting, no second meetup needed!"
+        },
+        step4: {
+          title: "Volunteer Returns Bottles",
+          description: "The volunteer takes the bottles to the store, gets the full 50 HUF refund per bottle, and keeps their portion. Both parties profit, and you never have to leave home again!"
+        },
+        step5: {
+          title: "Rate & Build Trust",
+          description: "After a successful exchange, both parties can rate each other. This builds trust in the community and helps everyone find reliable partners for future exchanges."
+        },
+        paymentHighlight: {
+          title: "Simple & Safe Payment",
+          description: "You get paid immediately during the one and only meetup. The volunteer hands you cash for your share of the refund, takes the bottles, and that's it! They handle the return process and collect the full refund from the store. Everyone wins, and you never have to worry about meeting again or waiting for payment."
+        },
+        stats: {
+          bottlesRecycled: "Bottles Recycled",
+          activeUsers: "Active Users",
+          cities: "Cities",
+          userSatisfaction: "User Satisfaction"
+        },
+        cta: {
+          title: "Ready to Make a Difference?",
+          description: "Join thousands of users who are making bottle recycling easier and more rewarding.",
+          getStarted: "Get Started Today",
+          exploreListings: "Explore Listings",
+          joinToday: "Join BottleBuddy Today"
+        }
       }
     }
   },
@@ -600,15 +664,79 @@ const resources = {
       },
       about: {
         title: "A BottleBuddy-ról",
+        backToHome: "Vissza a főoldalra",
+        madeWithLove: "Szeretettel készítve a bolygóért",
+        subtitle: "Küldetésünk, hogy a palackok visszaváltását könnyebbé, jutalmazóbbá és közösségibbé tegyük. A BottleBuddy összeköti azokat az embereket, akiknek visszaváltható palackjaik vannak, azokkal, akik szívesen visszaviszik őket, mindenki számára előnyös helyzetet teremtve.",
         mission: "Küldetésünk",
         missionText: "Az újrahasznosítás jövedelmezővé és közösség-vezérelté tétele Magyarországon.",
+        missionDescription: "Fenntartható jövő létrehozása azáltal, hogy a palackok visszaváltását mindenki számára elérhetővé, közösségivé és jutalmazóvá tesszük. Hiszünk abban, hogy a kis cselekedetek, ha milliók teszik őket, megváltoztathatják a világot.",
         story: "Történetünk",
         storyText: "A BottleBuddy-t azért hoztuk létre, hogy megoldjunk egy egyszerű problémát: Sokan gyűjtenek palackokat, de nincs idejük visszavinni őket. Összekapcsoljuk ezeket az embereket olyan önkéntesekkel, akik szívesen segítenek a visszatérítés megosztása fejében.",
         howWeHelp: "Hogyan segítünk",
-        feature1: "Közösség-vezérelt újrahasznosítás",
-        feature2: "Tisztességes haszonmegosztás",
-        feature3: "Környezeti hatás",
-        feature4: "Helyi kapcsolatok építése"
+        whyChoose: "Miért válaszd a BottleBuddy-t?",
+        whyChooseSubtitle: "A legátfogóbb platformot építettük meg a palackok megosztásához és újrahasznosításához. Ez tesz minket különlegessé.",
+        howItWorksTitle: "Hogyan működik",
+        feature1: {
+          title: "Könnyű palackmegosztás",
+          description: "Hirdesd meg a visszaváltható palackjaidat néhány érintéssel. Add meg a helyszínt, a részleteket, és kész vagy!"
+        },
+        feature2: {
+          title: "Közösség-vezérelt",
+          description: "Lépj kapcsolatba szomszédokkal, akik elvihetik a palackjaidat. Építs egy hálózatot olyan emberekkel, akik törődnek az újrahasznosítással."
+        },
+        feature3: {
+          title: "Környezeti hatás",
+          description: "Minden visszaváltott palack egy lépés a tisztább bolygó felé. Kövesd nyomon a fenntarthatósághoz való hozzájárulásodat."
+        },
+        feature4: {
+          title: "Biztonságos és megbízható",
+          description: "Felhasználói értékelések, ellenőrzött profilok és biztonságos hitelesítés biztosítják a megbízható élményt."
+        },
+        feature5: {
+          title: "Gyors és hatékony",
+          description: "Valós idejű hirdetések és értesítések segítenek azonnal megtalálni a közeli palackokat."
+        },
+        feature6: {
+          title: "Helyi fókusz",
+          description: "Az interaktív térképnézet megmutatja a környékbeli palackokat, megkönnyítve és hatékonyabbá téve a gyűjtést."
+        },
+        step1: {
+          title: "Hozz létre egy fiókot",
+          description: "Regisztrálj az e-mail címeddel vagy Google fiókkal. Kevesebb, mint egy percbe telik az indulás."
+        },
+        step2: {
+          title: "Hirdesd meg vagy keresd a palackokat",
+          description: "Vannak palackjaid? Hozz létre egy hirdetést részletekkel, helyszínnel és az általad preferált visszatérítési osztással. Gyűjteni szeretnél? Böngéssz a térképen, hogy megtaláld a közeli palackokat és lásd a kereseti potenciált."
+        },
+        step3: {
+          title: "Kapj előre fizetést az átvételkor",
+          description: "Egyeztess az átvételről az alkalmazáson belüli üzenetküldéssel. Amikor találkoztok, az önkéntes azonnal fizet neked a megállapodott részedet (pl. 25 Ft/palack). Nincs várakozás, nincs második találkozó szükséges!"
+        },
+        step4: {
+          title: "Az önkéntes visszaviszi a palackokat",
+          description: "Az önkéntes elviszi a palackokat a boltba, megkapja a teljes 50 Ft-os visszatérítést palackonként, és megtartja a részét. Mindkét fél profitál, és neked soha nem kell többet elmenned otthonról!"
+        },
+        step5: {
+          title: "Értékelj és építs bizalmat",
+          description: "Egy sikeres csere után mindkét fél értékelheti a másikat. Ez bizalmat épít a közösségben és segít mindenkinek megbízható partnereket találni a jövőbeli cserékhez."
+        },
+        paymentHighlight: {
+          title: "Egyszerű és biztonságos fizetés",
+          description: "Azonnal megkapod a fizetést az egyetlen találkozó alkalmával. Az önkéntes készpénzben kifizeti neked a részedet a visszatérítésből, átveszi a palackokat, és ennyi! Ő intézi a visszaváltási folyamatot és beszedte a teljes visszatérítést a boltból. Mindenki nyer, és soha nem kell aggódnod újabb találkozó vagy a fizetésre való várakozás miatt."
+        },
+        stats: {
+          bottlesRecycled: "Visszaváltott palackok",
+          activeUsers: "Aktív felhasználók",
+          cities: "Városok",
+          userSatisfaction: "Felhasználói elégedettség"
+        },
+        cta: {
+          title: "Készen állsz a változásra?",
+          description: "Csatlakozz a felhasználók ezreihez, akik könnyebbé és jutalmazóbbá teszik a palackok visszaváltását.",
+          getStarted: "Kezdd el ma",
+          exploreListings: "Hirdetések böngészése",
+          joinToday: "Csatlakozz még ma a BottleBuddy-hoz"
+        }
       }
     }
   }
