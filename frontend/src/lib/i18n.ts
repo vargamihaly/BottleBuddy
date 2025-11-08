@@ -101,6 +101,55 @@ const resources = {
           noMessage: "No message"
         }
       },
+      homeSections: {
+        cta: {
+          title: "Ready to Start Sharing?",
+          subtitle: "Join Hungary's growing community of eco-conscious bottle sharers today.",
+          listBottles: "List Your Bottles",
+          viewDashboard: "View Dashboard",
+          signUpFree: "Sign Up Free",
+          learnMore: "Learn More"
+        },
+        myListings: {
+          title: "My Active Listings",
+          subtitle: "Your bottles available for pickup",
+          count: "{{count}} listing",
+          count_plural: "{{count}} listings",
+          viewAll: "View All",
+          noListings: "You currently don't have any active listings.",
+          createFirst: "Create Your First Listing"
+        },
+        availableBottles: {
+          title: "Available Bottles Near You",
+          subtitle: "Help others by picking up their bottles",
+          count: "{{count}} listing",
+          count_plural: "{{count}} listings",
+          viewAll: "View All",
+          viewMap: "View on Map",
+          noBottles: "No bottles available near you at the moment.",
+          checkBack: "Check back later or explore the map to find bottles!"
+        },
+        pickupTasks: {
+          title: "My Pickup Tasks",
+          subtitle: "Bottles you've offered to pick up",
+          count: "{{count}} task",
+          count_plural: "{{count}} tasks",
+          viewAll: "View All",
+          noTasks: "You don't have any active pickup tasks.",
+          findBottles: "Find Bottles to Pick Up",
+          pending: "Pending",
+          accepted: "Accepted"
+        },
+        completedPickups: {
+          title: "Completed Pickups",
+          subtitle: "Your recycling history",
+          count: "{{count}} completed",
+          viewAll: "View All",
+          noCompleted: "No completed pickups yet.",
+          startPickup: "Start your first pickup!",
+          completedOn: "Completed on {{date}}"
+        }
+      },
       stats: {
         bottlesReturned: "Bottles Returned",
         hufShared: "HUF Shared",
@@ -174,7 +223,7 @@ const resources = {
         updateSuccess: "Listing updated successfully",
         deleteSuccess: "Listing deleted successfully",
         pickupRequests: "Pickup Requests",
-        noPick upRequests: "No pickup requests yet",
+        noPickupRequests: "No pickup requests yet",
         shareToGetVolunteers: "Share your listing to get volunteers!",
         yourListing: "Your Listing",
         offerToPickUp: "Offer to Pick Up",
@@ -468,6 +517,55 @@ const resources = {
             accepted: "Elfogadva"
           },
           noMessage: "Nincs üzenet"
+        }
+      },
+      homeSections: {
+        cta: {
+          title: "Készen állsz a megosztásra?",
+          subtitle: "Csatlakozz Magyarország növekvő környezettudatos palackmegosztó közösségéhez még ma.",
+          listBottles: "Palackok meghirdetése",
+          viewDashboard: "Irányítópult megtekintése",
+          signUpFree: "Ingyenes regisztráció",
+          learnMore: "Tudj meg többet"
+        },
+        myListings: {
+          title: "Aktív hirdetéseim",
+          subtitle: "Átvételre váró palackjaid",
+          count: "{{count}} hirdetés",
+          count_plural: "{{count}} hirdetés",
+          viewAll: "Összes megtekintése",
+          noListings: "Jelenleg nincsenek aktív hirdetéseid.",
+          createFirst: "Hozd létre az első hirdetésedet"
+        },
+        availableBottles: {
+          title: "Elérhető palackok a közeledben",
+          subtitle: "Segíts másoknak a palackjaik átvételével",
+          count: "{{count}} hirdetés",
+          count_plural: "{{count}} hirdetés",
+          viewAll: "Összes megtekintése",
+          viewMap: "Megtekintés térképen",
+          noBottles: "Jelenleg nincsenek elérhető palackok a közeledben.",
+          checkBack: "Nézz vissza később, vagy fedezd fel a térképet, hogy palackokat találj!"
+        },
+        pickupTasks: {
+          title: "Átvételi feladataim",
+          subtitle: "Palackok, amelyeket felajánlottál átvételre",
+          count: "{{count}} feladat",
+          count_plural: "{{count}} feladat",
+          viewAll: "Összes megtekintése",
+          noTasks: "Nincsenek aktív átvételi feladataid.",
+          findBottles: "Találj palackokat átvételre",
+          pending: "Függőben",
+          accepted: "Elfogadva"
+        },
+        completedPickups: {
+          title: "Teljesített átvételek",
+          subtitle: "Újrahasznosítási előzményeid",
+          count: "{{count}} teljesítve",
+          viewAll: "Összes megtekintése",
+          noCompleted: "Még nincsenek teljesített átvételeid.",
+          startPickup: "Kezdd el az első átvételedet!",
+          completedOn: "Teljesítve: {{date}}"
         }
       },
       stats: {

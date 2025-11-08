@@ -6,6 +6,7 @@ import { BottleListingsGridSkeleton } from "@/components/BottleListingSkeleton";
 import { BottleListing } from "@/types";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTranslation } from "react-i18next";
 
 interface MyListingsSectionProps {
   listings: BottleListing[];
@@ -15,6 +16,7 @@ interface MyListingsSectionProps {
 export const MyListingsSection = ({ listings, isLoading }: MyListingsSectionProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useTranslation();
 
   if (!user) {
     return null;
@@ -25,15 +27,15 @@ export const MyListingsSection = ({ listings, isLoading }: MyListingsSectionProp
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h3 className="text-2xl font-bold text-gray-900">My Active Listings</h3>
-            <p className="text-sm text-gray-600 mt-1">Your bottles available for pickup</p>
+            <h3 className="text-2xl font-bold text-gray-900">{t("homeSections.myListings.title")}</h3>
+            <p className="text-sm text-gray-600 mt-1">{t("homeSections.myListings.subtitle")}</p>
           </div>
           <div className="flex items-center gap-3">
             <Badge variant="secondary" className="bg-blue-100 text-blue-700">
-              {listings.length} {listings.length === 1 ? 'listing' : 'listings'}
+              {t("homeSections.myListings.count", { count: listings.length })}
             </Badge>
             <Button variant="outline" size="sm" onClick={() => navigate("/my-listings")}>
-              View All
+              {t("homeSections.myListings.viewAll")}
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
           </div>
@@ -42,12 +44,12 @@ export const MyListingsSection = ({ listings, isLoading }: MyListingsSectionProp
           <BottleListingsGridSkeleton count={3} />
         ) : listings.length === 0 ? (
           <div className="bg-white/80 rounded-lg p-8 text-center">
-            <p className="text-gray-600 mb-4">You currently don't have any active listings.</p>
+            <p className="text-gray-600 mb-4">{t("homeSections.myListings.noListings")}</p>
             <Button
               onClick={() => navigate("/create-listing")}
               className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
             >
-              Create Your First Listing
+              {t("homeSections.myListings.createFirst")}
             </Button>
           </div>
         ) : (

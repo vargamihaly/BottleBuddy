@@ -3,6 +3,7 @@ import { BottleListingCard } from "@/components/BottleListingCard";
 import { BottleListingsGridSkeleton } from "@/components/BottleListingSkeleton";
 import { BottleListing, PickupRequest } from "@/types";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTranslation } from "react-i18next";
 
 interface MyCompletedPickupTasksSectionProps {
   listings: BottleListing[];
@@ -12,6 +13,7 @@ interface MyCompletedPickupTasksSectionProps {
 
 export const MyCompletedPickupTasksSection = ({ listings, pickupRequests, isLoading }: MyCompletedPickupTasksSectionProps) => {
   const { user } = useAuth();
+  const { t } = useTranslation();
 
   if (!user || listings.length === 0) {
     return null;
@@ -22,11 +24,11 @@ export const MyCompletedPickupTasksSection = ({ listings, pickupRequests, isLoad
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h3 className="text-2xl font-bold text-gray-900">Completed Pickup Tasks</h3>
-            <p className="text-sm text-gray-600 mt-1">Rate your experience with these exchanges</p>
+            <h3 className="text-2xl font-bold text-gray-900">{t("homeSections.completedPickups.title")}</h3>
+            <p className="text-sm text-gray-600 mt-1">{t("homeSections.completedPickups.subtitle")}</p>
           </div>
           <Badge variant="secondary" className="bg-gray-100 text-gray-700">
-            {listings.length} {listings.length === 1 ? 'completed' : 'completed'}
+            {t("homeSections.completedPickups.count", { count: listings.length })}
           </Badge>
         </div>
         {isLoading ? (
