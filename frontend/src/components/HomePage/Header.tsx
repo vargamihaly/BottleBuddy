@@ -1,8 +1,10 @@
 import { Button } from "@/components/ui/button";
-import { MapPin, Users, Bell, LogOut, Info, Recycle } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { MapPin, Users, Bell, LogOut, Info, Recycle, MessageCircle, HelpCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import { useTotalUnreadCount } from "@/hooks/useMessages";
 
 interface HeaderProps {
   onMapClick: () => void;
@@ -13,6 +15,7 @@ export const Header = ({ onMapClick, onDashboardClick }: HeaderProps) => {
   const { user, signOut } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const totalUnreadCount = useTotalUnreadCount();
 
   const handleSignOut = async () => {
     try {
@@ -57,6 +60,10 @@ export const Header = ({ onMapClick, onDashboardClick }: HeaderProps) => {
               <Info className="w-4 h-4 mr-2" />
               About
             </Button>
+            <Button variant="ghost" onClick={() => navigate("/faq")} className="text-gray-700 hover:text-green-600">
+              <HelpCircle className="w-4 h-4 mr-2" />
+              FAQ
+            </Button>
           </nav>
 
           <div className="flex items-center space-x-2">
@@ -65,6 +72,19 @@ export const Header = ({ onMapClick, onDashboardClick }: HeaderProps) => {
                 <Button variant="outline" size="sm" onClick={onDashboardClick} className="hidden sm:flex">
                   <Users className="w-4 h-4 mr-2" />
                   Profile
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigate("/messages")}
+                  className="relative"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  {totalUnreadCount > 0 && (
+                    <Badge className="absolute -top-2 -right-2 h-5 min-w-5 bg-red-500 text-white text-xs px-1.5">
+                      {totalUnreadCount}
+                    </Badge>
+                  )}
                 </Button>
                 <Button variant="outline" size="sm">
                   <Bell className="w-4 h-4" />

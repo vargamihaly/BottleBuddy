@@ -137,3 +137,23 @@ export interface Statistics {
     totalHufShared: number;
     activeUsers: number;
 }
+
+// Message types
+export interface Message {
+    id: string;
+    pickupRequestId: string;
+    senderId: string;
+    content: string;
+    isRead: boolean;
+    readAtUtc?: string;
+    createdAt: string;
+    imageUrl?: string;
+    imageFileName?: string;
+    senderName?: string;
+    senderAvatarUrl?: string;
+}
+
+export interface CreateMessage {
+    content?: string;
+    image?: File;
+}

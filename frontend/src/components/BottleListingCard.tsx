@@ -1,20 +1,140 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { MapPin, Star, Clock, Users, Trash2, CheckCircle, XCircle, ChevronDown, ChevronUp } from "lucide-react";
+import { MapPin, Star, Clock, Users, Trash2, CheckCircle, XCircle, MessageCircle } from "lucide-react";
 import { BottleListing, CreatePickupRequest, PickupRequest, Transaction, Rating } from "@/types";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { apiClient, ApiRequestError } from "@/lib/apiClient";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { Separator } from "@/components/ui/separator";
 import { RatingDialog } from "@/components/RatingDialog";
+import { useMessages } from "@/hooks/useMessages";
 
 interface BottleListingCardProps {
   listing: BottleListing;
   isOwnListing?: boolean;
   myPickupRequests?: PickupRequest[];
 }
+
+// Helper component for pickup request item
+const PickupRequestItem = ({
+  request,
+  onAccept,
+  onReject,
+  onComplete,
+  onOpenRatingDialog,
+  isUpdating,
+}: {
+  request: PickupRequest;
+  onAccept: (requestId: string) => void;
+  onReject: (requestId: string) => void;
+  onComplete: (requestId: string) => void;
+  onOpenRatingDialog: (transaction: Transaction) => void;
+  isUpdating: boolean;
+}) => {
+  const navigate = useNavigate();
+  const { unreadCount } = useMessages(request.id, request.status === 'accepted' || request.status === 'pending');
+  const canMessage = request.status === 'accepted' || request.status === 'pending';
+
+  return (
+    <div className="bg-gray-50 rounded-lg p-3 space-y-2">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          <Users className="w-4 h-4 text-gray-500" />
+          <span className="text-sm font-medium text-gray-900">
+            {request.volunteerName || request.volunteerEmail}
+          </span>
+        </div>
+        <Badge
+          variant={
+            request.status === 'pending'
+              ? 'default'
+              : request.status === 'accepted'
+              ? 'secondary'
+              : 'outline'
+          }
+          className={
+            request.status === 'pending'
+              ? 'bg-yellow-100 text-yellow-800'
+              : request.status === 'accepted'
+              ? 'bg-green-100 text-green-800'
+              : 'bg-red-100 text-red-800'
+          }
+        >
+          {request.status}
+        </Badge>
+      </div>
+
+      {request.message && (
+        <p className="text-xs text-gray-600 italic">"{request.message}"</p>
+      )}
+
+      {request.status === 'pending' && (
+        <div className="flex gap-2">
+          <Button
+            size="sm"
+            className="flex-1 bg-green-600 hover:bg-green-700"
+            onClick={() => onAccept(request.id)}
+            disabled={isUpdating}
+          >
+            <CheckCircle className="w-3 h-3 mr-1" />
+            Accept
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            className="flex-1 border-red-300 text-red-700 hover:bg-red-50"
+            onClick={() => onReject(request.id)}
+            disabled={isUpdating}
+          >
+            <XCircle className="w-3 h-3 mr-1" />
+            Reject
+          </Button>
+        </div>
+      )}
+
+      {request.status === 'accepted' && (
+        <div className="space-y-2">
+          {canMessage && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="w-full border-green-300 text-green-700 hover:bg-green-50"
+              onClick={() => navigate(`/messages?conversation=${request.id}`)}
+            >
+              <MessageCircle className="w-3 h-3 mr-1" />
+              Message
+              {unreadCount > 0 && (
+                <Badge className="ml-2 h-4 min-w-4 bg-red-500 text-white text-xs px-1.5">
+                  {unreadCount}
+                </Badge>
+              )}
+            </Button>
+          )}
+          <Button
+            size="sm"
+            className="w-full bg-blue-600 hover:bg-blue-700"
+            onClick={() => onComplete(request.id)}
+            disabled={isUpdating}
+          >
+            <CheckCircle className="w-3 h-3 mr-1" />
+            Mark as Completed
+          </Button>
+        </div>
+      )}
+
+      {request.status === 'completed' && (
+        <CompletedRequestRating
+          requestId={request.id}
+          volunteerName={request.volunteerName || request.volunteerEmail || 'Volunteer'}
+          onOpenRatingDialog={onOpenRatingDialog}
+        />
+      )}
+    </div>
+  );
+};
 
 // Helper component for completed request rating in owner's view
 const CompletedRequestRating = ({
@@ -95,9 +215,9 @@ const CompletedRequestRating = ({
 export const BottleListingCard = ({ listing, isOwnListing = false, myPickupRequests = [] }: BottleListingCardProps) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [isDeleting, setIsDeleting] = useState(false);
   const [isOfferingPickup, setIsOfferingPickup] = useState(false);
-  const [showPickupRequests, setShowPickupRequests] = useState(false);
   const [showRatingDialog, setShowRatingDialog] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
 
@@ -108,7 +228,7 @@ export const BottleListingCard = ({ listing, isOwnListing = false, myPickupReque
       const response = await apiClient.get<PickupRequest[]>(`/api/pickuprequests/listing/${listing.id}`);
       return response;
     },
-    enabled: isOwnListing && showPickupRequests,
+    enabled: isOwnListing,
   });
 
   // Check if user already has an active pickup request for this listing
@@ -358,123 +478,57 @@ export const BottleListingCard = ({ listing, isOwnListing = false, myPickupReque
 
         {isOwnListing ? (
           <>
-            <Button
-              className="w-full"
-              variant="outline"
-              onClick={() => setShowPickupRequests(!showPickupRequests)}
-            >
-              {showPickupRequests ? (
-                <>
-                  <ChevronUp className="w-4 h-4 mr-2" />
-                  Hide Pickup Requests
-                </>
-              ) : (
-                <>
-                  <ChevronDown className="w-4 h-4 mr-2" />
-                  View Pickup Requests
-                </>
-              )}
-            </Button>
-
-            {showPickupRequests && (
-              <div className="space-y-2">
-                {isLoadingRequests ? (
-                  <div className="text-center py-4 text-sm text-gray-500">
-                    Loading requests...
-                  </div>
-                ) : pickupRequests.length === 0 ? (
-                  <div className="text-center py-4 text-sm text-gray-500">
-                    No pickup requests yet
-                  </div>
-                ) : (
-                  <>
-                    <Separator />
-                    <div className="space-y-3 max-h-64 overflow-y-auto">
-                      {pickupRequests.map((request) => (
-                        <div
-                          key={request.id}
-                          className="bg-gray-50 rounded-lg p-3 space-y-2"
-                        >
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-2">
-                              <Users className="w-4 h-4 text-gray-500" />
-                              <span className="text-sm font-medium text-gray-900">
-                                {request.volunteerName || request.volunteerEmail}
-                              </span>
-                            </div>
-                            <Badge
-                              variant={
-                                request.status === 'pending'
-                                  ? 'default'
-                                  : request.status === 'accepted'
-                                  ? 'secondary'
-                                  : 'outline'
-                              }
-                              className={
-                                request.status === 'pending'
-                                  ? 'bg-yellow-100 text-yellow-800'
-                                  : request.status === 'accepted'
-                                  ? 'bg-green-100 text-green-800'
-                                  : 'bg-red-100 text-red-800'
-                              }
-                            >
-                              {request.status}
-                            </Badge>
-                          </div>
-                          {request.message && (
-                            <p className="text-xs text-gray-600">{request.message}</p>
-                          )}
-                          {request.status === 'pending' && (
-                            <div className="flex gap-2">
-                              <Button
-                                size="sm"
-                                className="flex-1 bg-green-600 hover:bg-green-700"
-                                onClick={() => handleAcceptRequest(request.id)}
-                                disabled={updatePickupRequestStatusMutation.isPending}
-                              >
-                                <CheckCircle className="w-3 h-3 mr-1" />
-                                Accept
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="flex-1 border-red-300 text-red-700 hover:bg-red-50"
-                                onClick={() => handleRejectRequest(request.id)}
-                                disabled={updatePickupRequestStatusMutation.isPending}
-                              >
-                                <XCircle className="w-3 h-3 mr-1" />
-                                Reject
-                              </Button>
-                            </div>
-                          )}
-                          {request.status === 'accepted' && (
-                            <Button
-                              size="sm"
-                              className="w-full bg-blue-600 hover:bg-blue-700"
-                              onClick={() => handleCompletePickup(request.id)}
-                              disabled={updatePickupRequestStatusMutation.isPending}
-                            >
-                              <CheckCircle className="w-3 h-3 mr-1" />
-                              Mark as Completed
-                            </Button>
-                          )}
-                          {request.status === 'completed' && (
-                            <CompletedRequestRating
-                              requestId={request.id}
-                              volunteerName={request.volunteerName || request.volunteerEmail || 'Volunteer'}
-                              onOpenRatingDialog={(txn) => {
-                                setSelectedTransaction(txn);
-                                setShowRatingDialog(true);
-                              }}
-                            />
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </>
-                )}
+            {/* Pickup Requests Section - Always Visible */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <h4 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                  Pickup Requests
+                  {pickupRequests.length > 0 && (
+                    <Badge variant="secondary" className="bg-blue-100 text-blue-700">
+                      {pickupRequests.length}
+                    </Badge>
+                  )}
+                  {pickupRequests.filter(r => r.status === 'pending').length > 0 && (
+                    <Badge className="bg-yellow-500 text-white">
+                      {pickupRequests.filter(r => r.status === 'pending').length} pending
+                    </Badge>
+                  )}
+                </h4>
               </div>
-            )}
+
+              <Separator />
+
+              {isLoadingRequests ? (
+                <div className="text-center py-4 text-sm text-gray-500">
+                  Loading requests...
+                </div>
+              ) : pickupRequests.length === 0 ? (
+                <div className="text-center py-4 bg-gray-50 rounded-lg">
+                  <Users className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                  <p className="text-sm text-gray-500">No pickup requests yet</p>
+                  <p className="text-xs text-gray-400 mt-1">Share your listing to get volunteers!</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {pickupRequests.map((request) => (
+                    <PickupRequestItem
+                      key={request.id}
+                      request={request}
+                      onAccept={handleAcceptRequest}
+                      onReject={handleRejectRequest}
+                      onComplete={handleCompletePickup}
+                      onOpenRatingDialog={(txn) => {
+                        setSelectedTransaction(txn);
+                        setShowRatingDialog(true);
+                      }}
+                      isUpdating={updatePickupRequestStatusMutation.isPending}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <Separator />
 
             <Button
               className="w-full bg-red-600 hover:bg-red-700 text-white"
@@ -488,15 +542,49 @@ export const BottleListingCard = ({ listing, isOwnListing = false, myPickupReque
           </>
         ) : (
           <>
-            {myPickupRequest?.status === 'accepted' ? (
-              <Button
-                className="w-full bg-blue-600 hover:bg-blue-700"
-                onClick={() => handleCompletePickup(myPickupRequest.id)}
-                disabled={updatePickupRequestStatusMutation.isPending}
-              >
-                <CheckCircle className="w-4 h-4 mr-2" />
-                Mark as Completed
-              </Button>
+            {(myPickupRequest?.status === 'accepted' || myPickupRequest?.status === 'pending') ? (
+              <div className="space-y-2">
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-gray-700">Your Pickup Request</span>
+                    <Badge
+                      className={
+                        myPickupRequest.status === 'pending'
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : 'bg-green-100 text-green-800'
+                      }
+                    >
+                      {myPickupRequest.status}
+                    </Badge>
+                  </div>
+                  <p className="text-xs text-gray-600">
+                    {myPickupRequest.status === 'pending'
+                      ? `Waiting for ${listing.createdByUserName || 'the owner'} to accept`
+                      : `Accepted! Coordinate pickup details`}
+                  </p>
+                </div>
+                {myPickupRequest.status === 'accepted' && (
+                  <>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="w-full border-green-300 text-green-700 hover:bg-green-50"
+                      onClick={() => navigate(`/messages?conversation=${myPickupRequest.id}`)}
+                    >
+                      <MessageCircle className="w-4 h-4 mr-2" />
+                      Message {listing.createdByUserName || 'Owner'}
+                    </Button>
+                    <Button
+                      className="w-full bg-blue-600 hover:bg-blue-700"
+                      onClick={() => handleCompletePickup(myPickupRequest.id)}
+                      disabled={updatePickupRequestStatusMutation.isPending}
+                    >
+                      <CheckCircle className="w-4 h-4 mr-2" />
+                      Mark as Completed
+                    </Button>
+                  </>
+                )}
+              </div>
             ) : myCompletedPickupRequest ? (
               <div className="space-y-2">
                 {transaction && (

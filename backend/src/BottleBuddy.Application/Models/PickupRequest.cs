@@ -13,6 +13,9 @@ public class PickupRequest
     public DateTime? PickupTime { get; set; }
     public PickupRequestStatus Status { get; set; } = PickupRequestStatus.Pending;
 
+    // Navigation property for messages
+    public ICollection<Message> Messages { get; set; } = new List<Message>();
+
     // Audit fields
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAtUtc { get; set; }

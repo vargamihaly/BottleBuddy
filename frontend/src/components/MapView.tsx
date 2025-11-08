@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, MapPin, Star, Users, Search, Filter, Navigation } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { BottleListing } from "@/types";
+import { BottleListing, CreatePickupRequest, PickupRequest } from "@/types";
 import {
   DEFAULT_CENTER,
   DEFAULT_ZOOM,
@@ -18,7 +18,9 @@ import {
   formatDistance,
 } from "@/lib/mapUtils";
 import type { Map as LeafletMap } from 'leaflet';
-import {useAuth} from "@/contexts/AuthContext.tsx";
+import { useAuth } from "@/contexts/AuthContext.tsx";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiClient, ApiRequestError } from "@/lib/apiClient";
 
 
 interface BottleListingWithDistance extends BottleListing {
@@ -62,8 +64,10 @@ export const MapView = ({ listings, onBackToHome }: MapViewProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [mapCenter, setMapCenter] = useState<[number, number]>(DEFAULT_CENTER);
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
+  const [isOfferingPickup, setIsOfferingPickup] = useState(false);
   const { toast } = useToast();
   const mapRef = useRef<LeafletMap | null>(null);
+  const queryClient = useQueryClient();
 
   // Get user's location on mount
   useEffect(() => {
@@ -85,6 +89,44 @@ export const MapView = ({ listings, onBackToHome }: MapViewProps) => {
         });
       });
   }, [toast]);
+
+  // Pickup request mutation
+  const pickupRequestMutation = useMutation({
+    mutationFn: async (data: CreatePickupRequest) => {
+      const response = await apiClient.post<PickupRequest>('/api/pickuprequests', data);
+      return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["bottleListings"] });
+      queryClient.invalidateQueries({ queryKey: ["myPickupRequests"] });
+      toast({
+        title: "Pickup request sent!",
+        description: "The listing owner will be notified of your offer.",
+      });
+      setIsOfferingPickup(false);
+      setSelectedListing(null);
+    },
+    onError: (error: unknown) => {
+      const description = error instanceof ApiRequestError
+        ? error.getUserMessage()
+        : "Failed to send pickup request. Please try again.";
+      toast({
+        title: "Error",
+        description,
+        variant: "destructive",
+      });
+      setIsOfferingPickup(false);
+    },
+  });
+
+  const handleOfferPickup = (listing: BottleListingWithDistance) => {
+    if (window.confirm(`Are you sure you want to offer to pick up ${listing.bottleCount} bottles from ${listing.locationAddress}?`)) {
+      setIsOfferingPickup(true);
+      pickupRequestMutation.mutate({
+        listingId: listing.id,
+      });
+    }
+  };
 
   // Exclude completed listings from the map view
   const activeListings = listings.filter(listing => listing.status !== 'completed');
@@ -248,10 +290,10 @@ export const MapView = ({ listings, onBackToHome }: MapViewProps) => {
                         <Button
                           size="sm"
                           className="w-full bg-gradient-to-r from-green-600 to-emerald-600"
-                          onClick={() => setSelectedListing(listing)}
-                          disabled={listing.status !== 'open'}
+                          onClick={() => handleOfferPickup(listing)}
+                          disabled={listing.status !== 'open' || isOfferingPickup}
                         >
-                          {listing.status === 'open' ? 'Offer to Pick Up' : `Status: ${listing.status}`}
+                          {isOfferingPickup ? 'Sending request...' : listing.status === 'open' ? 'Offer to Pick Up' : `Status: ${listing.status}`}
                         </Button>
                       )}
                     </div>
@@ -365,9 +407,10 @@ export const MapView = ({ listings, onBackToHome }: MapViewProps) => {
                               <Button
                                 size="sm"
                                 className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
-                                disabled={listing.status !== 'open'}
+                                onClick={() => handleOfferPickup(listing)}
+                                disabled={listing.status !== 'open' || isOfferingPickup}
                               >
-                                {listing.status === 'open' ? 'Offer to Pick Up' : `Status: ${listing.status}`}
+                                {isOfferingPickup ? 'Sending request...' : listing.status === 'open' ? 'Offer to Pick Up' : `Status: ${listing.status}`}
                               </Button>
                             )}
                           </div>

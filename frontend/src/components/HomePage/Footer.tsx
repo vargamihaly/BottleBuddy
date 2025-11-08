@@ -37,6 +37,7 @@ export const Footer = () => {
           <div>
             <h4 className="font-semibold mb-4">Support</h4>
             <ul className="space-y-2 text-gray-400">
+              <li className="hover:text-green-400 cursor-pointer transition-colors" onClick={() => navigate("/faq")}>FAQ</li>
               <li className="hover:text-green-400 cursor-pointer transition-colors">Help Center</li>
               <li className="hover:text-green-400 cursor-pointer transition-colors">Contact Us</li>
               <li className="hover:text-green-400 cursor-pointer transition-colors">Terms of Service</li>

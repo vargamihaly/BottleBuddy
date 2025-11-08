@@ -1,7 +1,9 @@
 using System.Diagnostics;
 using System.Security.Claims;
 using BottleBuddy.Api.Extensions;
+using BottleBuddy.Api.Hubs;
 using BottleBuddy.Api.Middleware;
+using BottleBuddy.Api.Services;
 using BottleBuddy.Application.Data;
 using BottleBuddy.Application.Services;
 using Microsoft.EntityFrameworkCore;
@@ -58,7 +60,13 @@ try
     builder.Services.AddScoped<ITransactionService, TransactionService>();
     builder.Services.AddScoped<IRatingService, RatingService>();
     builder.Services.AddScoped<IStatisticsService, StatisticsService>();
+    builder.Services.AddScoped<IMessageService, MessageService>();
+    builder.Services.AddScoped<IImageStorageService, ImageStorageService>();
     builder.Services.AddScoped<PickupRequestService>();
+
+    // SignalR
+    builder.Services.AddSignalR();
+    builder.Services.AddSingleton<IMessageHubService, MessageHubService>();
 
     // Application Insights (Azure monitoring)
     if (!string.IsNullOrEmpty(builder.Configuration["ApplicationInsights:ConnectionString"]))
@@ -108,11 +116,18 @@ try
 
     app.UseGlobalExceptionHandler();
     app.UseCors();
+
+    // Serve static files (for uploaded images)
+    app.UseStaticFiles();
+
     app.UseAuthentication();
     app.UseAuthorization();
 
     // Map controllers
     app.MapControllers();
+
+    // Map SignalR hub
+    app.MapHub<MessageHub>("/hubs/messages");
 
     // Run database migrations and seed sample data
     using (var scope = app.Services.CreateScope())

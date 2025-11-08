@@ -11,6 +11,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Profile> Profiles => Set<Profile>();
     public DbSet<Rating> Ratings => Set<Rating>();
     public DbSet<Transaction> Transactions => Set<Transaction>();
+    public DbSet<Message> Messages => Set<Message>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -94,7 +95,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             entity.HasOne<User>()
                 .WithMany()
                 .HasForeignKey(r => r.RaterId)
-                .OnDelete(DeleteBehavior.Restrict); 
+                .OnDelete(DeleteBehavior.Restrict);
 
             // Relationship with Rated User (who receives the rating)
             entity.HasOne<User>()
@@ -106,7 +107,44 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             entity.HasOne<Transaction>()
                 .WithMany()
                 .HasForeignKey(r => r.TransactionId)
-                .OnDelete(DeleteBehavior.Cascade); 
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // Configure Message
+        modelBuilder.Entity<Message>(entity =>
+        {
+            entity.HasKey(m => m.Id);
+
+            // Relationship with PickupRequest
+            entity.HasOne(m => m.PickupRequest)
+                .WithMany(pr => pr.Messages)
+                .HasForeignKey(m => m.PickupRequestId)
+                .OnDelete(DeleteBehavior.Cascade); // Delete messages when pickup request is deleted
+
+            // Relationship with Sender (User)
+            entity.HasOne(m => m.Sender)
+                .WithMany()
+                .HasForeignKey(m => m.SenderId)
+                .OnDelete(DeleteBehavior.Restrict); // Don't delete messages when user is deleted
+
+            // Content validation
+            entity.Property(m => m.Content)
+                .IsRequired()
+                .HasMaxLength(1000);
+
+            // Index for querying messages by pickup request
+            entity.HasIndex(m => m.PickupRequestId);
+
+            // Index for ordering messages by creation time
+            entity.HasIndex(m => m.CreatedAtUtc);
+
+            // Default value for CreatedAtUtc
+            entity.Property(m => m.CreatedAtUtc)
+                .HasDefaultValueSql("GETUTCDATE()");
+
+            // Default value for IsRead
+            entity.Property(m => m.IsRead)
+                .HasDefaultValue(false);
         });
     }
 }

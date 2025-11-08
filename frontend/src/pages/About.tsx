@@ -184,8 +184,8 @@ const About = () => {
               <div>
                 <h3 className="text-xl font-bold mb-2 text-gray-800">List or Find Bottles</h3>
                 <p className="text-gray-600">
-                  Have bottles? Create a listing with details and location. Looking to collect? Browse the map
-                  to find bottles near you.
+                  Have bottles? Create a listing with details, location, and your preferred refund split.
+                  Looking to collect? Browse the map to find bottles near you and see the earnings potential.
                 </p>
               </div>
             </div>
@@ -194,10 +194,52 @@ const About = () => {
                 3
               </div>
               <div>
-                <h3 className="text-xl font-bold mb-2 text-gray-800">Connect & Collect</h3>
+                <h3 className="text-xl font-bold mb-2 text-gray-800">Get Paid Upfront During Pickup</h3>
                 <p className="text-gray-600">
-                  Coordinate pickup times, collect bottles, and earn refunds. Rate your experience to
-                  build trust in the community.
+                  Coordinate pickup via in-app messaging. When you meet, the volunteer pays you your agreed share
+                  immediately (e.g., 25 HUF per bottle). No waiting, no second meetup needed!
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-6 items-start">
+              <div className="flex-shrink-0 w-12 h-12 rounded-full bg-orange-600 text-white flex items-center justify-center text-xl font-bold">
+                4
+              </div>
+              <div>
+                <h3 className="text-xl font-bold mb-2 text-gray-800">Volunteer Returns Bottles</h3>
+                <p className="text-gray-600">
+                  The volunteer takes the bottles to the store, gets the full 50 HUF refund per bottle,
+                  and keeps their portion. Both parties profit, and you never have to leave home again!
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-6 items-start">
+              <div className="flex-shrink-0 w-12 h-12 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xl font-bold">
+                5
+              </div>
+              <div>
+                <h3 className="text-xl font-bold mb-2 text-gray-800">Rate & Build Trust</h3>
+                <p className="text-gray-600">
+                  After a successful exchange, both parties can rate each other. This builds trust in the
+                  community and helps everyone find reliable partners for future exchanges.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Payment Highlight Box */}
+          <div className="mt-12 bg-gradient-to-r from-green-100 to-blue-100 border-2 border-green-300 rounded-2xl p-6">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0 w-12 h-12 bg-green-600 rounded-full flex items-center justify-center text-2xl">
+                💡
+              </div>
+              <div>
+                <h4 className="font-bold text-lg text-gray-800 mb-2">Simple & Safe Payment</h4>
+                <p className="text-gray-700 leading-relaxed">
+                  <strong>You get paid immediately during the one and only meetup.</strong> The volunteer hands
+                  you cash for your share of the refund, takes the bottles, and that's it! They handle the return
+                  process and collect the full refund from the store. Everyone wins, and you never have to worry
+                  about meeting again or waiting for payment.
                 </p>
               </div>
             </div>
