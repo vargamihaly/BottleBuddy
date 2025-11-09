@@ -106,7 +106,7 @@ const FAQ = () => {
                     variant="outline"
                     size="lg"
                     className="bg-white/10 border-white text-white hover:bg-white/20"
-                    onClick={() => window.location.href = "mailto:support@bottlebuddy.com"}
+                    onClick={() => window.location.href = "mailto:misi@protonmail.ch"}
                   >
                     {t("faq.contactSupport")}
                   </Button>

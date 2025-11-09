@@ -31,7 +31,7 @@ export const CTASection = ({ onDashboardClick }: CTASectionProps) => {
             </>
           ) : (
             <>
-              <Button size="lg" variant="secondary" onClick={() => navigate("/auth")}>
+              <Button size="lg" variant="secondary" onClick={() => navigate("/auth")}>about
                 {t("homeSections.cta.signUpFree")}
               </Button>
               <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-green-600">
