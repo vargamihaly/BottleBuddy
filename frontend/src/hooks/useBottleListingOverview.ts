@@ -10,42 +10,46 @@ export const useBottleListingOverview = () => {
 
   // Use new hooks
   const {
-    data: bottleListings = [],
+    data: bottleListings,
     isLoading,
     isError,
   } = useAllBottleListings();
 
   const {
-    data: myPickupRequests = [],
+    data: myPickupRequests,
   } = useMyPickupRequests({ enabled: !!user });
 
+  // Ensure we have arrays (fallback if API fails)
+  const safeBottleListings = Array.isArray(bottleListings) ? bottleListings : [];
+  const safeMyPickupRequests = Array.isArray(myPickupRequests) ? myPickupRequests : [];
+
   // Separate user's own listings from others (exclude completed ones from homepage)
-  const myListings = bottleListings.filter(
+  const myListings = safeBottleListings.filter(
     listing => listing.createdByUserEmail === user?.email && listing.status !== 'completed'
   );
 
   // Get IDs of listings with active pickup requests (pending or accepted) by this user
-  const activePickupRequestListingIds = myPickupRequests
+  const activePickupRequestListingIds = safeMyPickupRequests
     .filter(request => request.status === 'pending' || request.status === 'accepted')
     .map(request => request.listingId);
 
   // Get IDs of listings with completed pickup requests by this user
-  const completedPickupRequestListingIds = myPickupRequests
+  const completedPickupRequestListingIds = safeMyPickupRequests
     .filter(request => request.status === 'completed')
     .map(request => request.listingId);
 
   // Listings where user has active pickup requests (pending or accepted)
-  const myPickupTaskListings = bottleListings.filter(
+  const myPickupTaskListings = safeBottleListings.filter(
     listing => listing.createdByUserEmail !== user?.email && activePickupRequestListingIds.includes(listing.id)
   );
 
   // Listings where user has completed pickup requests
-  const myCompletedPickupTaskListings = bottleListings.filter(
+  const myCompletedPickupTaskListings = safeBottleListings.filter(
     listing => listing.createdByUserEmail !== user?.email && completedPickupRequestListingIds.includes(listing.id)
   );
 
   // Available listings (exclude own, exclude with active pickup requests, exclude completed)
-  const availableListings = bottleListings.filter(
+  const availableListings = safeBottleListings.filter(
     listing =>
       listing.createdByUserEmail !== user?.email &&
       !activePickupRequestListingIds.includes(listing.id) &&
@@ -53,12 +57,12 @@ export const useBottleListingOverview = () => {
   );
 
   return {
-    bottleListings,
+    bottleListings: safeBottleListings,
     myListings,
     myPickupTaskListings,
     myCompletedPickupTaskListings,
     availableListings,
-    myPickupRequests,
+    myPickupRequests: safeMyPickupRequests,
     isLoading,
     isError,
   };
