@@ -17,30 +17,43 @@ export interface UpdateBottleListingRequest extends Partial<CreateBottleListingR
   status?: 'open' | 'claimed' | 'completed' | 'cancelled';
 }
 
+// Backend wraps responses in { data: ... }
+interface ApiResponse<T> {
+  data: T;
+}
+
 export const bottleListingService = {
   /**
    * Get all bottle listings
    */
-  getAll: () =>
-    apiClient.get<BottleListing[]>('/api/bottlelistings'),
+  getAll: async () => {
+    const response = await apiClient.get<ApiResponse<BottleListing[]>>('/api/bottlelistings');
+    return response.data;
+  },
 
   /**
    * Get a single bottle listing by ID
    */
-  getById: (id: string) =>
-    apiClient.get<BottleListing>(`/api/bottlelistings/${id}`),
+  getById: async (id: string) => {
+    const response = await apiClient.get<ApiResponse<BottleListing>>(`/api/bottlelistings/${id}`);
+    return response.data;
+  },
 
   /**
    * Create a new bottle listing
    */
-  create: (data: CreateBottleListingRequest) =>
-    apiClient.post<BottleListing>('/api/bottlelistings', data),
+  create: async (data: CreateBottleListingRequest) => {
+    const response = await apiClient.post<ApiResponse<BottleListing>>('/api/bottlelistings', data);
+    return response.data;
+  },
 
   /**
    * Update an existing bottle listing
    */
-  update: (id: string, data: UpdateBottleListingRequest) =>
-    apiClient.patch<BottleListing>(`/api/bottlelistings/${id}`, data),
+  update: async (id: string, data: UpdateBottleListingRequest) => {
+    const response = await apiClient.patch<ApiResponse<BottleListing>>(`/api/bottlelistings/${id}`, data);
+    return response.data;
+  },
 
   /**
    * Delete a bottle listing
@@ -51,6 +64,8 @@ export const bottleListingService = {
   /**
    * Get listings created by the current user
    */
-  getMyListings: () =>
-    apiClient.get<BottleListing[]>('/api/bottlelistings/my-listings'),
+  getMyListings: async () => {
+    const response = await apiClient.get<ApiResponse<BottleListing[]>>('/api/bottlelistings/my-listings');
+    return response.data;
+  },
 };
