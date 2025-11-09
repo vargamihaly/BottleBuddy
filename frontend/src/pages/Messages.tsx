@@ -1,14 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ArrowLeft, MessageSquare } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
-import { apiClient } from "@/lib/apiClient";
-import {BottleListing, PickupRequest} from "@/types";
+import { BottleListing, PickupRequest } from "@/types";
 import { ConversationList } from "@/components/ConversationList";
 import { ChatBox } from "@/components/ChatBox";
+import { useBottleListings, useMyPickupRequests } from "@/hooks/api";
+import { pickupRequestService } from "@/api/services";
 
 const Messages = () => {
   const navigate = useNavigate();
@@ -18,56 +19,50 @@ const Messages = () => {
     searchParams.get("conversation")
   );
 
-  // Fetch user's pickup requests (both as volunteer and as owner)
-  const { data: myPickupRequests = [], isLoading } = useQuery<PickupRequest[]>({
-    queryKey: ["myPickupRequests"],
-    queryFn: async () => {
-      const response = await apiClient.get<PickupRequest[]>("/api/pickuprequests/my-requests");
-      return response;
-    },
-    enabled: !!user,
-  });
+  const {
+    data: myPickupRequests = [],
+    isLoading: isLoadingMyPickupRequests,
+  } = useMyPickupRequests({ enabled: !!user });
 
-  // Fetch all bottle listings to get listings owned by user
-  const { data: allListings = [] } = useQuery<BottleListing[]>({
-    queryKey: ["bottleListings"],
-    queryFn: async () => {
-      const response = await apiClient.get<BottleListing[]>("/api/bottlelistings");
-      return response || [];
-    },
-    enabled: !!user,
-  });
+  const {
+    data: allListings = [],
+    isLoading: isLoadingListings,
+  } = useBottleListings();
 
-  // Get pickup requests where user is the owner (via their listings)
-  const { data: ownerPickupRequests = [] } = useQuery<PickupRequest[]>({
-    queryKey: ["ownerPickupRequests", allListings],
-    queryFn: async () => {
-      // Get user's own listings
-      const myListings = allListings.filter(
-        (listing: any) => listing.createdByUserEmail === user?.email
-      );
+  const myListings = useMemo(
+    () => allListings.filter((listing) => listing.createdByUserEmail === user?.email),
+    [allListings, user?.email]
+  );
 
-      // Fetch pickup requests for each of the user's listings
+  const {
+    data: ownerPickupRequests = [],
+    isLoading: isLoadingOwnerPickupRequests,
+  } = useQuery<PickupRequest[]>({
+    queryKey: ["ownerPickupRequests", myListings.map((listing) => listing.id)],
+    queryFn: async () => {
       const requests = await Promise.all(
-        myListings.map((listing: any) =>
-          apiClient.get<PickupRequest[]>(`/api/pickuprequests/listing/${listing.id}`)
-            .catch(() => [])
+        myListings.map((listing) =>
+          pickupRequestService.getByListingId(listing.id).catch(() => [])
         )
       );
 
-      // Flatten the array of arrays into a single array
       return requests.flat();
     },
-    enabled: !!user && allListings.length > 0,
+    enabled: !!user && myListings.length > 0,
   });
 
   // Combine all pickup requests (remove duplicates by id)
-  const allPickupRequests = [
-    ...myPickupRequests,
-    ...ownerPickupRequests.filter(
-      (ownerReq) => !myPickupRequests.some((myReq) => myReq.id === ownerReq.id)
-    ),
-  ];
+  const allPickupRequests = useMemo(
+    () => [
+      ...myPickupRequests,
+      ...ownerPickupRequests.filter(
+        (ownerReq) => !myPickupRequests.some((myReq) => myReq.id === ownerReq.id)
+      ),
+    ],
+    [myPickupRequests, ownerPickupRequests]
+  );
+
+  const isLoading = isLoadingMyPickupRequests || isLoadingOwnerPickupRequests || isLoadingListings;
 
   // Update URL when conversation is selected
   useEffect(() => {
@@ -99,7 +94,7 @@ const Messages = () => {
     if (!selectedConversation) return "User";
 
     // Find the listing for this pickup request
-    const listing = allListings.find((l: any) => l.id === selectedConversation.listingId);
+    const listing = allListings.find((listing) => listing.id === selectedConversation.listingId);
 
     // If current user is the volunteer, show the listing owner's name
     if (selectedConversation.volunteerId === user?.id) {

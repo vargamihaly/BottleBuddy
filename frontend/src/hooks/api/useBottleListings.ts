@@ -6,6 +6,7 @@ import {
   UpdateBottleListingRequest
 } from "@/api/services";
 import { useTranslation } from "react-i18next";
+import { ApiRequestError } from "@/lib/apiClient";
 
 /**
  * Query keys for bottle listings
@@ -44,10 +45,11 @@ export const useBottleListing = (id: string) => {
 /**
  * Hook to fetch current user's bottle listings
  */
-export const useMyBottleListings = () => {
+export const useMyBottleListings = ({ enabled = true }: { enabled?: boolean } = {}) => {
   return useQuery({
     queryKey: bottleListingKeys.myListings(),
     queryFn: bottleListingService.getMyListings,
+    enabled,
   });
 };
 
@@ -68,10 +70,16 @@ export const useCreateBottleListing = () => {
         description: t('listing.createSuccess'),
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const description = error instanceof ApiRequestError
+        ? error.getUserMessage()
+        : error instanceof Error
+          ? error.message
+          : t('common.error');
+
       toast({
         title: t('common.error'),
-        description: error?.message || t('common.error'),
+        description,
         variant: "destructive",
       });
     },
@@ -97,10 +105,16 @@ export const useUpdateBottleListing = () => {
         description: t('listing.updateSuccess'),
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const description = error instanceof ApiRequestError
+        ? error.getUserMessage()
+        : error instanceof Error
+          ? error.message
+          : t('common.error');
+
       toast({
         title: t('common.error'),
-        description: error?.message || t('common.error'),
+        description,
         variant: "destructive",
       });
     },
@@ -124,10 +138,16 @@ export const useDeleteBottleListing = () => {
         description: t('listing.deleteSuccess'),
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const description = error instanceof ApiRequestError
+        ? error.getUserMessage()
+        : error instanceof Error
+          ? error.message
+          : t('common.error');
+
       toast({
         title: t('common.error'),
-        description: error?.message || t('common.error'),
+        description,
         variant: "destructive",
       });
     },

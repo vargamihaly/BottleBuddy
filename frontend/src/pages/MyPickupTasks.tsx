@@ -8,7 +8,7 @@ import { ArrowLeft } from "lucide-react";
 import { BottleListingCard } from "@/components/BottleListingCard";
 import { BottleListingsGridSkeleton } from "@/components/BottleListingSkeleton";
 import { useAuth } from "@/contexts/AuthContext";
-import { useBottleListings } from "@/hooks/useBottleListings";
+import { useBottleListingOverview } from "@/hooks/useBottleListingOverview";
 
 const MyPickupTasks = () => {
   const navigate = useNavigate();
@@ -21,7 +21,7 @@ const MyPickupTasks = () => {
     myPickupRequests,
     isLoading,
     isError,
-  } = useBottleListings();
+  } = useBottleListingOverview();
 
   if (!user) {
     return (

@@ -1,42 +1,56 @@
 import { apiClient } from "@/lib/apiClient";
 import { Message } from "@/types";
 
+export interface SendMessagePayload {
+  content?: string;
+  image?: File | Blob;
+}
+
 export const messageService = {
   /**
    * Get all messages for a specific pickup request conversation
    */
   getByPickupRequestId: (pickupRequestId: string) =>
-    apiClient.get<Message[]>(`/api/messages/pickup-request/${pickupRequestId}`),
+    apiClient.get<Message[]>(`/api/pickuprequests/${pickupRequestId}/messages`),
 
   /**
-   * Send a text message
+   * Send a message (supports optional image attachment)
    */
-  sendMessage: (pickupRequestId: string, content: string) =>
-    apiClient.post<Message>(`/api/messages/pickup-request/${pickupRequestId}`, { content }),
+  sendMessage: (pickupRequestId: string, data: SendMessagePayload) => {
+    const formData = new FormData();
 
-  /**
-   * Send a message with an image
-   */
-  sendImageMessage: (pickupRequestId: string, formData: FormData) =>
-    apiClient.post<Message>(
-      `/api/messages/pickup-request/${pickupRequestId}/image`,
-      formData,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      }
-    ),
+    if (data.content) {
+      formData.append('content', data.content);
+    }
+
+    if (data.image) {
+      formData.append('image', data.image);
+    }
+
+    return apiClient.post<Message>(`/api/pickuprequests/${pickupRequestId}/messages`, formData);
+  },
 
   /**
    * Mark messages as read
    */
   markAsRead: (pickupRequestId: string) =>
-    apiClient.post(`/api/messages/pickup-request/${pickupRequestId}/mark-read`, {}),
+    apiClient.patch(`/api/pickuprequests/${pickupRequestId}/messages/mark-all-read`, {}),
 
   /**
    * Get unread message count for a specific conversation
    */
   getUnreadCount: (pickupRequestId: string) =>
-    apiClient.get<number>(`/api/messages/pickup-request/${pickupRequestId}/unread-count`),
+    apiClient.get<number>(`/api/pickuprequests/${pickupRequestId}/messages/unread-count`),
+
+  /**
+   * Get total unread messages for the current user
+   */
+  getTotalUnreadCount: () =>
+    apiClient.get<number>('/api/messages/unread-count'),
+
+  /**
+   * Mark a single message as read
+   */
+  markMessageAsRead: (messageId: string) =>
+    apiClient.patch(`/api/messages/${messageId}/read`, {}),
 };

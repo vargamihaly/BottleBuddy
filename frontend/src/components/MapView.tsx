@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, MapPin, Star, Users, Search, Filter, Navigation } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { BottleListing, CreatePickupRequest, PickupRequest } from "@/types";
+import { BottleListing } from "@/types";
 import {
   DEFAULT_CENTER,
   DEFAULT_ZOOM,
@@ -19,9 +19,8 @@ import {
 } from "@/lib/mapUtils";
 import type { Map as LeafletMap } from 'leaflet';
 import { useAuth } from "@/contexts/AuthContext.tsx";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiClient, ApiRequestError } from "@/lib/apiClient";
 import { useTranslation } from "react-i18next";
+import { useCreatePickupRequest } from "@/hooks/api";
 
 
 interface BottleListingWithDistance extends BottleListing {
@@ -69,7 +68,7 @@ export const MapView = ({ listings, onBackToHome }: MapViewProps) => {
   const [isOfferingPickup, setIsOfferingPickup] = useState(false);
   const { toast } = useToast();
   const mapRef = useRef<LeafletMap | null>(null);
-  const queryClient = useQueryClient();
+  const createPickupRequest = useCreatePickupRequest();
 
   // Get user's location on mount
   useEffect(() => {
@@ -93,40 +92,20 @@ export const MapView = ({ listings, onBackToHome }: MapViewProps) => {
   }, [toast, t]);
 
   // Pickup request mutation
-  const pickupRequestMutation = useMutation({
-    mutationFn: async (data: CreatePickupRequest) => {
-      const response = await apiClient.post<PickupRequest>('/api/pickuprequests', data);
-      return response;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["bottleListings"] });
-      queryClient.invalidateQueries({ queryKey: ["myPickupRequests"] });
-      toast({
-        title: t("map.pickupRequestSent"),
-        description: t("map.ownerNotified"),
-      });
-      setIsOfferingPickup(false);
-      setSelectedListing(null);
-    },
-    onError: (error: unknown) => {
-      const description = error instanceof ApiRequestError
-        ? error.getUserMessage()
-        : t("common.error");
-      toast({
-        title: t("common.error"),
-        description,
-        variant: "destructive",
-      });
-      setIsOfferingPickup(false);
-    },
-  });
-
   const handleOfferPickup = (listing: BottleListingWithDistance) => {
     if (window.confirm(t("map.offerPickupConfirm", { count: listing.bottleCount, location: listing.locationAddress }))) {
       setIsOfferingPickup(true);
-      pickupRequestMutation.mutate({
-        listingId: listing.id,
-      });
+      createPickupRequest.mutate(
+        { listingId: listing.id },
+        {
+          onSuccess: () => {
+            setSelectedListing(null);
+          },
+          onSettled: () => {
+            setIsOfferingPickup(false);
+          },
+        }
+      );
     }
   };
 

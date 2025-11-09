@@ -3,6 +3,7 @@ import { useToast } from "@/hooks/use-toast";
 import { pickupRequestService } from "@/api/services";
 import { CreatePickupRequest } from "@/types";
 import { useTranslation } from "react-i18next";
+import { ApiRequestError } from "@/lib/apiClient";
 
 /**
  * Query keys for pickup requests
@@ -29,10 +30,11 @@ export const usePickupRequestsByListing = (listingId: string, enabled = true) =>
 /**
  * Hook to fetch current user's pickup requests (as volunteer)
  */
-export const useMyPickupRequests = () => {
+export const useMyPickupRequests = ({ enabled = true }: { enabled?: boolean } = {}) => {
   return useQuery({
     queryKey: pickupRequestKeys.myRequests(),
     queryFn: pickupRequestService.getMyRequests,
+    enabled,
   });
 };
 
@@ -54,10 +56,16 @@ export const useCreatePickupRequest = () => {
         description: t('map.ownerNotified'),
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const description = error instanceof ApiRequestError
+        ? error.getUserMessage()
+        : error instanceof Error
+          ? error.message
+          : t('common.error');
+
       toast({
         title: t('common.error'),
-        description: error?.message || t('common.error'),
+        description,
         variant: "destructive",
       });
     },
@@ -83,10 +91,16 @@ export const useUpdatePickupRequestStatus = () => {
         description: t('listing.updateSuccess'),
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const description = error instanceof ApiRequestError
+        ? error.getUserMessage()
+        : error instanceof Error
+          ? error.message
+          : t('common.error');
+
       toast({
         title: t('common.error'),
-        description: error?.message || t('common.error'),
+        description,
         variant: "destructive",
       });
     },
@@ -110,10 +124,16 @@ export const useDeletePickupRequest = () => {
         description: t('common.success'),
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const description = error instanceof ApiRequestError
+        ? error.getUserMessage()
+        : error instanceof Error
+          ? error.message
+          : t('common.error');
+
       toast({
         title: t('common.error'),
-        description: error?.message || t('common.error'),
+        description,
         variant: "destructive",
       });
     },

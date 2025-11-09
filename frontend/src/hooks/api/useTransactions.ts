@@ -1,5 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { transactionService } from "@/api/services";
+import { ApiRequestError } from "@/lib/apiClient";
+import { Transaction } from "@/types";
 
 /**
  * Query keys for transactions
@@ -29,9 +31,18 @@ export const useMyTransactions = () => {
  * Hook to fetch a transaction by pickup request ID
  */
 export const useTransactionByPickupRequest = (pickupRequestId: string, enabled = true) => {
-  return useQuery({
+  return useQuery<Transaction | null>({
     queryKey: transactionKeys.byPickupRequest(pickupRequestId),
-    queryFn: () => transactionService.getByPickupRequestId(pickupRequestId),
+    queryFn: async () => {
+      try {
+        return await transactionService.getByPickupRequestId(pickupRequestId);
+      } catch (error) {
+        if (error instanceof ApiRequestError && error.statusCode === 404) {
+          return null;
+        }
+        throw error;
+      }
+    },
     enabled: !!pickupRequestId && enabled,
   });
 };

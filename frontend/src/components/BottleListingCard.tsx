@@ -2,7 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { MapPin, Star, Clock, Users, Trash2, CheckCircle, XCircle, MessageCircle } from "lucide-react";
-import { BottleListing, PickupRequest, Transaction, Rating } from "@/types";
+import { BottleListing, PickupRequest, Transaction } from "@/types";
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Separator } from "@/components/ui/separator";
@@ -154,33 +154,27 @@ const CompletedRequestRating = ({
   onOpenRatingDialog: (transaction: Transaction) => void;
 }) => {
   const { t } = useTranslation();
-  const { data: transaction } = useQuery<Transaction>({
-    queryKey: ["transaction", requestId],
-    queryFn: async () => {
-      const response = await apiClient.get<Transaction>(`/api/transactions/pickup-request/${requestId}`);
-      return response;
-    },
-  });
+  const {
+    data: transaction,
+    isLoading: isLoadingTransaction,
+  } = useTransactionByPickupRequest(requestId);
 
-  const { data: myRating } = useQuery<Rating | null>({
-    queryKey: ["rating", transaction?.id],
-    queryFn: async () => {
-      if (!transaction) return null;
-      try {
-        const response = await apiClient.get<Rating>(`/api/ratings/transaction/${transaction.id}`);
-        return response;
-      } catch (error: unknown) {
-        if (error instanceof ApiRequestError && error.statusCode === 404) {
-          return null;
-        }
-        throw error;
-      }
-    },
-    enabled: !!transaction,
-  });
+  const transactionId = transaction?.id ?? '';
+  const {
+    data: myRating,
+    isLoading: isLoadingRating,
+  } = useRatingByTransaction(transactionId, !!transactionId);
+
+  if (isLoadingTransaction) {
+    return <div className="text-xs text-gray-500">{t('listing.loadingRequests')}</div>;
+  }
 
   if (!transaction) {
-    return <div className="text-xs text-gray-500">{t('listing.loadingRequests')}</div>;
+    return (
+      <div className="text-xs text-gray-500">
+        {t('listing.transactionPending')}
+      </div>
+    );
   }
 
   return (
@@ -192,7 +186,7 @@ const CompletedRequestRating = ({
           <span className="font-semibold text-emerald-700">{transaction.ownerAmount} HUF</span>
         </div>
       </div>
-      {!myRating ? (
+      {!myRating && !isLoadingRating ? (
         <Button
           size="sm"
           className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600"
@@ -201,7 +195,7 @@ const CompletedRequestRating = ({
           <Star className="w-3 h-3 mr-1" />
           {t('listing.rate', { name: volunteerName })}
         </Button>
-      ) : (
+      ) : myRating ? (
         <div className="bg-gray-50 rounded-lg p-2 text-center">
           <div className="flex items-center justify-center space-x-1 mb-1">
             {[1, 2, 3, 4, 5].map((star) => (
@@ -215,6 +209,8 @@ const CompletedRequestRating = ({
           </div>
           <p className="text-xs text-gray-600">{t('listing.youRated')}</p>
         </div>
+      ) : (
+        <div className="text-xs text-gray-500">{t('listing.loadingRequests')}</div>
       )}
     </div>
   );
