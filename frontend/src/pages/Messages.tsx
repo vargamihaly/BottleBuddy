@@ -6,7 +6,7 @@ import { ArrowLeft, MessageSquare } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { apiClient } from "@/lib/apiClient";
-import { PickupRequest } from "@/types";
+import {BottleListing, PickupRequest} from "@/types";
 import { ConversationList } from "@/components/ConversationList";
 import { ChatBox } from "@/components/ChatBox";
 
@@ -29,11 +29,11 @@ const Messages = () => {
   });
 
   // Fetch all bottle listings to get listings owned by user
-  const { data: allListings = [] } = useQuery({
+  const { data: allListings = [] } = useQuery<BottleListing[]>({
     queryKey: ["bottleListings"],
     queryFn: async () => {
-      const response = await apiClient.get("/api/bottlelistings");
-      return response.data || [];
+      const response = await apiClient.get<BottleListing[]>("/api/bottlelistings");
+      return response || [];
     },
     enabled: !!user,
   });

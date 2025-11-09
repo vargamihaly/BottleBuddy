@@ -637,8 +637,6 @@ export const BottleListingCard = ({ listing, isOwnListing = false, myPickupReque
               >
                 {isOfferingPickup
                   ? t('listing.sendingRequest')
-                  : myPickupRequest?.status === 'pending'
-                  ? t('listing.requestPending')
                   : listing.status === 'open'
                   ? t('listing.offerToPickUp')
                   : `${t('common.status')}: ${t(`listing.${listing.status}`)}`}

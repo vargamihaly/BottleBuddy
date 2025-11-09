@@ -104,7 +104,7 @@ export const MyActivePickupsWidget = ({ pickupRequests, listings }: MyActivePick
                   </div>
                   <div className="flex items-center gap-1 text-xs text-gray-600 mb-1">
                     <MapPin className="w-3 h-3" />
-                    <span className="truncate">{listing.location}</span>
+                    <span className="truncate">{listing.locationAddress}</span>
                   </div>
                   <p className="text-xs text-gray-500 line-clamp-1">
                     {pickup.message || t("dashboard.activePickups.noMessage")}

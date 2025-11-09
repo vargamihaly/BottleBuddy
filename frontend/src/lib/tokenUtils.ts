@@ -54,7 +54,7 @@ export function isTokenExpired(token: string): boolean {
  */
 export function getUserIdFromToken(token: string): string | null {
   const payload = decodeToken(token);
-  return payload?.sub || payload?.userId || null;
+  return payload?.sub || (typeof payload?.userId === 'string' ? payload.userId : null) || null;
 }
 
 /**

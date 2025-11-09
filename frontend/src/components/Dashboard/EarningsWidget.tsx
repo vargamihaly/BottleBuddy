@@ -12,6 +12,12 @@ interface UserStats {
   averageRating: number;
 }
 
+interface Transaction {
+  ownerRefundAmount?: number;
+  volunteerRefundAmount?: number;
+  bottleCount?: number;
+}
+
 export const EarningsWidget = () => {
   const { user } = useAuth();
   const { t } = useTranslation();
@@ -20,17 +26,17 @@ export const EarningsWidget = () => {
     queryKey: ["userStats", user?.id],
     queryFn: async () => {
       // Fetch user's transactions
-      const transactions = await apiClient.get(`/api/transactions/my-transactions`);
+      const transactions = await apiClient.get<Transaction[]>(`/api/transactions/my-transactions`);
 
       // Calculate stats from transactions
       const totalEarnings = transactions.reduce(
-        (sum: number, transaction: any) =>
+        (sum: number, transaction: Transaction) =>
           sum + (transaction.ownerRefundAmount || 0) + (transaction.volunteerRefundAmount || 0),
         0
       );
 
       const totalBottles = transactions.reduce(
-        (sum: number, transaction: any) => sum + (transaction.bottleCount || 0),
+        (sum: number, transaction: Transaction) => sum + (transaction.bottleCount || 0),
         0
       );
 
@@ -38,7 +44,7 @@ export const EarningsWidget = () => {
         totalBottles,
         totalEarnings,
         completedPickups: transactions.length,
-        averageRating: user?.averageRating || 0
+        averageRating: user?.rating || 0
       };
     },
     enabled: !!user,
