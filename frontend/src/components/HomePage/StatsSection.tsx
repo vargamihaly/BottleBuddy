@@ -1,20 +1,9 @@
-import { useQuery } from "@tanstack/react-query";
-import { apiClient } from "@/lib/apiClient";
-import { Statistics } from "@/types";
 import { useTranslation } from "react-i18next";
-
-const fetchStatistics = async (): Promise<Statistics> => {
-  const response = await apiClient.get<Statistics>('/api/statistics');
-  return response;
-};
+import { useGlobalStatistics } from "@/hooks/api";
 
 export const StatsSection = () => {
   const { t } = useTranslation();
-  const { data: stats, isLoading, isError } = useQuery({
-    queryKey: ["statistics"],
-    queryFn: fetchStatistics,
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
-  });
+  const { data: stats, isLoading, isError } = useGlobalStatistics();
 
   // Show placeholders while loading or on error
   const displayStats = {

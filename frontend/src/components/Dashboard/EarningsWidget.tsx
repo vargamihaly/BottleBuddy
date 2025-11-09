@@ -1,9 +1,9 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { TrendingUp, Coins, Recycle, Star } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { apiClient } from "@/lib/apiClient";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTranslation } from "react-i18next";
+import { useMyTransactions } from "@/hooks/api";
+import { useMemo } from "react";
 
 interface UserStats {
   totalBottles: number;
@@ -12,56 +12,38 @@ interface UserStats {
   averageRating: number;
 }
 
-interface Transaction {
-  ownerRefundAmount?: number;
-  volunteerRefundAmount?: number;
-  bottleCount?: number;
-}
-
 export const EarningsWidget = () => {
   const { user } = useAuth();
   const { t } = useTranslation();
+  const { data: transactions = [] } = useMyTransactions();
 
-  const { data: stats } = useQuery<UserStats>({
-    queryKey: ["userStats", user?.id],
-    queryFn: async () => {
-      // Fetch user's transactions
-      const transactions = await apiClient.get<Transaction[]>(`/api/transactions/my-transactions`);
+  const stats: UserStats = useMemo(() => {
+    // Calculate stats from transactions
+    const totalEarnings = transactions.reduce(
+      (sum, transaction) =>
+        sum + (transaction.ownerAmount || 0) + (transaction.volunteerAmount || 0),
+      0
+    );
 
-      // Calculate stats from transactions
-      const totalEarnings = transactions.reduce(
-        (sum: number, transaction: Transaction) =>
-          sum + (transaction.ownerRefundAmount || 0) + (transaction.volunteerRefundAmount || 0),
-        0
-      );
+    const totalBottles = transactions.reduce(
+      (sum, transaction) => sum + (transaction.bottleCount || 0),
+      0
+    );
 
-      const totalBottles = transactions.reduce(
-        (sum: number, transaction: Transaction) => sum + (transaction.bottleCount || 0),
-        0
-      );
-
-      return {
-        totalBottles,
-        totalEarnings,
-        completedPickups: transactions.length,
-        averageRating: user?.rating || 0
-      };
-    },
-    enabled: !!user,
-    initialData: {
-      totalBottles: 0,
-      totalEarnings: 0,
-      completedPickups: 0,
-      averageRating: 0
-    }
-  });
+    return {
+      totalBottles,
+      totalEarnings,
+      completedPickups: transactions.length,
+      averageRating: user?.rating || 0
+    };
+  }, [transactions, user?.rating]);
 
   const statCards = [
     {
       icon: Coins,
       label: t("dashboard.impact.totalEarnings"),
       value: t("dashboard.impact.earningsValue", {
-        amount: stats?.totalEarnings.toLocaleString() ?? "0"
+        amount: stats.totalEarnings.toLocaleString()
       }),
       color: "text-green-600",
       bgColor: "bg-green-100"
@@ -69,21 +51,21 @@ export const EarningsWidget = () => {
     {
       icon: Recycle,
       label: t("dashboard.impact.bottlesReturned"),
-      value: stats?.totalBottles.toLocaleString() || "0",
+      value: stats.totalBottles.toLocaleString(),
       color: "text-blue-600",
       bgColor: "bg-blue-100"
     },
     {
       icon: TrendingUp,
       label: t("dashboard.impact.completedPickups"),
-      value: stats?.completedPickups.toLocaleString() || "0",
+      value: stats.completedPickups.toLocaleString(),
       color: "text-purple-600",
       bgColor: "bg-purple-100"
     },
     {
       icon: Star,
       label: t("dashboard.impact.rating"),
-      value: stats?.averageRating ? stats.averageRating.toFixed(1) : t("common.notAvailable"),
+      value: stats.averageRating ? stats.averageRating.toFixed(1) : t("common.notAvailable"),
       color: "text-yellow-600",
       bgColor: "bg-yellow-100"
     }

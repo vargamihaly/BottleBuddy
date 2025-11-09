@@ -1,37 +1,23 @@
-import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
-import { BottleListing, PaginatedResponse, PickupRequest } from "@/types";
-import { apiClient } from "@/lib/apiClient";
+import { useBottleListings as useAllBottleListings, useMyPickupRequests } from "@/hooks/api";
 
-const fetchBottleListings = async (): Promise<BottleListing[]> => {
-  const response = await apiClient.get<PaginatedResponse<BottleListing>>('/api/bottlelistings');
-  return response.data;
-};
-
-const fetchMyPickupRequests = async (): Promise<PickupRequest[]> => {
-  const response = await apiClient.get<PickupRequest[]>('/api/pickuprequests/my-requests');
-  return response;
-};
-
+/**
+ * Legacy hook that combines listings and pickup requests with filtering logic
+ * Uses the new service layer underneath
+ */
 export const useBottleListings = () => {
   const { user } = useAuth();
 
+  // Use new hooks
   const {
     data: bottleListings = [],
     isLoading,
     isError,
-  } = useQuery({
-    queryKey: ["bottleListings"],
-    queryFn: fetchBottleListings
-  });
+  } = useAllBottleListings();
 
   const {
     data: myPickupRequests = [],
-  } = useQuery({
-    queryKey: ["myPickupRequests"],
-    queryFn: fetchMyPickupRequests,
-    enabled: !!user
-  });
+  } = useMyPickupRequests();
 
   // Separate user's own listings from others (exclude completed ones from homepage)
   const myListings = bottleListings.filter(

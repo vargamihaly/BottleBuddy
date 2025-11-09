@@ -10,28 +10,16 @@ import { Slider } from "@/components/ui/slider";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Calendar, Info, Coins, Wallet } from "lucide-react";
-import { apiClient, ApiRequestError } from "@/lib/apiClient";
 import { LocationPicker } from "@/components/LocationPicker";
 import { useTranslation } from "react-i18next";
-
-interface CreateListingRequest {
-  title?: string;
-  bottleCount: number;
-  locationAddress: string;
-  description?: string;
-  latitude?: number;
-  longitude?: number;
-  estimatedRefund: number;
-  splitPercentage: number;
-  pickupDeadline?: string;
-}
+import { useCreateBottleListing } from "@/hooks/api";
 
 const CreateListing = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
-  const [loading, setLoading] = useState(false);
+  const createListingMutation = useCreateBottleListing();
 
   const [formData, setFormData] = useState({
     title: "",
@@ -76,8 +64,8 @@ const CreateListing = () => {
 
     if (!user) {
       toast({
-        title: "Authentication required",
-        description: "Please sign in to create a listing",
+        title: t('auth.authenticationRequired'),
+        description: t('auth.pleaseSignIn'),
         variant: "destructive",
       });
       navigate("/auth");
@@ -86,55 +74,30 @@ const CreateListing = () => {
 
     if (!hasLocation || !formData.locationAddress) {
       toast({
-        title: "Location required",
-        description: "Please select a location on the map",
+        title: t('listing.locationRequired'),
+        description: t('listing.pleaseSelectLocation'),
         variant: "destructive",
       });
       return;
     }
 
-    setLoading(true);
+    const requestBody = {
+      bottleCount,
+      locationAddress: formData.locationAddress,
+      estimatedRefund,
+      splitPercentage,
+      title: formData.title || undefined,
+      description: formData.description || undefined,
+      latitude: hasLocation ? formData.latitude : undefined,
+      longitude: hasLocation ? formData.longitude : undefined,
+      pickupDeadline: formData.pickupDeadline ? new Date(formData.pickupDeadline).toISOString() : undefined,
+    };
 
-    try {
-      const requestBody: CreateListingRequest = {
-        bottleCount,
-        locationAddress: formData.locationAddress,
-        estimatedRefund,
-        splitPercentage,
-      };
-
-      // Add optional fields if provided
-      if (formData.title) requestBody.title = formData.title;
-      if (formData.description) requestBody.description = formData.description;
-      if (hasLocation) {
-        requestBody.latitude = formData.latitude;
-        requestBody.longitude = formData.longitude;
-      }
-      if (formData.pickupDeadline) requestBody.pickupDeadline = new Date(formData.pickupDeadline).toISOString();
-
-      await apiClient.post("/api/bottlelistings", requestBody);
-
-      toast({
-        title: "Success!",
-        description: "Your bottle listing has been created",
-      });
-
-      navigate("/");
-    } catch (error: unknown) {
-      console.error("Failed to create listing:", error);
-      toast({
-        title: "Error",
-        description:
-          error instanceof ApiRequestError
-            ? error.getUserMessage()
-            : error instanceof Error
-            ? error.message
-            : "Failed to create listing. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
+    createListingMutation.mutate(requestBody, {
+      onSuccess: () => {
+        navigate("/");
+      },
+    });
   };
 
   return (
@@ -316,9 +279,9 @@ const CreateListing = () => {
                 <Button
                   type="submit"
                   className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
-                  disabled={loading}
+                  disabled={createListingMutation.isPending}
                 >
-                  {loading ? t('listing.creatingButton') : t('listing.createButton')}
+                  {createListingMutation.isPending ? t('listing.creatingButton') : t('listing.createButton')}
                 </Button>
                 <Button type="button" variant="outline" onClick={() => navigate("/")}>
                   {t('common.cancel')}

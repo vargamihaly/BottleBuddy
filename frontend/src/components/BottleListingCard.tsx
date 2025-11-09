@@ -2,16 +2,21 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { MapPin, Star, Clock, Users, Trash2, CheckCircle, XCircle, MessageCircle } from "lucide-react";
-import { BottleListing, CreatePickupRequest, PickupRequest, Transaction, Rating } from "@/types";
-import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
-import { apiClient, ApiRequestError } from "@/lib/apiClient";
-import { useToast } from "@/hooks/use-toast";
+import { BottleListing, PickupRequest, Transaction, Rating } from "@/types";
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Separator } from "@/components/ui/separator";
 import { RatingDialog } from "@/components/RatingDialog";
 import { useMessages } from "@/hooks/useMessages";
 import { useTranslation } from "react-i18next";
+import {
+  usePickupRequestsByListing,
+  useCreatePickupRequest,
+  useUpdatePickupRequestStatus,
+  useDeleteBottleListing,
+  useTransactionByPickupRequest,
+  useRatingByTransaction,
+} from "@/hooks/api";
 
 interface BottleListingCardProps {
   listing: BottleListing;
@@ -217,23 +222,15 @@ const CompletedRequestRating = ({
 
 export const BottleListingCard = ({ listing, isOwnListing = false, myPickupRequests = [] }: BottleListingCardProps) => {
   const { t } = useTranslation();
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [isOfferingPickup, setIsOfferingPickup] = useState(false);
   const [showRatingDialog, setShowRatingDialog] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
 
   // Fetch pickup requests for this listing if it's the user's own listing
-  const { data: pickupRequests = [], isLoading: isLoadingRequests } = useQuery<PickupRequest[]>({
-    queryKey: ["pickupRequests", listing.id],
-    queryFn: async () => {
-      const response = await apiClient.get<PickupRequest[]>(`/api/pickuprequests/listing/${listing.id}`);
-      return response;
-    },
-    enabled: isOwnListing,
-  });
+  const { data: pickupRequests = [], isLoading: isLoadingRequests } = usePickupRequestsByListing(
+    listing.id,
+    isOwnListing
+  );
 
   // Check if user already has an active pickup request for this listing
   const myPickupRequest = useMemo(() => {
@@ -253,35 +250,16 @@ export const BottleListingCard = ({ listing, isOwnListing = false, myPickupReque
   const hasActivePickupRequest = !!myPickupRequest;
 
   // Fetch transaction for completed pickup request
-  const { data: transaction } = useQuery<Transaction | null>({
-    queryKey: ["transaction", myCompletedPickupRequest?.id],
-    queryFn: async () => {
-      if (!myCompletedPickupRequest) return null;
-      const response = await apiClient.get<Transaction>(
-        `/api/transactions/pickup-request/${myCompletedPickupRequest.id}`
-      );
-      return response;
-    },
-    enabled: !!myCompletedPickupRequest,
-  });
+  const { data: transaction } = useTransactionByPickupRequest(
+    myCompletedPickupRequest?.id || '',
+    !!myCompletedPickupRequest
+  );
 
   // Check if user has already rated this transaction
-  const { data: myRating } = useQuery<Rating | null>({
-    queryKey: ["rating", transaction?.id],
-    queryFn: async () => {
-      if (!transaction) return null;
-      try {
-        const response = await apiClient.get<Rating>(`/api/ratings/transaction/${transaction.id}`);
-        return response;
-      } catch (error: unknown) {
-        if (error instanceof ApiRequestError && error.statusCode === 404) {
-          return null; // No rating yet
-        }
-        throw error;
-      }
-    },
-    enabled: !!transaction,
-  });
+  const { data: myRating } = useRatingByTransaction(
+    transaction?.id || '',
+    !!transaction
+  );
 
   // Format created date if available
   const timePosted = listing.createdAt
@@ -305,102 +283,24 @@ export const BottleListingCard = ({ listing, isOwnListing = false, myPickupReque
   const userShare = isOwnListing ? ownerShare : volunteerShare;
   const userPercentage = isOwnListing ? ownerPercentage : volunteerPercentage;
 
-  // Delete mutation
-  const deleteMutation = useMutation({
-    mutationFn: async (listingId: string) => {
-      await apiClient.delete(`/api/bottlelistings/${listingId}`);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["bottleListings"] });
-      toast({
-        title: "Listing deleted",
-        description: "Your bottle listing has been successfully deleted.",
-      });
-      setIsDeleting(false);
-    },
-    onError: (error: unknown) => {
-      const description = error instanceof ApiRequestError
-        ? error.getUserMessage()
-        : "Failed to delete listing. Please try again.";
-      toast({
-        title: "Error",
-        description,
-        variant: "destructive",
-      });
-      setIsDeleting(false);
-    },
-  });
+  // Use custom hooks for mutations
+  const deleteMutation = useDeleteBottleListing();
+  const createPickupRequestMutation = useCreatePickupRequest();
+  const updatePickupRequestStatusMutation = useUpdatePickupRequestStatus();
 
   const handleDelete = () => {
-    if (window.confirm("Are you sure you want to delete this listing?")) {
-      setIsDeleting(true);
+    if (window.confirm(t('listing.deleteConfirm'))) {
       deleteMutation.mutate(listing.id);
     }
   };
 
-  // Pickup request mutation
-  const pickupRequestMutation = useMutation({
-    mutationFn: async (data: CreatePickupRequest) => {
-      const response = await apiClient.post<PickupRequest>('/api/pickuprequests', data);
-      return response;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["bottleListings"] });
-      queryClient.invalidateQueries({ queryKey: ["myPickupRequests"] });
-      toast({
-        title: "Pickup request sent!",
-        description: "The listing owner will be notified of your offer.",
-      });
-      setIsOfferingPickup(false);
-    },
-    onError: (error: unknown) => {
-      const description = error instanceof ApiRequestError
-        ? error.getUserMessage()
-        : "Failed to send pickup request. Please try again.";
-      toast({
-        title: "Error",
-        description,
-        variant: "destructive",
-      });
-      setIsOfferingPickup(false);
-    },
-  });
-
   const handleOfferPickup = () => {
     if (window.confirm(t('listing.confirmOffer', { count: listing.bottleCount, location: listing.locationAddress }))) {
-      setIsOfferingPickup(true);
-      pickupRequestMutation.mutate({
+      createPickupRequestMutation.mutate({
         listingId: listing.id,
       });
     }
   };
-
-  // Update pickup request status mutation
-  const updatePickupRequestStatusMutation = useMutation({
-    mutationFn: async ({ requestId, status }: { requestId: string; status: string }) => {
-      const response = await apiClient.patch(`/api/pickuprequests/${requestId}/status`, { Status: status });
-      return response;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["pickupRequests", listing.id] });
-      queryClient.invalidateQueries({ queryKey: ["bottleListings"] });
-      queryClient.invalidateQueries({ queryKey: ["myPickupRequests"] });
-      toast({
-        title: t('listing.updateSuccess'),
-        description: t('listing.updateSuccess'),
-      });
-    },
-    onError: (error: unknown) => {
-      const description = error instanceof ApiRequestError
-        ? error.getUserMessage()
-        : t('common.error');
-      toast({
-        title: t('common.error'),
-        description,
-        variant: "destructive",
-      });
-    },
-  });
 
   const handleAcceptRequest = (requestId: string) => {
     if (window.confirm(t('listing.confirmAccept'))) {
@@ -538,10 +438,10 @@ export const BottleListingCard = ({ listing, isOwnListing = false, myPickupReque
               className="w-full bg-red-600 hover:bg-red-700 text-white"
               variant="destructive"
               onClick={handleDelete}
-              disabled={isDeleting}
+              disabled={deleteMutation.isPending}
             >
               <Trash2 className="w-4 h-4 mr-2" />
-              {isDeleting ? t('listing.deletingButton') : t('listing.deleteButton')}
+              {deleteMutation.isPending ? t('listing.deletingButton') : t('listing.deleteButton')}
             </Button>
           </>
         ) : (
@@ -632,10 +532,10 @@ export const BottleListingCard = ({ listing, isOwnListing = false, myPickupReque
             ) : (
               <Button
                 className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
-                disabled={listing.status !== 'open' || isOfferingPickup || hasActivePickupRequest}
+                disabled={listing.status !== 'open' || createPickupRequestMutation.isPending || hasActivePickupRequest}
                 onClick={handleOfferPickup}
               >
-                {isOfferingPickup
+                {createPickupRequestMutation.isPending
                   ? t('listing.sendingRequest')
                   : listing.status === 'open'
                   ? t('listing.offerToPickUp')

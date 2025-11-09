@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Dialog,
   DialogContent,
@@ -11,9 +10,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Star } from "lucide-react";
-import { apiClient, ApiRequestError } from "@/lib/apiClient";
 import { useToast } from "@/hooks/use-toast";
-import { CreateRating, Transaction } from "@/types";
+import { Transaction } from "@/types";
+import { useCreateRating } from "@/hooks/api";
 
 interface RatingDialogProps {
   open: boolean;
@@ -27,35 +26,8 @@ export const RatingDialog = ({ open, onOpenChange, transaction, otherPartyName }
   const [hoveredRating, setHoveredRating] = useState(0);
   const [comment, setComment] = useState("");
   const { toast } = useToast();
-  const queryClient = useQueryClient();
 
-  const createRatingMutation = useMutation({
-    mutationFn: async (data: CreateRating) => {
-      const response = await apiClient.post('/api/ratings', data);
-      return response;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["transactions"] });
-      queryClient.invalidateQueries({ queryKey: ["ratings"] });
-      toast({
-        title: "Rating submitted!",
-        description: "Thank you for your feedback.",
-      });
-      onOpenChange(false);
-      setRating(0);
-      setComment("");
-    },
-    onError: (error: unknown) => {
-      const description = error instanceof ApiRequestError
-        ? error.getUserMessage()
-        : "Failed to submit rating. Please try again.";
-      toast({
-        title: "Error",
-        description,
-        variant: "destructive",
-      });
-    },
-  });
+  const createRatingMutation = useCreateRating();
 
   const handleSubmit = () => {
     if (rating === 0) {
@@ -67,11 +39,20 @@ export const RatingDialog = ({ open, onOpenChange, transaction, otherPartyName }
       return;
     }
 
-    createRatingMutation.mutate({
-      transactionId: transaction.id,
-      value: rating,
-      comment: comment.trim() || undefined,
-    });
+    createRatingMutation.mutate(
+      {
+        transactionId: transaction.id,
+        value: rating,
+        comment: comment.trim() || undefined,
+      },
+      {
+        onSuccess: () => {
+          onOpenChange(false);
+          setRating(0);
+          setComment("");
+        },
+      }
+    );
   };
 
   return (
