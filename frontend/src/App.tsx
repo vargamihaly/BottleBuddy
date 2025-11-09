@@ -12,6 +12,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import About from "./pages/About";
 import FAQ from "./pages/FAQ";
+import TermsOfService from "./pages/TermsOfService";
 import CreateListing from "./pages/CreateListing";
 import MyListings from "./pages/MyListings";
 import MyPickupTasks from "./pages/MyPickupTasks";
@@ -44,6 +45,7 @@ const App = () => (
               <Route path="/auth/success" element={<Auth />} />
               <Route path="/about" element={<About />} />
               <Route path="/faq" element={<FAQ />} />
+              <Route path="/terms" element={<TermsOfService />} />
               <Route path="/create-listing" element={<CreateListing />} />
               <Route path="/my-listings" element={<MyListings />} />
               <Route path="/my-pickup-tasks" element={<MyPickupTasks />} />

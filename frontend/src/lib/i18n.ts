@@ -492,6 +492,70 @@ const resources = {
           exploreListings: "Explore Listings",
           joinToday: "Join BottleBuddy Today"
         }
+      },
+      terms: {
+        title: "Terms of Service",
+        lastUpdated: "Last Updated",
+        section1: {
+          title: "Introduction",
+          content: "BottleBuddy (\"we\", \"us\", \"our\") is a community-driven platform operated in Hungary that connects users who wish to recycle bottles with volunteers. By using our website or mobile application (the \"Service\"), you agree to these Terms of Service (\"Terms\").\n\nThe platform's purpose is to facilitate connections between users for recycling and bottle exchange, making bottle return more accessible and rewarding for everyone involved."
+        },
+        section2: {
+          title: "Acceptance of Terms",
+          content: "By creating an account, accessing, or using BottleBuddy, you accept and agree to be bound by these Terms.\n\n• You must be at least 18 years old to use this Service, or have parental/guardian consent if you are a minor.\n• We reserve the right to update these Terms periodically. Continued use of the Service after changes constitutes acceptance of the revised Terms.\n• If you do not agree to these Terms, you must discontinue use of the Service immediately."
+        },
+        section3: {
+          title: "User Accounts",
+          content: "Users are responsible for:\n\n• Maintaining the confidentiality of their login credentials and account information\n• Providing accurate, current, and complete information during registration and keeping it updated\n• Not sharing accounts or impersonating others\n• All activities that occur under their account\n\nWe reserve the right to suspend or terminate accounts for:\n• Violations of these Terms\n• Fraudulent or illegal activity\n• Misuse of the platform or abuse of other users\n• Any other conduct we deem harmful to the Service or community"
+        },
+        section4: {
+          title: "Service Description",
+          content: "BottleBuddy provides:\n\n• A platform connecting users for bottle pickup and refund-sharing\n• Messaging and coordination tools to facilitate exchanges\n• Map-based discovery of nearby bottle listings\n• User rating and reputation system\n\nDisclaimer: BottleBuddy is not a delivery service, financial institution, or party to any transaction. We only facilitate user interactions. All exchanges, payments, and arrangements are made directly between users at their own discretion and risk."
+        },
+        section5: {
+          title: "User Conduct",
+          content: "Users must not:\n\n• Post illegal, offensive, false, or misleading content\n• Harass, threaten, spam, or abuse other users\n• Attempt to circumvent platform systems or security measures\n• Upload malicious files, viruses, or harmful code\n• Violate intellectual property rights or privacy of others\n• Use the Service for unauthorized commercial purposes\n• Create fake accounts or manipulate ratings\n• Engage in fraudulent activity or scams\n\nViolations may result in immediate account suspension or termination, and we may report illegal activity to authorities."
+        },
+        section6: {
+          title: "Listings and Transactions",
+          content: "BottleBuddy acts only as a facilitator, not as a party in transactions:\n\n• Users create listings and arrange pickups at their own discretion\n• Bottle exchanges and all related arrangements are private agreements between users\n• Refund sharing (HUF amounts) is a private arrangement; we do not process payments\n• Users handle all exchanges, meetings, and payments at their own risk\n\nWe are not responsible for:\n• Damages, losses, or disputes arising from user transactions\n• The accuracy of listings or user representations\n• Fraud, theft, or misconduct between users\n• Any injuries or damages occurring during meetups or exchanges"
+        },
+        section7: {
+          title: "Messaging System",
+          content: "Our in-app messaging system:\n\n• Messages are private between users but may be monitored for abuse, security, or legal compliance\n• Spam, harassment, and inappropriate content are prohibited\n• Images and attachments must comply with these Terms and applicable laws\n• We reserve the right to review, remove, or report messages that violate our policies\n\nUsers should report any abusive or suspicious messages immediately."
+        },
+        section8: {
+          title: "Payments and Refunds",
+          content: "Currently, BottleBuddy does not operate a payment system:\n\n• All payments between users are handled privately (typically cash during pickup)\n• We do not process, hold, or guarantee any payments\n• Refund-sharing arrangements are private agreements between users\n\nIf payment features are added in the future:\n• Terms will be updated with detailed payment and dispute resolution mechanisms\n• All transactions will be considered final unless otherwise required by law\n• Refund policies will be clearly stated"
+        },
+        section9: {
+          title: "Intellectual Property",
+          content: "BottleBuddy owns all rights to:\n\n• Platform branding, logos, trademarks, and design elements\n• User interface, source code, and software\n• Content created by BottleBuddy\n\nUser-generated content:\n• Users retain ownership of their posts, photos, and listings\n• By posting content, users grant BottleBuddy a non-exclusive, royalty-free, worldwide license to display, distribute, and use the content within the platform for operational purposes\n• Users represent that they have the right to post all content they upload"
+        },
+        section10: {
+          title: "Privacy and Data Protection",
+          content: "Your privacy is important to us. Please review our Privacy Policy for detailed information.\n\n• We use Google OAuth and JWT for secure authentication\n• We comply with GDPR and EU data protection regulations\n• Users have the right to access, correct, and delete their personal data\n• We implement industry-standard security practices to protect user data\n• Data retention periods and practices are outlined in our Privacy Policy\n\nFor privacy-related requests, contact us at: misi@protonmail.ch"
+        },
+        section11: {
+          title: "Account Termination",
+          content: "Accounts may be suspended or terminated for:\n\n• Violation of these Terms\n• Extended inactivity\n• Legal requirements or court orders\n• Protecting the safety and integrity of the platform\n\nUpon account deletion:\n• Your listings will be removed\n• Messages may be retained for legal compliance\n• Personal data will be handled according to our Privacy Policy and GDPR requirements\n• Some information may be retained for legal, accounting, or security purposes"
+        },
+        section12: {
+          title: "Limitation of Liability",
+          content: "TO THE MAXIMUM EXTENT PERMITTED BY LAW:\n\n• BottleBuddy is provided \"AS IS\" without warranties of any kind, express or implied\n• We make no guarantees about availability, accuracy, or reliability of the Service\n• We are not liable for lost profits, damages, disputes, or losses arising from use of the Service\n• We are not responsible for user-generated content or actions of users\n• We are not liable for system downtime, bugs, data loss, or technical issues\n• Users assume all risks associated with using the platform\n\nYour sole remedy for dissatisfaction is to discontinue use of the Service."
+        },
+        section13: {
+          title: "Indemnification",
+          content: "You agree to indemnify, defend, and hold harmless BottleBuddy, its operators, and affiliates from any claims, damages, losses, or expenses (including legal fees) arising from:\n\n• Your use or misuse of the Service\n• Your violation of these Terms\n• Your violation of any rights of another user or third party\n• Any illegal activity or fraud\n• Content you post or actions you take on the platform"
+        },
+        section14: {
+          title: "Governing Law and Jurisdiction",
+          content: "These Terms are governed by the laws of Hungary.\n\n• Any disputes arising from these Terms or use of the Service shall be resolved in Hungarian courts\n• If any provision of these Terms is found invalid or unenforceable, the remaining provisions remain in full effect\n• These Terms constitute the entire agreement between you and BottleBuddy regarding use of the Service"
+        },
+        section15: {
+          title: "Contact Information",
+          content: "For questions, support, or inquiries regarding these Terms of Service:\n\nEmail: misi@protonmail.ch\nPlatform: BottleBuddy\nOperator: Hungary\n\nFor data protection and privacy requests, please use the same contact information.\n\nThank you for being part of the BottleBuddy community!"
+        }
       }
     }
   },
@@ -984,6 +1048,70 @@ const resources = {
           getStarted: "Kezdd el ma",
           exploreListings: "Hirdetések böngészése",
           joinToday: "Csatlakozz még ma a BottleBuddy-hoz"
+        }
+      },
+      terms: {
+        title: "Felhasználási Feltételek",
+        lastUpdated: "Utolsó frissítés",
+        section1: {
+          title: "Bevezetés",
+          content: "A BottleBuddy (\"mi\", \"minket\", \"miénk\") egy közösség által vezérelt platform, amely Magyarországon működik, és összeköti azokat a felhasználókat, akik palackokat szeretnének újrahasznosítani önkéntesekkel. Weboldalunk vagy mobilalkalmazásunk (a \"Szolgáltatás\") használatával elfogadod ezeket a Felhasználási Feltételeket (\"Feltételek\").\n\nA platform célja, hogy megkönnyítse a felhasználók közötti kapcsolatfelvételt újrahasznosítás és palackok cseréje céljából, így a palackok visszaváltását mindenki számára hozzáférhetőbbé és jutalmazóbbá téve."
+        },
+        section2: {
+          title: "A Feltételek Elfogadása",
+          content: "A BottleBuddy fiók létrehozásával, elérésekor vagy használatakor elfogadod és válaszd, hogy kötelezed magad ezekhez a Feltételekhez.\n\n• A Szolgáltatás használatához legalább 18 évesnek kell lenned, vagy kiskorú esetén szülői/gyámi beleegyezéssel kell rendelkezned.\n• Fenntartjuk a jogot arra, hogy időszakosan frissítsük ezeket a Feltételeket. A Szolgáltatás folyamatos használata a változások után a módosított Feltételek elfogadását jelenti.\n• Ha nem értesz egyet ezekkel a Feltételekkel, azonnal abba kell hagynod a Szolgáltatás használatát."
+        },
+        section3: {
+          title: "Felhasználói Fiókok",
+          content: "A felhasználók felelősek a következőkért:\n\n• Bejelentkezési adataik és fiókjuk bizalmas kezelése\n• Pontos, aktuális és teljes információk megadása a regisztráció során és azok naprakészen tartása\n• Fiókok megosztásának mellőzése és mások megszemélyesítésének elkerülése\n• Minden tevékenységért, ami a fiókjuk alatt történik\n\nFenntartjuk a jogot fiókok felfüggesztésére vagy megszüntetésére:\n• Jelen Feltételek megsértése esetén\n• Csalárd vagy illegális tevékenység esetén\n• A platform visszaélésszerű használata vagy más felhasználók bántalmazása esetén\n• Bármely más magatartás, amely szerintünk káros a Szolgáltatásra vagy a közösségre nézve"
+        },
+        section4: {
+          title: "Szolgáltatás Leírása",
+          content: "A BottleBuddy az alábbiakat nyújtja:\n\n• Egy platform, amely összeköti a felhasználókat palackok átvétele és visszatérítés megosztása céljából\n• Üzenetküldő és koordinációs eszközök a cserék megkönnyítésére\n• Térkép alapú felfedezés a közeli palackhirdetésekhez\n• Felhasználói értékelési és hírnévrendszer\n\nJogi nyilatkozat: A BottleBuddy nem szállítási szolgáltatás, nem pénzügyi intézmény, és nem fél semmilyen tranzakcióban. Csak a felhasználói interakciókat segítjük elő. Minden csere, fizetés és megállapodás közvetlenül a felhasználók között történik saját belátásuk és kockázatuk szerint."
+        },
+        section5: {
+          title: "Felhasználói Magatartás",
+          content: "A felhasználók nem tehetik a következőket:\n\n• Illegális, sértő, hamis vagy megtévesztő tartalom közzététele\n• Más felhasználók zaklatása, fenyegetése, spammelése vagy bántalmazása\n• A platformrendszerek vagy biztonsági intézkedések megkerülésére tett kísérlet\n• Rosszindulatú fájlok, vírusok vagy káros kód feltöltése\n• Mások szellemi tulajdonjogainak vagy magánéletének megsértése\n• A Szolgáltatás jogosulatlan kereskedelmi célra történő használata\n• Hamis fiókok létrehozása vagy értékelések manipulálása\n• Csalárd tevékenység vagy átverések\n\nA szabálysértések azonnali fiókfelfüggesztést vagy megszüntetést eredményezhetnek, és illegális tevékenységet jelenthetünk a hatóságoknak."
+        },
+        section6: {
+          title: "Hirdetések és Tranzakciók",
+          content: "A BottleBuddy csak közvetítőként működik, nem részese a tranzakcióknak:\n\n• A felhasználók saját belátásuk szerint hoznak létre hirdetéseket és szerveznek átvételeket\n• A palackcserék és az összes kapcsolódó megállapodás privát egyezmények a felhasználók között\n• A visszatérítés megosztása (HUF összegek) privát megállapodás; nem dolgozunk fel kifizetéseket\n• A felhasználók minden cserét, találkozót és kifizetést saját kockázatukra kezelnek\n\nNem vagyunk felelősek:\n• A felhasználói tranzakciókból eredő károkért, veszteségekért vagy vitákért\n• A hirdetések vagy felhasználói nyilatkozatok pontosságáért\n• A felhasználók közötti csalásért, lopásért vagy visszaélésért\n• A találkozók vagy cserék során bekövetkező sérülésekért vagy károkért"
+        },
+        section7: {
+          title: "Üzenetküldő Rendszer",
+          content: "Alkalmazáson belüli üzenetküldő rendszerünk:\n\n• Az üzenetek privát a felhasználók között, de figyelhetők visszaélés, biztonság vagy jogi megfelelés miatt\n• A spam, zaklatás és nem megfelelő tartalom tilos\n• A képeknek és mellékleteknek meg kell felelniük ezeknek a Feltételeknek és az alkalmazandó jogszabályoknak\n• Fenntartjuk a jogot az üzenetek felülvizsgálatára, eltávolítására vagy jelentésére, amelyek megsértik szabályzatainkat\n\nA felhasználóknak azonnal jelenteniük kell minden visszaélésszerű vagy gyanús üzenetet."
+        },
+        section8: {
+          title: "Fizetések és Visszatérítések",
+          content: "Jelenleg a BottleBuddy nem működtet fizetési rendszert:\n\n• Minden felhasználók közötti fizetés privát módon történik (jellemzően készpénz az átvételkor)\n• Nem dolgozunk fel, nem tartunk fenn és nem garantálunk semmilyen kifizetést\n• A visszatérítés megosztási megállapodások privát egyezmények a felhasználók között\n\nHa a jövőben fizetési funkciókat adunk hozzá:\n• A Feltételek frissülnek részletes fizetési és vitarendezési mechanizmusokkal\n• Minden tranzakció véglegessé válik, kivéve ha a törvény másként előírja\n• A visszatérítési szabályzatok egyértelműen lesznek közölve"
+        },
+        section9: {
+          title: "Szellemi Tulajdon",
+          content: "A BottleBuddy tulajdonában van minden jog:\n\n• Platform branding, logók, védjegyek és design elemek\n• Felhasználói felület, forráskód és szoftver\n• A BottleBuddy által létrehozott tartalom\n\nFelhasználók által generált tartalom:\n• A felhasználók megtartják bejegyzéseik, fotóik és hirdetéseik tulajdonjogát\n• Tartalom közzétételével a felhasználók nem-kizárólagos, jogdíjmentes, világszintű licencet adnak a BottleBuddynak a tartalom megjelenítésére, terjesztésére és használatára a platformon belül működési célokra\n• A felhasználók kijelentik, hogy joguk van minden általuk feltöltött tartalom közzétételéhez"
+        },
+        section10: {
+          title: "Adatvédelem és Adatkezelés",
+          content: "Az adataid fontosak számunkra. Kérjük, tekintsd át Adatvédelmi Szabályzatunkat részletes információkért.\n\n• Google OAuth-ot és JWT-t használunk biztonságos hitelesítéshez\n• Megfelelünk a GDPR és EU adatvédelmi szabályozásoknak\n• A felhasználóknak joguk van személyes adataik hozzáféréséhez, javításához és törléséhez\n• Iparági szabványnak megfelelő biztonsági gyakorlatokat alkalmazunk a felhasználói adatok védelme érdekében\n• Az adatmegőrzési időszakok és gyakorlatok Adatvédelmi Szabályzatunkban vannak részletezve\n\nAdatvédelmi kérelmekért lépj kapcsolatba velünk: misi@protonmail.ch"
+        },
+        section11: {
+          title: "Fiók Megszüntetése",
+          content: "A fiókok felfüggeszthetők vagy megszüntethetők:\n\n• Jelen Feltételek megsértése esetén\n• Hosszan tartó inaktivitás esetén\n• Jogi követelmények vagy bírósági végzések alapján\n• A platform biztonságának és integritásának védelme érdekében\n\nFiók törlése esetén:\n• Hirdetéseid eltávolításra kerülnek\n• Az üzenetek megőrizhetők jogi megfelelés céljából\n• A személyes adatok kezelése az Adatvédelmi Szabályzatunk és GDPR követelmények szerint történik\n• Egyes információk megőrizhetők jogi, könyvelési vagy biztonsági célokra"
+        },
+        section12: {
+          title: "Felelősség Korlátozása",
+          content: "A TÖRVÉNY ÁLTAL MEGENGEDETT MAXIMÁLIS MÉRTÉKBEN:\n\n• A BottleBuddy \"JELEN ÁLLAPOTÁBAN\" kerül biztosításra, mindenféle kifejezett vagy hallgatólagos garancia nélkül\n• Nem garantáljuk a Szolgáltatás rendelkezésre állását, pontosságát vagy megbízhatóságát\n• Nem vagyunk felelősek elvesztett nyereségért, károkért, vitákért vagy veszteségekért, amelyek a Szolgáltatás használatából erednek\n• Nem vagyunk felelősek a felhasználók által generált tartalomért vagy a felhasználók cselekedeteiért\n• Nem vagyunk felelősek rendszerleállásokért, hibákért, adatvesztésért vagy technikai problémákért\n• A felhasználók vállalják a platformhasználattal járó minden kockázatot\n\nElégedetlenség esetén az egyetlen jogorvoslat a Szolgáltatás használatának beszüntetése."
+        },
+        section13: {
+          title: "Kártalanítás",
+          content: "Beleegyezel, hogy kártalanítod, megvéded és mentesíted a BottleBuddyt, annak üzemeltetőit és kapcsolt vállalkozásait minden igénytől, kártól, veszteségtől vagy költségtől (beleértve jogi díjakat) amely a következőkből ered:\n\n• A Szolgáltatás használatából vagy visszaélésszerű használatából\n• Jelen Feltételek megsértéséből\n• Más felhasználó vagy harmadik fél jogainak megsértéséből\n• Bármilyen illegális tevékenységből vagy csalásból\n• A platformon közzétett tartalomból vagy általad végzett cselekedetekből"
+        },
+        section14: {
+          title: "Irányadó Jog és Joghatóság",
+          content: "Ezekre a Feltételekre a magyar jogszabályok az irányadók.\n\n• A Feltételekből vagy a Szolgáltatás használatából eredő viták magyar bíróságok előtt rendezendők\n• Ha a Feltételek bármely rendelkezése érvénytelennek vagy végrehajthatatlannak bizonyul, a többi rendelkezés teljes hatályban marad\n• Ezek a Feltételek képezik a teljes megállapodást közted és a BottleBuddy között a Szolgáltatás használatára vonatkozóan"
+        },
+        section15: {
+          title: "Kapcsolattartási Információk",
+          content: "Kérdések, támogatás vagy érdeklődés a Felhasználási Feltételekkel kapcsolatban:\n\nEmail: misi@protonmail.ch\nPlatform: BottleBuddy\nÜzemeltető: Magyarország\n\nAdatvédelmi és adatkezelési kérelmekhez kérjük, használd ugyanezeket az elérhetőségeket.\n\nKöszönjük, hogy a BottleBuddy közösség része vagy!"
         }
       }
     }
