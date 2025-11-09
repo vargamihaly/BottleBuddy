@@ -11,6 +11,7 @@ import { useNavigate } from "react-router-dom";
 import { Separator } from "@/components/ui/separator";
 import { RatingDialog } from "@/components/RatingDialog";
 import { useMessages } from "@/hooks/useMessages";
+import { useTranslation } from "react-i18next";
 
 interface BottleListingCardProps {
   listing: BottleListing;
@@ -34,6 +35,7 @@ const PickupRequestItem = ({
   onOpenRatingDialog: (transaction: Transaction) => void;
   isUpdating: boolean;
 }) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { unreadCount } = useMessages(request.id, request.status === 'accepted' || request.status === 'pending');
   const canMessage = request.status === 'accepted' || request.status === 'pending';
@@ -63,7 +65,7 @@ const PickupRequestItem = ({
               : 'bg-red-100 text-red-800'
           }
         >
-          {request.status}
+          {t(`listing.${request.status}`)}
         </Badge>
       </div>
 
@@ -80,7 +82,7 @@ const PickupRequestItem = ({
             disabled={isUpdating}
           >
             <CheckCircle className="w-3 h-3 mr-1" />
-            Accept
+            {t('listing.accept')}
           </Button>
           <Button
             size="sm"
@@ -90,7 +92,7 @@ const PickupRequestItem = ({
             disabled={isUpdating}
           >
             <XCircle className="w-3 h-3 mr-1" />
-            Reject
+            {t('listing.reject')}
           </Button>
         </div>
       )}
@@ -105,7 +107,7 @@ const PickupRequestItem = ({
               onClick={() => navigate(`/messages?conversation=${request.id}`)}
             >
               <MessageCircle className="w-3 h-3 mr-1" />
-              Message
+              {t('listing.message')}
               {unreadCount > 0 && (
                 <Badge className="ml-2 h-4 min-w-4 bg-red-500 text-white text-xs px-1.5">
                   {unreadCount}
@@ -120,7 +122,7 @@ const PickupRequestItem = ({
             disabled={isUpdating}
           >
             <CheckCircle className="w-3 h-3 mr-1" />
-            Mark as Completed
+            {t('listing.markAsCompleted')}
           </Button>
         </div>
       )}
@@ -146,6 +148,7 @@ const CompletedRequestRating = ({
   volunteerName: string;
   onOpenRatingDialog: (transaction: Transaction) => void;
 }) => {
+  const { t } = useTranslation();
   const { data: transaction } = useQuery<Transaction>({
     queryKey: ["transaction", requestId],
     queryFn: async () => {
@@ -172,15 +175,15 @@ const CompletedRequestRating = ({
   });
 
   if (!transaction) {
-    return <div className="text-xs text-gray-500">Loading transaction...</div>;
+    return <div className="text-xs text-gray-500">{t('listing.loadingRequests')}</div>;
   }
 
   return (
     <div className="space-y-2">
       <div className="bg-emerald-50 rounded-lg p-2">
-        <p className="text-xs text-emerald-700 font-medium">Completed</p>
+        <p className="text-xs text-emerald-700 font-medium">{t('listing.completed')}</p>
         <div className="flex justify-between text-xs mt-1">
-          <span className="text-gray-600">Your share:</span>
+          <span className="text-gray-600">{t('listing.yourShare')}:</span>
           <span className="font-semibold text-emerald-700">{transaction.ownerAmount} HUF</span>
         </div>
       </div>
@@ -191,7 +194,7 @@ const CompletedRequestRating = ({
           onClick={() => onOpenRatingDialog(transaction)}
         >
           <Star className="w-3 h-3 mr-1" />
-          Rate {volunteerName}
+          {t('listing.rate', { name: volunteerName })}
         </Button>
       ) : (
         <div className="bg-gray-50 rounded-lg p-2 text-center">
@@ -205,7 +208,7 @@ const CompletedRequestRating = ({
               />
             ))}
           </div>
-          <p className="text-xs text-gray-600">You rated this exchange</p>
+          <p className="text-xs text-gray-600">{t('listing.youRated')}</p>
         </div>
       )}
     </div>
@@ -213,6 +216,7 @@ const CompletedRequestRating = ({
 };
 
 export const BottleListingCard = ({ listing, isOwnListing = false, myPickupRequests = [] }: BottleListingCardProps) => {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -363,7 +367,7 @@ export const BottleListingCard = ({ listing, isOwnListing = false, myPickupReque
   });
 
   const handleOfferPickup = () => {
-    if (window.confirm(`Are you sure you want to offer to pick up ${listing.bottleCount} bottles from ${listing.locationAddress}?`)) {
+    if (window.confirm(t('listing.confirmOffer', { count: listing.bottleCount, location: listing.locationAddress }))) {
       setIsOfferingPickup(true);
       pickupRequestMutation.mutate({
         listingId: listing.id,
@@ -382,16 +386,16 @@ export const BottleListingCard = ({ listing, isOwnListing = false, myPickupReque
       queryClient.invalidateQueries({ queryKey: ["bottleListings"] });
       queryClient.invalidateQueries({ queryKey: ["myPickupRequests"] });
       toast({
-        title: "Request updated",
-        description: "The pickup request has been updated successfully.",
+        title: t('listing.updateSuccess'),
+        description: t('listing.updateSuccess'),
       });
     },
     onError: (error: unknown) => {
       const description = error instanceof ApiRequestError
         ? error.getUserMessage()
-        : "Failed to update pickup request.";
+        : t('common.error');
       toast({
-        title: "Error",
+        title: t('common.error'),
         description,
         variant: "destructive",
       });
@@ -399,19 +403,19 @@ export const BottleListingCard = ({ listing, isOwnListing = false, myPickupReque
   });
 
   const handleAcceptRequest = (requestId: string) => {
-    if (window.confirm("Accept this pickup request? This will mark the listing as claimed.")) {
+    if (window.confirm(t('listing.confirmAccept'))) {
       updatePickupRequestStatusMutation.mutate({ requestId, status: "accepted" });
     }
   };
 
   const handleRejectRequest = (requestId: string) => {
-    if (window.confirm("Reject this pickup request?")) {
+    if (window.confirm(t('listing.confirmReject'))) {
       updatePickupRequestStatusMutation.mutate({ requestId, status: "rejected" });
     }
   };
 
   const handleCompletePickup = (requestId: string) => {
-    if (window.confirm("Mark this pickup as completed? This confirms the bottles were successfully exchanged.")) {
+    if (window.confirm(t('listing.confirmComplete'))) {
       updatePickupRequestStatusMutation.mutate({ requestId, status: "completed" });
     }
   };
@@ -442,7 +446,7 @@ export const BottleListingCard = ({ listing, isOwnListing = false, myPickupReque
             </div>
           </div>
           <Badge variant="secondary" className="bg-green-100 text-green-700">
-            {listing.status}
+            {t(`listing.${listing.status}`)}
           </Badge>
         </div>
       </CardHeader>
@@ -467,11 +471,11 @@ export const BottleListingCard = ({ listing, isOwnListing = false, myPickupReque
 
         <div className="bg-green-50 rounded-lg p-3">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-green-700">Estimated Total Refund:</span>
+            <span className="text-sm text-green-700">{t('listing.estimatedRefund')}:</span>
             <span className="font-bold text-green-800">{listing.estimatedRefund} HUF</span>
           </div>
           <div className="flex items-center justify-between mt-1">
-            <span className="text-xs text-green-600">Your share ({userPercentage}%):</span>
+            <span className="text-xs text-green-600">{t('listing.yourShare')} ({userPercentage}%):</span>
             <span className="text-sm font-semibold text-green-700">{userShare.toFixed(0)} HUF</span>
           </div>
         </div>
@@ -482,7 +486,7 @@ export const BottleListingCard = ({ listing, isOwnListing = false, myPickupReque
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <h4 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                  Pickup Requests
+                  {t('listing.pickupRequests')}
                   {pickupRequests.length > 0 && (
                     <Badge variant="secondary" className="bg-blue-100 text-blue-700">
                       {pickupRequests.length}
@@ -490,7 +494,7 @@ export const BottleListingCard = ({ listing, isOwnListing = false, myPickupReque
                   )}
                   {pickupRequests.filter(r => r.status === 'pending').length > 0 && (
                     <Badge className="bg-yellow-500 text-white">
-                      {pickupRequests.filter(r => r.status === 'pending').length} pending
+                      {pickupRequests.filter(r => r.status === 'pending').length} {t('listing.pending')}
                     </Badge>
                   )}
                 </h4>
@@ -500,13 +504,13 @@ export const BottleListingCard = ({ listing, isOwnListing = false, myPickupReque
 
               {isLoadingRequests ? (
                 <div className="text-center py-4 text-sm text-gray-500">
-                  Loading requests...
+                  {t('listing.loadingRequests')}
                 </div>
               ) : pickupRequests.length === 0 ? (
                 <div className="text-center py-4 bg-gray-50 rounded-lg">
                   <Users className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-                  <p className="text-sm text-gray-500">No pickup requests yet</p>
-                  <p className="text-xs text-gray-400 mt-1">Share your listing to get volunteers!</p>
+                  <p className="text-sm text-gray-500">{t('listing.noPickupRequests')}</p>
+                  <p className="text-xs text-gray-400 mt-1">{t('listing.shareToGetVolunteers')}</p>
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -537,7 +541,7 @@ export const BottleListingCard = ({ listing, isOwnListing = false, myPickupReque
               disabled={isDeleting}
             >
               <Trash2 className="w-4 h-4 mr-2" />
-              {isDeleting ? 'Deleting...' : 'Delete Listing'}
+              {isDeleting ? t('listing.deletingButton') : t('listing.deleteButton')}
             </Button>
           </>
         ) : (
@@ -546,7 +550,7 @@ export const BottleListingCard = ({ listing, isOwnListing = false, myPickupReque
               <div className="space-y-2">
                 <div className="bg-gray-50 rounded-lg p-3">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-gray-700">Your Pickup Request</span>
+                    <span className="text-sm font-medium text-gray-700">{t('listing.yourPickupRequest')}</span>
                     <Badge
                       className={
                         myPickupRequest.status === 'pending'
@@ -554,13 +558,13 @@ export const BottleListingCard = ({ listing, isOwnListing = false, myPickupReque
                           : 'bg-green-100 text-green-800'
                       }
                     >
-                      {myPickupRequest.status}
+                      {t(`listing.${myPickupRequest.status}`)}
                     </Badge>
                   </div>
                   <p className="text-xs text-gray-600">
                     {myPickupRequest.status === 'pending'
-                      ? `Waiting for ${listing.createdByUserName || 'the owner'} to accept`
-                      : `Accepted! Coordinate pickup details`}
+                      ? t('listing.waitingForAcceptance', { name: listing.createdByUserName || 'the owner' })
+                      : t('listing.coordinatePickup')}
                   </p>
                 </div>
                 {myPickupRequest.status === 'accepted' && (
@@ -572,7 +576,7 @@ export const BottleListingCard = ({ listing, isOwnListing = false, myPickupReque
                       onClick={() => navigate(`/messages?conversation=${myPickupRequest.id}`)}
                     >
                       <MessageCircle className="w-4 h-4 mr-2" />
-                      Message {listing.createdByUserName || 'Owner'}
+                      {t('listing.message')} {listing.createdByUserName || 'Owner'}
                     </Button>
                     <Button
                       className="w-full bg-blue-600 hover:bg-blue-700"
@@ -580,7 +584,7 @@ export const BottleListingCard = ({ listing, isOwnListing = false, myPickupReque
                       disabled={updatePickupRequestStatusMutation.isPending}
                     >
                       <CheckCircle className="w-4 h-4 mr-2" />
-                      Mark as Completed
+                      {t('listing.markAsCompleted')}
                     </Button>
                   </>
                 )}
@@ -589,9 +593,9 @@ export const BottleListingCard = ({ listing, isOwnListing = false, myPickupReque
               <div className="space-y-2">
                 {transaction && (
                   <div className="bg-emerald-50 rounded-lg p-3 space-y-1">
-                    <p className="text-xs text-emerald-700 font-medium">Transaction Completed</p>
+                    <p className="text-xs text-emerald-700 font-medium">{t('listing.transactionCompleted')}</p>
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Your share:</span>
+                      <span className="text-gray-600">{t('listing.yourShare')}:</span>
                       <span className="font-semibold text-emerald-700">
                         {transaction.volunteerAmount} HUF
                       </span>
@@ -605,7 +609,7 @@ export const BottleListingCard = ({ listing, isOwnListing = false, myPickupReque
                     disabled={!transaction}
                   >
                     <Star className="w-4 h-4 mr-2" />
-                    Rate This Exchange
+                    {t('listing.rateExchange')}
                   </Button>
                 ) : (
                   <div className="bg-gray-50 rounded-lg p-3 text-center">
@@ -621,7 +625,7 @@ export const BottleListingCard = ({ listing, isOwnListing = false, myPickupReque
                         />
                       ))}
                     </div>
-                    <p className="text-xs text-gray-600">You rated this exchange</p>
+                    <p className="text-xs text-gray-600">{t('listing.youRated')}</p>
                   </div>
                 )}
               </div>
@@ -632,12 +636,12 @@ export const BottleListingCard = ({ listing, isOwnListing = false, myPickupReque
                 onClick={handleOfferPickup}
               >
                 {isOfferingPickup
-                  ? 'Sending request...'
+                  ? t('listing.sendingRequest')
                   : myPickupRequest?.status === 'pending'
-                  ? 'Request Pending...'
+                  ? t('listing.requestPending')
                   : listing.status === 'open'
-                  ? 'Offer to Pick Up'
-                  : `Status: ${listing.status}`}
+                  ? t('listing.offerToPickUp')
+                  : `${t('common.status')}: ${t(`listing.${listing.status}`)}`}
               </Button>
             )}
           </>
