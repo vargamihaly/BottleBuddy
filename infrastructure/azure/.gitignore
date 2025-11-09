@@ -1,0 +1,8 @@
+# Ignore parameter files with secrets
+parameters-free.json
+parameters-*.json
+!parameters-*.example.json
+
+# Ignore local deployment outputs
+*.log
+deployment-output.txt

@@ -1,0 +1,36 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "value": "westeurope"
+    },
+    "environment": {
+      "value": "production"
+    },
+    "baseName": {
+      "value": "bottlebuddy"
+    },
+    "sqlAdminUsername": {
+      "value": "bottlebuddyadmin"
+    },
+    "sqlAdminPassword": {
+      "value": "REPLACE_WITH_STRONG_PASSWORD"
+    },
+    "jwtSecretKey": {
+      "value": "REPLACE_WITH_32_CHAR_SECRET_KEY"
+    },
+    "googleClientId": {
+      "value": "REPLACE_WITH_GOOGLE_CLIENT_ID"
+    },
+    "googleClientSecret": {
+      "value": "REPLACE_WITH_GOOGLE_CLIENT_SECRET"
+    },
+    "githubRepoUrl": {
+      "value": "https://github.com/YOUR_USERNAME/bottle-buddy-share"
+    },
+    "githubBranch": {
+      "value": "main"
+    }
+  }
+}
