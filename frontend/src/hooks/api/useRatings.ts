@@ -1,7 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { ratingService } from "@/api/services";
-import { CreateRating } from "@/types";
+import { CreateRating, Rating } from "@/types";
+import { ApiRequestError } from "@/lib/apiClient";
 import { useTranslation } from "react-i18next";
 
 /**
@@ -20,9 +21,18 @@ export const ratingKeys = {
  * Hook to fetch a rating for a specific transaction
  */
 export const useRatingByTransaction = (transactionId: string, enabled = true) => {
-  return useQuery({
+  return useQuery<Rating | null>({
     queryKey: ratingKeys.byTransaction(transactionId),
-    queryFn: () => ratingService.getByTransactionId(transactionId),
+    queryFn: async () => {
+      try {
+        return await ratingService.getByTransactionId(transactionId);
+      } catch (error) {
+        if (error instanceof ApiRequestError && error.statusCode === 404) {
+          return null;
+        }
+        throw error;
+      }
+    },
     enabled: !!transactionId && enabled,
     retry: false, // Don't retry if 404 (no rating exists)
   });
@@ -59,10 +69,16 @@ export const useCreateRating = () => {
         description: t('listing.youRated'),
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const description = error instanceof ApiRequestError
+        ? error.getUserMessage()
+        : error instanceof Error
+          ? error.message
+          : t('common.error');
+
       toast({
         title: t('common.error'),
-        description: error?.message || t('common.error'),
+        description,
         variant: "destructive",
       });
     },
@@ -87,10 +103,16 @@ export const useUpdateRating = () => {
         description: t('listing.updateSuccess'),
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const description = error instanceof ApiRequestError
+        ? error.getUserMessage()
+        : error instanceof Error
+          ? error.message
+          : t('common.error');
+
       toast({
         title: t('common.error'),
-        description: error?.message || t('common.error'),
+        description,
         variant: "destructive",
       });
     },
@@ -114,10 +136,16 @@ export const useDeleteRating = () => {
         description: t('common.success'),
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const description = error instanceof ApiRequestError
+        ? error.getUserMessage()
+        : error instanceof Error
+          ? error.message
+          : t('common.error');
+
       toast({
         title: t('common.error'),
-        description: error?.message || t('common.error'),
+        description,
         variant: "destructive",
       });
     },

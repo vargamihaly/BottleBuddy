@@ -3,7 +3,7 @@ import { UserDashboard } from "@/components/UserDashboard";
 import { MapView } from "@/components/MapView";
 import { FullPageLoader } from "@/components/LoadingSpinner";
 import { Button } from "@/components/ui/button";
-import { useBottleListings } from "@/hooks/useBottleListings";
+import { useBottleListingOverview } from "@/hooks/useBottleListingOverview";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   Header,
@@ -35,7 +35,7 @@ const Index = () => {
     myPickupRequests,
     isLoading,
     isError,
-  } = useBottleListings();
+  } = useBottleListingOverview();
 
   if (activeTab === "dashboard") {
     return <UserDashboard onBackToHome={() => setActiveTab("home")} />;

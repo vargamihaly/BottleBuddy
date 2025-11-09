@@ -51,30 +51,66 @@ interface RequestOptions extends RequestInit {
   skipAuth?: boolean;
 }
 
+const isFormData = (value: unknown): value is FormData =>
+  typeof FormData !== 'undefined' && value instanceof FormData;
+
+const isBlob = (value: unknown): value is Blob =>
+  typeof Blob !== 'undefined' && value instanceof Blob;
+
+const isArrayBufferView = (value: unknown): value is ArrayBufferView =>
+  typeof ArrayBuffer !== 'undefined' && ArrayBuffer.isView(value as ArrayBufferView);
+
+function resolveRequestBody(data?: unknown): BodyInit | undefined {
+  if (data === undefined || data === null) {
+    return undefined;
+  }
+
+  if (isFormData(data) || isBlob(data) || data instanceof URLSearchParams) {
+    return data;
+  }
+
+  if (data instanceof ArrayBuffer || isArrayBufferView(data)) {
+    return data as BodyInit;
+  }
+
+  if (typeof data === 'string') {
+    return data;
+  }
+
+  return JSON.stringify(data);
+}
+
 async function request<T>(
   endpoint: string,
   options: RequestOptions = {}
 ): Promise<T> {
   const { token, skipAuth, ...fetchOptions } = options;
+  const { headers: initialHeaders, body: requestBody, ...restFetchOptions } = fetchOptions;
 
-  const headers: HeadersInit = {
-    'Content-Type': 'application/json',
-    ...fetchOptions.headers,
-  };
+  const headers = new Headers(initialHeaders ?? {});
 
   // Add authorization header if token is provided or available in localStorage
   if (!skipAuth) {
     const authToken = token || localStorage.getItem('token');
     if (authToken) {
-      headers['Authorization'] = `Bearer ${authToken}`;
+      headers.set('Authorization', `Bearer ${authToken}`);
     }
+  }
+
+  const hasFormDataBody = isFormData(requestBody);
+
+  if (hasFormDataBody) {
+    headers.delete('Content-Type');
+  } else if (!headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json');
   }
 
   const url = `${API_BASE_URL}${endpoint}`;
 
   try {
     const response = await fetch(url, {
-      ...fetchOptions,
+      ...restFetchOptions,
+      body: requestBody,
       headers,
     });
 
@@ -158,21 +194,21 @@ export const apiClient = {
     requestWithRetry<T>(endpoint, {
       ...options,
       method: "POST",
-      body: data ? JSON.stringify(data) : undefined,
+      body: resolveRequestBody(data),
     }),
 
   put: <T>(endpoint: string, data?: unknown, options?: RequestOptions) =>
     requestWithRetry<T>(endpoint, {
       ...options,
       method: "PUT",
-      body: data ? JSON.stringify(data) : undefined,
+      body: resolveRequestBody(data),
     }),
 
   patch: <T>(endpoint: string, data?: unknown, options?: RequestOptions) =>
     requestWithRetry<T>(endpoint, {
       ...options,
       method: "PATCH",
-      body: data ? JSON.stringify(data) : undefined,
+      body: resolveRequestBody(data),
     }),
 
   delete: <T>(endpoint: string, options?: RequestOptions) =>
@@ -183,6 +219,6 @@ export const apiClient = {
     request<T>(endpoint, {
       ...options,
       method: "POST",
-      body: data ? JSON.stringify(data) : undefined,
+      body: resolveRequestBody(data),
     }),
 };
