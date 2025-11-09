@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,24 +8,18 @@ import { ArrowLeft, Plus } from "lucide-react";
 import { BottleListingCard } from "@/components/BottleListingCard";
 import { BottleListingsGridSkeleton } from "@/components/BottleListingSkeleton";
 import { useAuth } from "@/contexts/AuthContext";
-import { BottleListing, PaginatedResponse } from "@/types";
-import { apiClient } from "@/lib/apiClient";
+import { useMyBottleListings } from "@/hooks/api";
 
 const MyListings = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("active");
 
-  const fetchBottleListings = async (): Promise<BottleListing[]> => {
-    const response = await apiClient.get<PaginatedResponse<BottleListing>>('/api/bottlelistings');
-    return response.data;
-  };
-
   const {
     data: bottleListings = [],
     isLoading,
     isError,
-  } = useQuery({ queryKey: ["bottleListings"], queryFn: fetchBottleListings });
+  } = useMyBottleListings({ enabled: !!user });
 
   // Filter user's own listings
   const myListings = bottleListings.filter(listing => listing.createdByUserEmail === user?.email);

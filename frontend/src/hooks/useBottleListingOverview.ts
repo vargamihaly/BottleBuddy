@@ -5,7 +5,7 @@ import { useBottleListings as useAllBottleListings, useMyPickupRequests } from "
  * Legacy hook that combines listings and pickup requests with filtering logic
  * Uses the new service layer underneath
  */
-export const useBottleListings = () => {
+export const useBottleListingOverview = () => {
   const { user } = useAuth();
 
   // Use new hooks
@@ -17,7 +17,7 @@ export const useBottleListings = () => {
 
   const {
     data: myPickupRequests = [],
-  } = useMyPickupRequests();
+  } = useMyPickupRequests({ enabled: !!user });
 
   // Separate user's own listings from others (exclude completed ones from homepage)
   const myListings = bottleListings.filter(
@@ -46,7 +46,10 @@ export const useBottleListings = () => {
 
   // Available listings (exclude own, exclude with active pickup requests, exclude completed)
   const availableListings = bottleListings.filter(
-    listing => listing.createdByUserEmail !== user?.email && !activePickupRequestListingIds.includes(listing.id) && listing.status !== 'completed',
+    listing =>
+      listing.createdByUserEmail !== user?.email &&
+      !activePickupRequestListingIds.includes(listing.id) &&
+      listing.status !== 'completed'
   );
 
   return {
