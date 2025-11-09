@@ -1,8 +1,10 @@
 import { Recycle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 export const Footer = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
     <footer className="bg-gray-900 text-white py-12 px-4">
@@ -11,41 +13,41 @@ export const Footer = () => {
           <div>
             <div className="flex items-center space-x-2 mb-4">
               <Recycle className="w-6 h-6 text-green-500" />
-              <span className="font-bold text-lg">BottleBuddy</span>
+              <span className="font-bold text-lg">{t("common.brandName")}</span>
             </div>
             <p className="text-gray-400">
-              Making recycling profitable and community-driven across Hungary.
+              {t("about.missionText")}
             </p>
           </div>
           <div>
-            <h4 className="font-semibold mb-4">Platform</h4>
+            <h4 className="font-semibold mb-4">{t("footer.platform")}</h4>
             <ul className="space-y-2 text-gray-400">
-              <li className="hover:text-green-400 cursor-pointer transition-colors" onClick={() => navigate("/about")}>About Us</li>
-              <li className="hover:text-green-400 cursor-pointer transition-colors" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>How it Works</li>
-              <li className="hover:text-green-400 cursor-pointer transition-colors">Safety Guidelines</li>
-              <li className="hover:text-green-400 cursor-pointer transition-colors">Pricing</li>
+              <li className="hover:text-green-400 cursor-pointer transition-colors" onClick={() => navigate("/about")}>{t("footer.aboutUs")}</li>
+              <li className="hover:text-green-400 cursor-pointer transition-colors" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>{t("footer.howItWorks")}</li>
+              <li className="hover:text-green-400 cursor-pointer transition-colors">{t("footer.safetyGuidelines")}</li>
+              <li className="hover:text-green-400 cursor-pointer transition-colors">{t("footer.pricing")}</li>
             </ul>
           </div>
           <div>
-            <h4 className="font-semibold mb-4">Community</h4>
+            <h4 className="font-semibold mb-4">{t("footer.community")}</h4>
             <ul className="space-y-2 text-gray-400">
-              <li className="hover:text-green-400 cursor-pointer transition-colors">User Stories</li>
-              <li className="hover:text-green-400 cursor-pointer transition-colors">Environmental Impact</li>
-              <li className="hover:text-green-400 cursor-pointer transition-colors">Local Partners</li>
+              <li className="hover:text-green-400 cursor-pointer transition-colors">{t("footer.userStories")}</li>
+              <li className="hover:text-green-400 cursor-pointer transition-colors">{t("footer.environmentalImpact")}</li>
+              <li className="hover:text-green-400 cursor-pointer transition-colors">{t("footer.localPartners")}</li>
             </ul>
           </div>
           <div>
-            <h4 className="font-semibold mb-4">Support</h4>
+            <h4 className="font-semibold mb-4">{t("footer.support")}</h4>
             <ul className="space-y-2 text-gray-400">
-              <li className="hover:text-green-400 cursor-pointer transition-colors" onClick={() => navigate("/faq")}>FAQ</li>
-              <li className="hover:text-green-400 cursor-pointer transition-colors">Help Center</li>
-              <li className="hover:text-green-400 cursor-pointer transition-colors">Contact Us</li>
-              <li className="hover:text-green-400 cursor-pointer transition-colors">Terms of Service</li>
+              <li className="hover:text-green-400 cursor-pointer transition-colors" onClick={() => navigate("/faq")}>{t("common.faq")}</li>
+              <li className="hover:text-green-400 cursor-pointer transition-colors">{t("footer.helpCenter")}</li>
+              <li className="hover:text-green-400 cursor-pointer transition-colors">{t("footer.contactUs")}</li>
+              <li className="hover:text-green-400 cursor-pointer transition-colors">{t("footer.termsOfService")}</li>
             </ul>
           </div>
         </div>
         <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-          <p>&copy; 2024 BottleBuddy. Made with 💚 in Hungary.</p>
+          <p>&copy; 2025 {t("common.brandName")}. {t("footer.madeWithLove")}</p>
         </div>
       </div>
     </footer>

@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { apiClient } from "@/lib/apiClient";
 import { Statistics } from "@/types";
+import { useTranslation } from "react-i18next";
 
 const fetchStatistics = async (): Promise<Statistics> => {
   const response = await apiClient.get<Statistics>('/api/statistics');
@@ -8,6 +9,7 @@ const fetchStatistics = async (): Promise<Statistics> => {
 };
 
 export const StatsSection = () => {
+  const { t } = useTranslation();
   const { data: stats, isLoading, isError } = useQuery({
     queryKey: ["statistics"],
     queryFn: fetchStatistics,
@@ -34,24 +36,24 @@ export const StatsSection = () => {
             <div className={`text-4xl font-bold text-green-600 mb-2 ${isLoading ? 'animate-pulse' : ''}`}>
               {formatNumber(displayStats.totalBottlesReturned)}
             </div>
-            <p className="text-gray-600">Bottles Returned</p>
+            <p className="text-gray-600">{t("stats.bottlesReturned")}</p>
           </div>
           <div className="text-center">
             <div className={`text-4xl font-bold text-green-600 mb-2 ${isLoading ? 'animate-pulse' : ''}`}>
               {formatNumber(displayStats.totalHufShared)}
             </div>
-            <p className="text-gray-600">HUF Shared</p>
+            <p className="text-gray-600">{t("stats.hufShared")}</p>
           </div>
           <div className="text-center">
             <div className={`text-4xl font-bold text-green-600 mb-2 ${isLoading ? 'animate-pulse' : ''}`}>
               {formatNumber(displayStats.activeUsers)}
             </div>
-            <p className="text-gray-600">Active Users</p>
+            <p className="text-gray-600">{t("stats.activeUsers")}</p>
           </div>
         </div>
         {isError && (
           <p className="text-center text-sm text-gray-500 mt-4">
-            Statistics temporarily unavailable
+            {t("common.statisticsUnavailable")}
           </p>
         )}
       </div>

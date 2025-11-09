@@ -4,6 +4,7 @@ import { Plus, Search, MessageCircle, MapPin } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useTotalUnreadCount } from "@/hooks/useMessages";
 import { Badge } from "@/components/ui/badge";
+import { useTranslation } from "react-i18next";
 
 interface QuickActionsBarProps {
   onMapClick: () => void;
@@ -12,28 +13,29 @@ interface QuickActionsBarProps {
 export const QuickActionsBar = ({ onMapClick }: QuickActionsBarProps) => {
   const navigate = useNavigate();
   const totalUnreadCount = useTotalUnreadCount();
+  const { t } = useTranslation();
 
   const actions = [
     {
       icon: Plus,
-      label: "List Bottles",
-      description: "Create new listing",
+      label: t("dashboard.quickActions.listBottles.label"),
+      description: t("dashboard.quickActions.listBottles.description"),
       onClick: () => navigate("/create-listing"),
       variant: "default" as const,
       className: "bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
     },
     {
       icon: Search,
-      label: "Find Bottles",
-      description: "Browse available",
+      label: t("dashboard.quickActions.findBottles.label"),
+      description: t("dashboard.quickActions.findBottles.description"),
       onClick: onMapClick,
       variant: "outline" as const,
       className: ""
     },
     {
       icon: MessageCircle,
-      label: "Messages",
-      description: "View conversations",
+      label: t("dashboard.quickActions.messages.label"),
+      description: t("dashboard.quickActions.messages.description"),
       onClick: () => navigate("/messages"),
       variant: "outline" as const,
       className: "",
@@ -41,8 +43,8 @@ export const QuickActionsBar = ({ onMapClick }: QuickActionsBarProps) => {
     },
     {
       icon: MapPin,
-      label: "My Listings",
-      description: "Manage bottles",
+      label: t("dashboard.quickActions.myListings.label"),
+      description: t("dashboard.quickActions.myListings.description"),
       onClick: () => navigate("/my-listings"),
       variant: "outline" as const,
       className: ""
@@ -52,7 +54,7 @@ export const QuickActionsBar = ({ onMapClick }: QuickActionsBarProps) => {
   return (
     <Card className="border-2">
       <CardContent className="p-4">
-        <h3 className="text-sm font-semibold text-gray-700 mb-3">Quick Actions</h3>
+        <h3 className="text-sm font-semibold text-gray-700 mb-3">{t("dashboard.quickActions.title")}</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {actions.map((action, index) => (
             <Button

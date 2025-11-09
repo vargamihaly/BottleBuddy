@@ -6,6 +6,7 @@ import { BottleListingsGridSkeleton } from "@/components/BottleListingSkeleton";
 import { BottleListing, PickupRequest } from "@/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 interface MyPickupTasksSectionProps {
   activeListings: BottleListing[];
@@ -22,6 +23,7 @@ export const MyPickupTasksSection = ({
 }: MyPickupTasksSectionProps) => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   // Combine active and completed listings
   const allTaskListings = [...activeListings, ...completedListings];
@@ -35,21 +37,21 @@ export const MyPickupTasksSection = ({
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h3 className="text-2xl font-bold text-gray-900">My Pickup Tasks</h3>
+            <h3 className="text-2xl font-bold text-gray-900">{t("homeSections.pickupTasks.title")}</h3>
             <p className="text-sm text-gray-600 mt-1">
               {activeListings.length > 0 && completedListings.length > 0
-                ? 'Active and recently completed pickups'
+                ? t("homeSections.pickupTasks.activeAndCompleted")
                 : activeListings.length > 0
-                ? 'Bottles you\'ve offered to pick up'
-                : 'Recently completed - rate your experience'}
+                ? t("homeSections.pickupTasks.activeOnly")
+                : t("homeSections.pickupTasks.completedOnly")}
             </p>
           </div>
           <div className="flex items-center gap-3">
             <Badge variant="secondary" className="bg-emerald-100 text-emerald-700">
-              {allTaskListings.length} {allTaskListings.length === 1 ? 'task' : 'tasks'}
+              {t("homeSections.pickupTasks.count", { count: allTaskListings.length })}
             </Badge>
             <Button variant="outline" size="sm" onClick={() => navigate("/my-pickup-tasks")}>
-              View All
+              {t("homeSections.pickupTasks.viewAll")}
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
           </div>

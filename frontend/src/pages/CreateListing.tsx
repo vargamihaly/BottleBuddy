@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Calendar, Info, Coins, Wallet } from "lucide-react";
 import { apiClient, ApiRequestError } from "@/lib/apiClient";
 import { LocationPicker } from "@/components/LocationPicker";
+import { useTranslation } from "react-i18next";
 
 interface CreateListingRequest {
   title?: string;
@@ -26,6 +27,7 @@ interface CreateListingRequest {
 }
 
 const CreateListing = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
@@ -143,7 +145,7 @@ const CreateListing = () => {
           <div className="flex items-center space-x-3">
             <Button variant="ghost" onClick={() => navigate("/")}>
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Home
+              {t('common.backToHome')}
             </Button>
           </div>
         </div>
@@ -152,20 +154,20 @@ const CreateListing = () => {
       <div className="max-w-2xl mx-auto px-4 py-8">
         <Card className="border-green-200">
           <CardHeader>
-            <CardTitle className="text-2xl">List Your Bottles</CardTitle>
+            <CardTitle className="text-2xl">{t('listing.createPageTitle')}</CardTitle>
             <CardDescription>
-              Share your bottle collection details and connect with volunteers who can help return them
+              {t('listing.createPageSubtitle')}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Title (Optional) */}
               <div className="space-y-2">
-                <Label htmlFor="title">Title (Optional)</Label>
+                <Label htmlFor="title">{t('listing.titleOptional')}</Label>
                 <Input
                   id="title"
                   name="title"
-                  placeholder="e.g., 50 bottles near City Center"
+                  placeholder={t('listing.titlePlaceholder2')}
                   value={formData.title}
                   onChange={handleInputChange}
                   maxLength={200}
@@ -175,13 +177,13 @@ const CreateListing = () => {
               {/* Bottle Count (Required) */}
               <div className="space-y-2">
                 <Label htmlFor="bottleCount">
-                  Number of Bottles <span className="text-red-500">*</span>
+                  {t('listing.bottleCountRequired')}
                 </Label>
                 <Input
                   id="bottleCount"
                   name="bottleCount"
                   type="number"
-                  placeholder="e.g., 25"
+                  placeholder={t('listing.bottleCountPlaceholder2')}
                   value={formData.bottleCount}
                   onChange={handleInputChange}
                   required
@@ -206,11 +208,11 @@ const CreateListing = () => {
 
               {/* Description (Optional) */}
               <div className="space-y-2">
-                <Label htmlFor="description">Description (Optional)</Label>
+                <Label htmlFor="description">{t('listing.description')}</Label>
                 <Textarea
                   id="description"
                   name="description"
-                  placeholder="Add any additional details about the bottles, pickup instructions, etc."
+                  placeholder={t('listing.descriptionPlaceholder')}
                   value={formData.description}
                   onChange={handleInputChange}
                   maxLength={1000}
@@ -222,8 +224,7 @@ const CreateListing = () => {
               <Alert className="bg-blue-50 border-blue-200">
                 <Info className="h-4 w-4 text-blue-600" />
                 <AlertDescription className="text-sm text-blue-900">
-                  <strong>How payment works:</strong> The volunteer who picks up your bottles will return them to a collection point and receive the full refund.
-                  They will then pay you your agreed share in cash when picking up the bottles. You both benefit from recycling together!
+                  <strong>{t('listing.howPaymentWorks')}</strong> {t('listing.paymentExplanation')}
                 </AlertDescription>
               </Alert>
 
@@ -231,7 +232,7 @@ const CreateListing = () => {
               <div className="space-y-2">
                 <Label>
                   <Coins className="w-4 h-4 inline mr-1" />
-                  Total Bottle Refund
+                  {t('listing.totalBottleRefund')}
                 </Label>
                 <div className="flex items-center space-x-2">
                   <Input
@@ -240,11 +241,11 @@ const CreateListing = () => {
                     className="bg-gray-50 font-semibold text-lg"
                   />
                   <span className="text-sm text-gray-500 whitespace-nowrap">
-                    ({bottleCount} × 50 HUF)
+                    {t('listing.bottlesPerHuf', { count: bottleCount })}
                   </span>
                 </div>
                 <p className="text-xs text-gray-500">
-                  Automatically calculated: Each bottle refund is 50 HUF in Hungary
+                  {t('listing.autoCalculated')}
                 </p>
               </div>
 
@@ -253,7 +254,7 @@ const CreateListing = () => {
                 <div className="space-y-2">
                   <Label>
                     <Wallet className="w-4 h-4 inline mr-1" />
-                    Your Share: {splitPercentage}%
+                    {t('listing.splitPercentageWithValue', { value: splitPercentage })}
                   </Label>
                   <Slider
                     value={[splitPercentage]}
@@ -264,11 +265,11 @@ const CreateListing = () => {
                     className="w-full"
                   />
                   <div className="flex justify-between text-xs text-gray-500">
-                    <span>0%</span>
-                    <span>25%</span>
-                    <span>50%</span>
-                    <span>75%</span>
-                    <span>100%</span>
+                    <span>{t('listing.sliderLabels.zero')}</span>
+                    <span>{t('listing.sliderLabels.twentyFive')}</span>
+                    <span>{t('listing.sliderLabels.fifty')}</span>
+                    <span>{t('listing.sliderLabels.seventyFive')}</span>
+                    <span>{t('listing.sliderLabels.hundred')}</span>
                   </div>
                 </div>
 
@@ -276,22 +277,22 @@ const CreateListing = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <Card className="bg-green-50 border-green-200">
                     <CardContent className="pt-4">
-                      <p className="text-xs text-gray-600 mb-1">You receive (cash)</p>
+                      <p className="text-xs text-gray-600 mb-1">{t('listing.youReceive')}</p>
                       <p className="text-2xl font-bold text-green-700">{yourShare} HUF</p>
-                      <p className="text-xs text-gray-500 mt-1">{splitPercentage}% of total</p>
+                      <p className="text-xs text-gray-500 mt-1">{t('listing.ofTotal', { value: splitPercentage })}</p>
                     </CardContent>
                   </Card>
                   <Card className="bg-blue-50 border-blue-200">
                     <CardContent className="pt-4">
-                      <p className="text-xs text-gray-600 mb-1">Volunteer keeps</p>
+                      <p className="text-xs text-gray-600 mb-1">{t('listing.volunteerKeeps')}</p>
                       <p className="text-2xl font-bold text-blue-700">{volunteerShare} HUF</p>
-                      <p className="text-xs text-gray-500 mt-1">{100 - splitPercentage}% of total</p>
+                      <p className="text-xs text-gray-500 mt-1">{t('listing.ofTotal', { value: 100 - splitPercentage })}</p>
                     </CardContent>
                   </Card>
                 </div>
 
                 <p className="text-xs text-center text-gray-600 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-                  💡 <strong>Tip:</strong> Most users choose 50/50 split. Adjust to attract more volunteers or get a bigger share!
+                  {t('listing.tip')}
                 </p>
               </div>
 
@@ -299,7 +300,7 @@ const CreateListing = () => {
               <div className="space-y-2">
                 <Label htmlFor="pickupDeadline">
                   <Calendar className="w-4 h-4 inline mr-1" />
-                  Pickup Deadline (Optional)
+                  {t('listing.pickupDeadline')}
                 </Label>
                 <Input
                   id="pickupDeadline"
@@ -317,10 +318,10 @@ const CreateListing = () => {
                   className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
                   disabled={loading}
                 >
-                  {loading ? "Creating..." : "Create Listing"}
+                  {loading ? t('listing.creatingButton') : t('listing.createButton')}
                 </Button>
                 <Button type="button" variant="outline" onClick={() => navigate("/")}>
-                  Cancel
+                  {t('common.cancel')}
                 </Button>
               </div>
             </form>

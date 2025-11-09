@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar, MapPin, Package, ArrowRight } from "lucide-react";
 import { PickupRequest, BottleListing } from "@/types";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 interface MyActivePickupsWidgetProps {
   pickupRequests: PickupRequest[];
@@ -12,6 +13,7 @@ interface MyActivePickupsWidgetProps {
 
 export const MyActivePickupsWidget = ({ pickupRequests, listings }: MyActivePickupsWidgetProps) => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   // Filter active pickups (pending or accepted)
   const activePickups = pickupRequests.filter(
@@ -33,18 +35,18 @@ export const MyActivePickupsWidget = ({ pickupRequests, listings }: MyActivePick
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
             <Calendar className="w-5 h-5 text-green-600" />
-            Active Pickups
+            {t("dashboard.activePickups.title")}
           </CardTitle>
-          <CardDescription>You don't have any active pickup tasks</CardDescription>
+          <CardDescription>{t("dashboard.activePickups.emptyDescription")}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="text-center py-6">
             <Package className="w-12 h-12 text-gray-300 mx-auto mb-3" />
             <p className="text-sm text-gray-600 mb-4">
-              Browse available bottles near you to start earning!
+              {t("dashboard.activePickups.emptyCtaDescription")}
             </p>
             <Button onClick={() => navigate("/my-pickup-tasks")} variant="outline">
-              View All Pickup Tasks
+              {t("dashboard.activePickups.emptyButton")}
             </Button>
           </div>
         </CardContent>
@@ -58,7 +60,7 @@ export const MyActivePickupsWidget = ({ pickupRequests, listings }: MyActivePick
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg flex items-center gap-2">
             <Calendar className="w-5 h-5 text-green-600" />
-            Active Pickups
+            {t("dashboard.activePickups.title")}
             <Badge variant="secondary" className="ml-2">{activePickups.length}</Badge>
           </CardTitle>
           <Button
@@ -67,11 +69,11 @@ export const MyActivePickupsWidget = ({ pickupRequests, listings }: MyActivePick
             onClick={() => navigate("/my-pickup-tasks")}
             className="text-green-600 hover:text-green-700"
           >
-            View All
+            {t("dashboard.activePickups.viewAll")}
             <ArrowRight className="w-4 h-4 ml-1" />
           </Button>
         </div>
-        <CardDescription>Your upcoming bottle pickups</CardDescription>
+        <CardDescription>{t("dashboard.activePickups.description")}</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
@@ -91,13 +93,13 @@ export const MyActivePickupsWidget = ({ pickupRequests, listings }: MyActivePick
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2 mb-1">
                     <h4 className="font-semibold text-sm truncate">
-                      {listing.bottleCount} bottles
+                      {t("dashboard.activePickups.bottleCount", { count: listing.bottleCount })}
                     </h4>
                     <Badge
                       variant="outline"
                       className={`text-xs ${statusColor[pickup.status as keyof typeof statusColor]}`}
                     >
-                      {pickup.status}
+                      {t(`dashboard.activePickups.status.${pickup.status}`)}
                     </Badge>
                   </div>
                   <div className="flex items-center gap-1 text-xs text-gray-600 mb-1">
@@ -105,7 +107,7 @@ export const MyActivePickupsWidget = ({ pickupRequests, listings }: MyActivePick
                     <span className="truncate">{listing.location}</span>
                   </div>
                   <p className="text-xs text-gray-500 line-clamp-1">
-                    {pickup.message || "No message"}
+                    {pickup.message || t("dashboard.activePickups.noMessage")}
                   </p>
                 </div>
               </div>

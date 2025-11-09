@@ -2,48 +2,58 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { Recycle, Heart, Users, Leaf, ArrowLeft, Shield, Zap, Globe } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const About = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const features = [
     {
       icon: <Recycle className="w-8 h-8 text-green-600" />,
-      title: "Easy Bottle Sharing",
-      description: "List your returnable bottles with just a few taps. Set your location, add details, and you're done!"
+      titleKey: "about.feature1.title",
+      descriptionKey: "about.feature1.description"
     },
     {
       icon: <Users className="w-8 h-8 text-blue-600" />,
-      title: "Community Driven",
-      description: "Connect with neighbors who can pick up your bottles. Build a network of people who care about recycling."
+      titleKey: "about.feature2.title",
+      descriptionKey: "about.feature2.description"
     },
     {
       icon: <Leaf className="w-8 h-8 text-green-700" />,
-      title: "Environmental Impact",
-      description: "Every bottle returned is a step towards a cleaner planet. Track your contribution to sustainability."
+      titleKey: "about.feature3.title",
+      descriptionKey: "about.feature3.description"
     },
     {
       icon: <Shield className="w-8 h-8 text-purple-600" />,
-      title: "Safe & Secure",
-      description: "User ratings, verified profiles, and secure authentication ensure a trustworthy experience."
+      titleKey: "about.feature4.title",
+      descriptionKey: "about.feature4.description"
     },
     {
       icon: <Zap className="w-8 h-8 text-yellow-600" />,
-      title: "Fast & Efficient",
-      description: "Real-time listings and notifications help you find bottles nearby instantly."
+      titleKey: "about.feature5.title",
+      descriptionKey: "about.feature5.description"
     },
     {
       icon: <Globe className="w-8 h-8 text-indigo-600" />,
-      title: "Local Focus",
-      description: "Interactive map view shows bottles in your neighborhood, making collection easy and efficient."
+      titleKey: "about.feature6.title",
+      descriptionKey: "about.feature6.description"
     }
   ];
 
   const stats = [
-    { value: "1000+", label: "Bottles Recycled" },
-    { value: "500+", label: "Active Users" },
-    { value: "50+", label: "Cities" },
-    { value: "95%", label: "User Satisfaction" }
+    { value: "1000+", labelKey: "about.stats.bottlesRecycled" },
+    { value: "500+", labelKey: "about.stats.activeUsers" },
+    { value: "50+", labelKey: "about.stats.cities" },
+    { value: "95%", labelKey: "about.stats.userSatisfaction" }
+  ];
+
+  const steps = [
+    { titleKey: "about.step1.title", descriptionKey: "about.step1.description", color: "green" },
+    { titleKey: "about.step2.title", descriptionKey: "about.step2.description", color: "blue" },
+    { titleKey: "about.step3.title", descriptionKey: "about.step3.description", color: "purple" },
+    { titleKey: "about.step4.title", descriptionKey: "about.step4.description", color: "orange" },
+    { titleKey: "about.step5.title", descriptionKey: "about.step5.description", color: "indigo" }
   ];
 
   return (
@@ -58,12 +68,12 @@ const About = () => {
               className="flex items-center gap-2 hover:bg-green-100"
             >
               <ArrowLeft className="w-4 h-4" />
-              Back to Home
+              {t("about.backToHome")}
             </Button>
             <div className="flex items-center gap-2">
               <Recycle className="w-6 h-6 text-green-600" />
               <span className="text-xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
-                BottleBuddy
+                {t("common.brandName")}
               </span>
             </div>
           </div>
@@ -75,15 +85,13 @@ const About = () => {
         <div className="container mx-auto max-w-4xl text-center">
           <div className="inline-flex items-center gap-2 bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-medium mb-6">
             <Heart className="w-4 h-4" />
-            Made with love for the planet
+            {t("about.madeWithLove")}
           </div>
           <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-green-600 via-blue-600 to-purple-600 bg-clip-text text-transparent">
-            About BottleBuddy
+            {t("about.title")}
           </h1>
           <p className="text-xl text-gray-700 leading-relaxed">
-            We're on a mission to make bottle recycling easier, more rewarding, and more social.
-            BottleBuddy connects people who have returnable bottles with those willing to return them,
-            creating a win-win situation for everyone involved.
+            {t("about.subtitle")}
           </p>
         </div>
       </section>
@@ -97,7 +105,7 @@ const About = () => {
                 <div className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent mb-2">
                   {stat.value}
                 </div>
-                <div className="text-gray-600 font-medium">{stat.label}</div>
+                <div className="text-gray-600 font-medium">{t(stat.labelKey)}</div>
               </div>
             ))}
           </div>
@@ -108,10 +116,9 @@ const About = () => {
       <section className="py-20 px-4">
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4 text-gray-800">Why Choose BottleBuddy?</h2>
+            <h2 className="text-4xl font-bold mb-4 text-gray-800">{t("about.whyChoose")}</h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              We've built the most comprehensive platform for bottle sharing and recycling.
-              Here's what makes us special.
+              {t("about.whyChooseSubtitle")}
             </p>
           </div>
 
@@ -120,10 +127,10 @@ const About = () => {
               <Card key={index} className="border-2 hover:border-green-300 transition-all hover:shadow-lg bg-white/80 backdrop-blur-sm">
                 <CardHeader>
                   <div className="mb-4">{feature.icon}</div>
-                  <CardTitle className="text-xl">{feature.title}</CardTitle>
+                  <CardTitle className="text-xl">{t(feature.titleKey)}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <CardDescription className="text-base">{feature.description}</CardDescription>
+                  <CardDescription className="text-base">{t(feature.descriptionKey)}</CardDescription>
                 </CardContent>
               </Card>
             ))}
@@ -134,11 +141,9 @@ const About = () => {
       {/* Mission Section */}
       <section className="py-20 px-4 bg-gradient-to-r from-green-600 to-blue-600 text-white">
         <div className="container mx-auto max-w-4xl text-center">
-          <h2 className="text-4xl font-bold mb-6">Our Mission</h2>
+          <h2 className="text-4xl font-bold mb-6">{t("about.mission")}</h2>
           <p className="text-xl leading-relaxed mb-8">
-            To create a sustainable future by making bottle recycling accessible, social, and rewarding
-            for everyone. We believe that small actions, when multiplied by millions of people,
-            can transform the world.
+            {t("about.missionDescription")}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button
@@ -147,7 +152,7 @@ const About = () => {
               onClick={() => navigate("/auth")}
               className="bg-white text-green-600 hover:bg-gray-100"
             >
-              Get Started Today
+              {t("about.cta.getStarted")}
             </Button>
             <Button
               size="lg"
@@ -155,7 +160,7 @@ const About = () => {
               onClick={() => navigate("/")}
               className="border-2 border-white text-white hover:bg-white/10"
             >
-              Explore Listings
+              {t("about.cta.exploreListings")}
             </Button>
           </div>
         </div>
@@ -164,67 +169,21 @@ const About = () => {
       {/* How It Works Section */}
       <section className="py-20 px-4">
         <div className="container mx-auto max-w-4xl">
-          <h2 className="text-4xl font-bold mb-12 text-center text-gray-800">How It Works</h2>
+          <h2 className="text-4xl font-bold mb-12 text-center text-gray-800">{t("about.howItWorksTitle")}</h2>
           <div className="space-y-8">
-            <div className="flex gap-6 items-start">
-              <div className="flex-shrink-0 w-12 h-12 rounded-full bg-green-600 text-white flex items-center justify-center text-xl font-bold">
-                1
+            {steps.map((step, index) => (
+              <div key={index} className="flex gap-6 items-start">
+                <div className={`flex-shrink-0 w-12 h-12 rounded-full bg-${step.color}-600 text-white flex items-center justify-center text-xl font-bold`}>
+                  {index + 1}
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold mb-2 text-gray-800">{t(step.titleKey)}</h3>
+                  <p className="text-gray-600">
+                    {t(step.descriptionKey)}
+                  </p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-xl font-bold mb-2 text-gray-800">Create an Account</h3>
-                <p className="text-gray-600">
-                  Sign up with your email or Google account. It takes less than a minute to get started.
-                </p>
-              </div>
-            </div>
-            <div className="flex gap-6 items-start">
-              <div className="flex-shrink-0 w-12 h-12 rounded-full bg-blue-600 text-white flex items-center justify-center text-xl font-bold">
-                2
-              </div>
-              <div>
-                <h3 className="text-xl font-bold mb-2 text-gray-800">List or Find Bottles</h3>
-                <p className="text-gray-600">
-                  Have bottles? Create a listing with details, location, and your preferred refund split.
-                  Looking to collect? Browse the map to find bottles near you and see the earnings potential.
-                </p>
-              </div>
-            </div>
-            <div className="flex gap-6 items-start">
-              <div className="flex-shrink-0 w-12 h-12 rounded-full bg-purple-600 text-white flex items-center justify-center text-xl font-bold">
-                3
-              </div>
-              <div>
-                <h3 className="text-xl font-bold mb-2 text-gray-800">Get Paid Upfront During Pickup</h3>
-                <p className="text-gray-600">
-                  Coordinate pickup via in-app messaging. When you meet, the volunteer pays you your agreed share
-                  immediately (e.g., 25 HUF per bottle). No waiting, no second meetup needed!
-                </p>
-              </div>
-            </div>
-            <div className="flex gap-6 items-start">
-              <div className="flex-shrink-0 w-12 h-12 rounded-full bg-orange-600 text-white flex items-center justify-center text-xl font-bold">
-                4
-              </div>
-              <div>
-                <h3 className="text-xl font-bold mb-2 text-gray-800">Volunteer Returns Bottles</h3>
-                <p className="text-gray-600">
-                  The volunteer takes the bottles to the store, gets the full 50 HUF refund per bottle,
-                  and keeps their portion. Both parties profit, and you never have to leave home again!
-                </p>
-              </div>
-            </div>
-            <div className="flex gap-6 items-start">
-              <div className="flex-shrink-0 w-12 h-12 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xl font-bold">
-                5
-              </div>
-              <div>
-                <h3 className="text-xl font-bold mb-2 text-gray-800">Rate & Build Trust</h3>
-                <p className="text-gray-600">
-                  After a successful exchange, both parties can rate each other. This builds trust in the
-                  community and helps everyone find reliable partners for future exchanges.
-                </p>
-              </div>
-            </div>
+            ))}
           </div>
 
           {/* Payment Highlight Box */}
@@ -234,12 +193,9 @@ const About = () => {
                 💡
               </div>
               <div>
-                <h4 className="font-bold text-lg text-gray-800 mb-2">Simple & Safe Payment</h4>
+                <h4 className="font-bold text-lg text-gray-800 mb-2">{t("about.paymentHighlight.title")}</h4>
                 <p className="text-gray-700 leading-relaxed">
-                  <strong>You get paid immediately during the one and only meetup.</strong> The volunteer hands
-                  you cash for your share of the refund, takes the bottles, and that's it! They handle the return
-                  process and collect the full refund from the store. Everyone wins, and you never have to worry
-                  about meeting again or waiting for payment.
+                  {t("about.paymentHighlight.description")}
                 </p>
               </div>
             </div>
@@ -250,16 +206,16 @@ const About = () => {
       {/* Footer CTA */}
       <section className="py-16 px-4 bg-gray-100">
         <div className="container mx-auto max-w-4xl text-center">
-          <h2 className="text-3xl font-bold mb-4 text-gray-800">Ready to Make a Difference?</h2>
+          <h2 className="text-3xl font-bold mb-4 text-gray-800">{t("about.cta.title")}</h2>
           <p className="text-lg text-gray-600 mb-8">
-            Join thousands of users who are making bottle recycling easier and more rewarding.
+            {t("about.cta.description")}
           </p>
           <Button
             size="lg"
             onClick={() => navigate("/auth")}
             className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white"
           >
-            Join BottleBuddy Today
+            {t("about.cta.joinToday")}
           </Button>
         </div>
       </section>

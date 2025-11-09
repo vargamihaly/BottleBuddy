@@ -6,12 +6,14 @@ import { Progress } from "@/components/ui/progress";
 import { ArrowUp, Star, MapPin, Users, Plus, ArrowLeft, TrendingUp, Recycle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 interface UserDashboardProps {
   onBackToHome: () => void;
 }
 
 export const UserDashboard = ({ onBackToHome }: UserDashboardProps) => {
+  const { t } = useTranslation();
   const { user, loading } = useAuth();
   const navigate = useNavigate();
 
@@ -24,7 +26,7 @@ export const UserDashboard = ({ onBackToHome }: UserDashboardProps) => {
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading profile...</p>
+          <p className="text-gray-600">{t('userDashboard.loading')}</p>
         </div>
       </div>
     );
@@ -43,7 +45,7 @@ export const UserDashboard = ({ onBackToHome }: UserDashboardProps) => {
     completedExchanges: 23,
     rating: user.rating ?? null,
     totalRatings: user.totalRatings ?? 0,
-    level: "Eco Champion"
+    level: t('userDashboard.level.ecoChampion')
   };
 
   // Get user initials for avatar
@@ -101,11 +103,11 @@ export const UserDashboard = ({ onBackToHome }: UserDashboardProps) => {
             <div className="flex items-center space-x-3">
               <Button variant="ghost" onClick={onBackToHome}>
                 <ArrowLeft className="w-4 h-4 mr-2" />
-                Back
+                {t('userDashboard.back')}
               </Button>
               <div>
-                <h1 className="text-xl font-bold text-gray-900">My Dashboard</h1>
-                <p className="text-sm text-gray-600">Track your recycling impact</p>
+                <h1 className="text-xl font-bold text-gray-900">{t('userDashboard.title')}</h1>
+                <p className="text-sm text-gray-600">{t('userDashboard.trackImpact')}</p>
               </div>
             </div>
             <Badge variant="secondary" className="bg-green-100 text-green-700">
@@ -137,18 +139,18 @@ export const UserDashboard = ({ onBackToHome }: UserDashboardProps) => {
                   {userStats.rating !== null && userStats.rating > 0 && (
                     <>
                       <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                      <span>{userStats.rating.toFixed(1)} rating</span>
-                      <span className="text-xs">({userStats.totalRatings} reviews)</span>
+                      <span>{userStats.rating.toFixed(1)} {t('userDashboard.profile.rating')}</span>
+                      <span className="text-xs">({userStats.totalRatings} {t('userDashboard.profile.reviews')})</span>
                       <span>•</span>
                     </>
                   )}
                   {userStats.totalRatings === 0 && (
                     <>
-                      <span className="text-xs text-gray-500">No ratings yet</span>
+                      <span className="text-xs text-gray-500">{t('userDashboard.profile.noRatings')}</span>
                       <span>•</span>
                     </>
                   )}
-                  <span>{userStats.completedExchanges} completed exchanges</span>
+                  <span>{userStats.completedExchanges} {t('userDashboard.profile.completedExchanges')}</span>
                 </CardDescription>
               </div>
             </div>
@@ -161,14 +163,14 @@ export const UserDashboard = ({ onBackToHome }: UserDashboardProps) => {
             <CardHeader className="pb-3">
               <div className="flex items-center space-x-2">
                 <Recycle className="w-5 h-5 text-green-600" />
-                <CardTitle className="text-lg">Total Bottles</CardTitle>
+                <CardTitle className="text-lg">{t('userDashboard.stats.totalBottles')}</CardTitle>
               </div>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-green-600 mb-2">{userStats.totalBottles}</div>
               <div className="flex items-center space-x-1 text-sm text-gray-600">
                 <ArrowUp className="w-3 h-3 text-green-500" />
-                <span>+12 this week</span>
+                <span>{t('userDashboard.stats.thisWeekBottles', { count: 12 })}</span>
               </div>
             </CardContent>
           </Card>
@@ -177,14 +179,14 @@ export const UserDashboard = ({ onBackToHome }: UserDashboardProps) => {
             <CardHeader className="pb-3">
               <div className="flex items-center space-x-2">
                 <TrendingUp className="w-5 h-5 text-green-600" />
-                <CardTitle className="text-lg">Total Earnings</CardTitle>
+                <CardTitle className="text-lg">{t('userDashboard.stats.totalEarnings')}</CardTitle>
               </div>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-green-600 mb-2">{userStats.totalEarnings} HUF</div>
               <div className="flex items-center space-x-1 text-sm text-gray-600">
                 <ArrowUp className="w-3 h-3 text-green-500" />
-                <span>+375 this week</span>
+                <span>{t('userDashboard.stats.thisWeekEarnings', { amount: 375 })}</span>
               </div>
             </CardContent>
           </Card>
@@ -193,7 +195,7 @@ export const UserDashboard = ({ onBackToHome }: UserDashboardProps) => {
             <CardHeader className="pb-3">
               <div className="flex items-center space-x-2">
                 <Users className="w-5 h-5 text-green-600" />
-                <CardTitle className="text-lg">Success Rate</CardTitle>
+                <CardTitle className="text-lg">{t('userDashboard.stats.successRate')}</CardTitle>
               </div>
             </CardHeader>
             <CardContent>
@@ -207,19 +209,19 @@ export const UserDashboard = ({ onBackToHome }: UserDashboardProps) => {
         <div className="flex flex-col sm:flex-row gap-4 mb-8">
           <Button size="lg" onClick={() => navigate("/create-listing")} className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700">
             <Plus className="w-5 h-5 mr-2" />
-            List New Bottles
+            {t('userDashboard.actions.listNewBottles')}
           </Button>
           <Button size="lg" variant="outline" onClick={onBackToHome}>
             <MapPin className="w-5 h-5 mr-2" />
-            Find Bottles to Pick Up
+            {t('userDashboard.actions.findBottles')}
           </Button>
         </div>
 
         {/* Recent Activity */}
         <Card className="border-green-200">
           <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
-            <CardDescription>Your latest bottle exchanges and listings</CardDescription>
+            <CardTitle>{t('userDashboard.recentActivity.title')}</CardTitle>
+            <CardDescription>{t('userDashboard.recentActivity.subtitle')}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -231,15 +233,15 @@ export const UserDashboard = ({ onBackToHome }: UserDashboardProps) => {
                     </div>
                     <div>
                       <h4 className="font-semibold">
-                        {activity.type === "pickup" ? "Picked up bottles" : "Listed bottles"}
+                        {activity.type === "pickup" ? t('userDashboard.recentActivity.pickedUp') : t('userDashboard.recentActivity.listed')}
                       </h4>
                       <p className="text-sm text-gray-600">
-                        {activity.bottles} bottles • {activity.location} • with {activity.partner}
+                        {activity.bottles} {t('common.bottles')} • {activity.location} • {t('userDashboard.recentActivity.with', { name: activity.partner })}
                       </p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="font-semibold text-green-600">+{activity.earnings} HUF</div>
+                    <div className="font-semibold text-green-600">{t('userDashboard.recentActivity.earnings', { amount: activity.earnings })}</div>
                     <div className="text-sm text-gray-500">{activity.date}</div>
                   </div>
                 </div>
