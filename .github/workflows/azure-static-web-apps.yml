@@ -38,6 +38,13 @@ jobs:
         run: npm ci
         working-directory: ./frontend
 
+      - name: Verify environment variables
+        run: |
+          echo "Checking environment variables..."
+          echo "VITE_API_URL is set: ${{ secrets.VITE_API_URL != '' }}"
+          echo "VITE_GOOGLE_CLIENT_ID is set: ${{ secrets.VITE_GOOGLE_CLIENT_ID != '' }}"
+        working-directory: ./frontend
+
       - name: Build frontend with environment variables
         run: npm run build
         working-directory: ./frontend
