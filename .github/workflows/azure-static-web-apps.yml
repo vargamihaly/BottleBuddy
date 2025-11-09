@@ -1,23 +1,24 @@
 name: Deploy Frontend to Azure Static Web Apps
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'frontend/**'
-      - '.github/workflows/azure-static-web-apps.yml'
-  pull_request:
-    types: [opened, synchronize, reopened, closed]
-    branches:
-      - main
-    paths:
-      - 'frontend/**'
-  workflow_dispatch:
+  workflow_dispatch:  # Manual trigger only - deploy from GitHub Actions tab
+  # Automatic deployment disabled - uncomment below to re-enable
+  # push:
+  #   branches:
+  #     - main
+  #   paths:
+  #     - 'frontend/**'
+  #     - '.github/workflows/azure-static-web-apps.yml'
+  # pull_request:
+  #   types: [opened, synchronize, reopened, closed]
+  #   branches:
+  #     - main
+  #   paths:
+  #     - 'frontend/**'
 
 jobs:
   build_and_deploy:
-    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
+    if: github.event_name == 'workflow_dispatch'  # Only run on manual trigger
     runs-on: ubuntu-latest
     name: Build and Deploy Frontend
     steps:

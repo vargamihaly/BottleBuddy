@@ -1,13 +1,14 @@
 name: Deploy Backend to Azure App Service
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'backend/**'
-      - '.github/workflows/azure-deploy-backend.yml'
-  workflow_dispatch:
+  workflow_dispatch:  # Manual trigger only - deploy from GitHub Actions tab
+  # Automatic deployment disabled - uncomment below to re-enable
+  # push:
+  #   branches:
+  #     - main
+  #   paths:
+  #     - 'backend/**'
+  #     - '.github/workflows/azure-deploy-backend.yml'
 
 env:
   AZURE_WEBAPP_NAME: bottlebuddy-production-api
