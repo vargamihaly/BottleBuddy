@@ -60,12 +60,4 @@ export const bottleListingService = {
    */
   delete: (id: string) =>
     apiClient.delete(`/api/bottlelistings/${id}`),
-
-  /**
-   * Get listings created by the current user
-   */
-  getMyListings: async () => {
-    const response = await apiClient.get<ApiResponse<BottleListing[]>>('/api/bottlelistings/my-listings');
-    return response.data;
-  },
 };

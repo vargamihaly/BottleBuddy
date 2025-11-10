@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { MapPin, Navigation, Search } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 import {
   DEFAULT_CENTER,
   DEFAULT_ZOOM,
@@ -70,6 +71,7 @@ export const LocationPicker = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoadingAddress, setIsLoadingAddress] = useState(false);
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   // Reverse geocode to get address from coordinates
   const reverseGeocode = async (lat: number, lng: number) => {
@@ -92,8 +94,8 @@ export const LocationPicker = ({
     } catch (error) {
       console.error("Reverse geocoding failed:", error);
       toast({
-        title: "Address lookup failed",
-        description: "Please enter the address manually",
+        title: t("locationPicker.addressLookupFailed"),
+        description: t("locationPicker.addressLookupFailedDesc"),
         variant: "destructive",
       });
     } finally {
@@ -129,21 +131,21 @@ export const LocationPicker = ({
         });
 
         toast({
-          title: "Location found",
-          description: "Click on the map to adjust if needed",
+          title: t("locationPicker.locationFound"),
+          description: t("locationPicker.locationFoundDesc"),
         });
       } else {
         toast({
-          title: "Location not found",
-          description: "Try a different search or click on the map",
+          title: t("locationPicker.locationNotFound"),
+          description: t("locationPicker.locationNotFoundDesc"),
           variant: "destructive",
         });
       }
     } catch (error) {
       console.error("Forward geocoding failed:", error);
       toast({
-        title: "Search failed",
-        description: "Please try again or click on the map",
+        title: t("locationPicker.searchFailed"),
+        description: t("locationPicker.searchFailedDesc"),
         variant: "destructive",
       });
     } finally {
@@ -162,14 +164,14 @@ export const LocationPicker = ({
         setPosition(location);
         reverseGeocode(location[0], location[1]);
         toast({
-          title: "Location found",
-          description: "Using your current location",
+          title: t("locationPicker.locationFound"),
+          description: t("locationPicker.usingYourLocation"),
         });
       })
       .catch(() => {
         toast({
-          title: "Location unavailable",
-          description: "Please enable location services or search manually",
+          title: t("locationPicker.locationUnavailable"),
+          description: t("locationPicker.locationUnavailableDesc"),
           variant: "destructive",
         });
       });
@@ -195,10 +197,10 @@ export const LocationPicker = ({
       <CardHeader>
         <CardTitle className="flex items-center space-x-2">
           <MapPin className="w-5 h-5 text-green-600" />
-          <span>Pick Location on Map</span>
+          <span>{t("locationPicker.title")}</span>
         </CardTitle>
         <CardDescription>
-          Click on the map to select your bottle location, or search for an address
+          {t("locationPicker.subtitle")}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -208,14 +210,14 @@ export const LocationPicker = ({
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <Input
               type="text"
-              placeholder="Search address in Hungary..."
+              placeholder={t("locationPicker.searchPlaceholder")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
             />
           </div>
           <Button type="submit" variant="outline" disabled={isLoadingAddress}>
-            Search
+            {t("locationPicker.search")}
           </Button>
           <Button
             type="button"
@@ -224,7 +226,7 @@ export const LocationPicker = ({
             disabled={isLoadingAddress}
           >
             <Navigation className="w-4 h-4 mr-2" />
-            My Location
+            {t("locationPicker.myLocation")}
           </Button>
         </form>
 
@@ -248,36 +250,23 @@ export const LocationPicker = ({
         {/* Address Display/Edit */}
         <div className="space-y-2">
           <Label htmlFor="address-display">
-            Selected Address <span className="text-red-500">*</span>
+            {t("locationPicker.selectedAddress")} <span className="text-red-500">*</span>
           </Label>
           <Input
             id="address-display"
             value={address}
             onChange={handleAddressChange}
-            placeholder="Address will appear here when you click on the map"
+            placeholder={t("locationPicker.addressPlaceholder")}
             disabled={isLoadingAddress}
           />
           <p className="text-xs text-gray-500">
-            You can edit the address manually if needed
+            {t("locationPicker.addressHint")}
           </p>
-        </div>
-
-        {/* Coordinates Display */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label className="text-xs text-gray-500">Latitude</Label>
-            <Input value={position[0].toFixed(6)} readOnly className="text-sm" />
-          </div>
-          <div className="space-y-2">
-            <Label className="text-xs text-gray-500">Longitude</Label>
-            <Input value={position[1].toFixed(6)} readOnly className="text-sm" />
-          </div>
         </div>
 
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
           <p className="text-sm text-blue-900">
-            <strong>💡 Tip:</strong> Click anywhere on the map to set your bottle location.
-            The address will be automatically filled in.
+            <strong>{t("locationPicker.tipTitle")}</strong> {t("locationPicker.tipDescription")}
           </p>
         </div>
       </CardContent>

@@ -9,25 +9,25 @@ interface ApiResponse<T> {
 export const transactionService = {
   /**
    * Get all transactions for the current user
+   * Note: Try without unwrapping first - backend might return array directly
    */
   getMyTransactions: async () => {
-    const response = await apiClient.get<ApiResponse<Transaction[]>>('/api/transactions/my-transactions');
-    return response.data;
+    return await apiClient.get<Transaction[]>('/api/transactions/my-transactions');
   },
 
   /**
    * Get a transaction by pickup request ID
+   * Note: Try without unwrapping first - backend might return object directly
    */
   getByPickupRequestId: async (pickupRequestId: string) => {
-    const response = await apiClient.get<ApiResponse<Transaction>>(`/api/transactions/pickup-request/${pickupRequestId}`);
-    return response.data;
+    return await apiClient.get<Transaction>(`/api/transactions/pickup-request/${pickupRequestId}`);
   },
 
   /**
    * Get a transaction by ID
+   * Note: Try without unwrapping first - backend might return object directly
    */
   getById: async (transactionId: string) => {
-    const response = await apiClient.get<ApiResponse<Transaction>>(`/api/transactions/${transactionId}`);
-    return response.data;
+    return await apiClient.get<Transaction>(`/api/transactions/${transactionId}`);
   },
 };

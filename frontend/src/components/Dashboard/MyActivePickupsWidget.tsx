@@ -1,19 +1,97 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, MapPin, Package, ArrowRight } from "lucide-react";
+import { Calendar, MapPin, Package, ArrowRight, CheckCircle } from "lucide-react";
 import { PickupRequest, BottleListing } from "@/types";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useUpdatePickupRequestStatus } from "@/hooks/api";
+import { useMessages } from "@/hooks/useMessages";
 
 interface MyActivePickupsWidgetProps {
   pickupRequests: PickupRequest[];
   listings: BottleListing[];
 }
 
+// Helper component for individual pickup card to properly use hooks
+interface PickupCardProps {
+  pickup: PickupRequest;
+  listing: BottleListing;
+  statusColor: Record<string, string>;
+  onComplete: (requestId: string) => void;
+  isUpdating: boolean;
+}
+
+const PickupCard = ({ pickup, listing, statusColor, onComplete, isUpdating }: PickupCardProps) => {
+  const navigate = useNavigate();
+  const { t } = useTranslation();
+  const { unreadCount } = useMessages(pickup.id, true);
+
+  const handleCardClick = () => {
+    navigate(`/messages?conversation=${pickup.id}`);
+  };
+
+  const handleCompleteClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click navigation
+    onComplete(pickup.id);
+  };
+
+  return (
+    <div className="space-y-2">
+      <div
+        className="flex items-start gap-3 p-3 rounded-lg border hover:bg-gray-50 transition-colors cursor-pointer"
+        onClick={handleCardClick}
+      >
+        <div className="flex-shrink-0 w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+          <Package className="w-6 h-6 text-green-600" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-start justify-between gap-2 mb-1">
+            <h4 className="font-semibold text-sm truncate">
+              {t("dashboard.activePickups.bottleCount", { count: listing.bottleCount })}
+            </h4>
+            <div className="flex items-center gap-1">
+              {unreadCount > 0 && (
+                <Badge className="h-5 min-w-5 bg-red-500 text-white text-xs px-1.5">
+                  {unreadCount}
+                </Badge>
+              )}
+              <Badge
+                variant="outline"
+                className={`text-xs ${statusColor[pickup.status as keyof typeof statusColor]}`}
+              >
+                {t(`dashboard.activePickups.status.${pickup.status}`)}
+              </Badge>
+            </div>
+          </div>
+          <div className="flex items-center gap-1 text-xs text-gray-600 mb-1">
+            <MapPin className="w-3 h-3" />
+            <span className="truncate">{listing.locationAddress}</span>
+          </div>
+          <p className="text-xs text-gray-500 line-clamp-1">
+            {pickup.message || t("dashboard.activePickups.noMessage")}
+          </p>
+        </div>
+      </div>
+      {pickup.status === 'accepted' && (
+        <Button
+          size="sm"
+          className="w-full bg-blue-600 hover:bg-blue-700"
+          onClick={handleCompleteClick}
+          disabled={isUpdating}
+        >
+          <CheckCircle className="w-3 h-3 mr-1" />
+          {t('listing.markAsCompleted')}
+        </Button>
+      )}
+    </div>
+  );
+};
+
 export const MyActivePickupsWidget = ({ pickupRequests, listings }: MyActivePickupsWidgetProps) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const updatePickupRequestStatusMutation = useUpdatePickupRequestStatus();
 
   // Filter active pickups (pending or accepted)
   const activePickups = pickupRequests.filter(
@@ -27,6 +105,12 @@ export const MyActivePickupsWidget = ({ pickupRequests, listings }: MyActivePick
   const statusColor = {
     pending: "bg-yellow-100 text-yellow-800 border-yellow-300",
     accepted: "bg-green-100 text-green-800 border-green-300",
+  };
+
+  const handleCompletePickup = (requestId: string) => {
+    if (window.confirm(t('listing.confirmComplete'))) {
+      updatePickupRequestStatusMutation.mutate({ requestId, status: "completed" });
+    }
   };
 
   if (activePickups.length === 0) {
@@ -82,35 +166,14 @@ export const MyActivePickupsWidget = ({ pickupRequests, listings }: MyActivePick
             if (!listing) return null;
 
             return (
-              <div
+              <PickupCard
                 key={pickup.id}
-                className="flex items-start gap-3 p-3 rounded-lg border hover:bg-gray-50 transition-colors cursor-pointer"
-                onClick={() => navigate(`/messages?conversation=${pickup.id}`)}
-              >
-                <div className="flex-shrink-0 w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                  <Package className="w-6 h-6 text-green-600" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between gap-2 mb-1">
-                    <h4 className="font-semibold text-sm truncate">
-                      {t("dashboard.activePickups.bottleCount", { count: listing.bottleCount })}
-                    </h4>
-                    <Badge
-                      variant="outline"
-                      className={`text-xs ${statusColor[pickup.status as keyof typeof statusColor]}`}
-                    >
-                      {t(`dashboard.activePickups.status.${pickup.status}`)}
-                    </Badge>
-                  </div>
-                  <div className="flex items-center gap-1 text-xs text-gray-600 mb-1">
-                    <MapPin className="w-3 h-3" />
-                    <span className="truncate">{listing.locationAddress}</span>
-                  </div>
-                  <p className="text-xs text-gray-500 line-clamp-1">
-                    {pickup.message || t("dashboard.activePickups.noMessage")}
-                  </p>
-                </div>
-              </div>
+                pickup={pickup}
+                listing={listing}
+                statusColor={statusColor}
+                onComplete={handleCompletePickup}
+                isUpdating={updatePickupRequestStatusMutation.isPending}
+              />
             );
           })}
         </div>

@@ -13,18 +13,18 @@ interface ApiResponse<T> {
 export const pickupRequestService = {
   /**
    * Get all pickup requests for a specific listing
+   * Note: This endpoint returns array directly, NOT wrapped in { data: ... }
    */
   getByListingId: async (listingId: string) => {
-    const response = await apiClient.get<ApiResponse<PickupRequest[]>>(`/api/pickuprequests/listing/${listingId}`);
-    return response.data;
+    return await apiClient.get<PickupRequest[]>(`/api/pickuprequests/listing/${listingId}`);
   },
 
   /**
    * Get all pickup requests created by the current user (as volunteer)
+   * Note: This endpoint returns array directly, NOT wrapped in { data: ... }
    */
   getMyRequests: async () => {
-    const response = await apiClient.get<ApiResponse<PickupRequest[]>>('/api/pickuprequests/my-requests');
-    return response.data;
+    return await apiClient.get<PickupRequest[]>('/api/pickuprequests/my-requests');
   },
 
   /**

@@ -49,11 +49,11 @@ const About = () => {
   ];
 
   const steps = [
-    { titleKey: "about.step1.title", descriptionKey: "about.step1.description", color: "green" },
-    { titleKey: "about.step2.title", descriptionKey: "about.step2.description", color: "blue" },
-    { titleKey: "about.step3.title", descriptionKey: "about.step3.description", color: "purple" },
-    { titleKey: "about.step4.title", descriptionKey: "about.step4.description", color: "orange" },
-    { titleKey: "about.step5.title", descriptionKey: "about.step5.description", color: "indigo" }
+    { titleKey: "about.step1.title", descriptionKey: "about.step1.description", colorClass: "bg-green-600" },
+    { titleKey: "about.step2.title", descriptionKey: "about.step2.description", colorClass: "bg-blue-600" },
+    { titleKey: "about.step3.title", descriptionKey: "about.step3.description", colorClass: "bg-purple-600" },
+    { titleKey: "about.step4.title", descriptionKey: "about.step4.description", colorClass: "bg-orange-600" },
+    { titleKey: "about.step5.title", descriptionKey: "about.step5.description", colorClass: "bg-indigo-600" }
   ];
 
   return (
@@ -158,7 +158,7 @@ const About = () => {
               size="lg"
               variant="outline"
               onClick={() => navigate("/")}
-              className="border-2 border-white text-white hover:bg-white/10"
+              className="border-2 border-white text-white hover:bg-white hover:text-green-600"
             >
               {t("about.cta.exploreListings")}
             </Button>
@@ -173,7 +173,7 @@ const About = () => {
           <div className="space-y-8">
             {steps.map((step, index) => (
               <div key={index} className="flex gap-6 items-start">
-                <div className={`flex-shrink-0 w-12 h-12 rounded-full bg-${step.color}-600 text-white flex items-center justify-center text-xl font-bold`}>
+                <div className={`flex-shrink-0 w-12 h-12 rounded-full ${step.colorClass} text-white flex items-center justify-center text-xl font-bold`}>
                   {index + 1}
                 </div>
                 <div>

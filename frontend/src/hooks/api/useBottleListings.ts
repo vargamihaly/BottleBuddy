@@ -17,7 +17,6 @@ export const bottleListingKeys = {
   list: (filters?: unknown) => [...bottleListingKeys.lists(), { filters }] as const,
   details: () => [...bottleListingKeys.all, 'detail'] as const,
   detail: (id: string) => [...bottleListingKeys.details(), id] as const,
-  myListings: () => [...bottleListingKeys.all, 'my-listings'] as const,
 };
 
 /**
@@ -44,12 +43,15 @@ export const useBottleListing = (id: string) => {
 
 /**
  * Hook to fetch current user's bottle listings
+ * Note: This fetches all listings and filters them client-side
+ * The filtering is done in the component using user?.email
  */
 export const useMyBottleListings = ({ enabled = true }: { enabled?: boolean } = {}) => {
   return useQuery({
-    queryKey: bottleListingKeys.myListings(),
-    queryFn: bottleListingService.getMyListings,
+    queryKey: bottleListingKeys.list(), // Use same cache as getAll
+    queryFn: bottleListingService.getAll,
     enabled,
+    staleTime: 30000, // 30 seconds
   });
 };
 

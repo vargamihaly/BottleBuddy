@@ -14,6 +14,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Loader2, Recycle, Sparkles } from "lucide-react";
 import config from "@/config";
+import { useTranslation } from "react-i18next";
 
 // Validation schemas
 const signInSchema = z.object({
@@ -73,6 +74,7 @@ const Auth = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
 
   // Form for sign in
   const signInForm = useForm<SignInFormData>({
@@ -251,7 +253,7 @@ const Auth = () => {
           className="mb-4 bg-white/80 backdrop-blur-sm hover:bg-white"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Home
+          {t("auth.backToHome")}
         </Button>
 
         <Card className="shadow-2xl border-2 bg-white/90 backdrop-blur-md">
@@ -261,14 +263,14 @@ const Auth = () => {
             </div>
             <div className="flex items-center justify-center gap-2 mb-2">
               <CardTitle className="text-3xl bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
-                {isSignUp ? "Join BottleBuddy" : "Welcome Back"}
+                {isSignUp ? t("auth.joinBottleBuddy") : t("auth.welcomeBack")}
               </CardTitle>
               {isSignUp && <Sparkles className="w-5 h-5 text-yellow-500" />}
             </div>
             <CardDescription className="text-base">
               {isSignUp
-                ? "Create your account to start sharing bottles and making an impact"
-                : "Sign in to continue your recycling journey"
+                ? t("auth.signUpSubtitle")
+                : t("auth.signInSubtitle")
               }
             </CardDescription>
           </CardHeader>
@@ -289,7 +291,7 @@ const Auth = () => {
             <div className="relative">
               <Separator />
               <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-white px-2 text-sm text-gray-500">
-                or
+                {t("auth.or")}
               </span>
             </div>
 
@@ -302,10 +304,10 @@ const Auth = () => {
                     name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Email</FormLabel>
+                        <FormLabel>{t("auth.email")}</FormLabel>
                         <FormControl>
                           <Input
-                            placeholder="your@email.com"
+                            placeholder={t("auth.emailPlaceholder")}
                             type="email"
                             autoComplete="email"
                             {...field}
@@ -321,10 +323,10 @@ const Auth = () => {
                     name="password"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Password</FormLabel>
+                        <FormLabel>{t("auth.password")}</FormLabel>
                         <FormControl>
                           <Input
-                            placeholder="••••••••"
+                            placeholder={t("auth.passwordPlaceholder")}
                             type="password"
                             autoComplete="current-password"
                             {...field}
@@ -343,10 +345,10 @@ const Auth = () => {
                     {loading ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Signing In...
+                        {t("auth.signingIn")}
                       </>
                     ) : (
-                      "Sign In"
+                      t("auth.signIn")
                     )}
                   </Button>
                 </form>
@@ -362,10 +364,10 @@ const Auth = () => {
                     name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Email</FormLabel>
+                        <FormLabel>{t("auth.email")}</FormLabel>
                         <FormControl>
                           <Input
-                            placeholder="your@email.com"
+                            placeholder={t("auth.emailPlaceholder")}
                             type="email"
                             autoComplete="email"
                             {...field}
@@ -381,10 +383,10 @@ const Auth = () => {
                     name="fullName"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Full Name <span className="text-gray-400 text-xs">(optional)</span></FormLabel>
+                        <FormLabel>{t("auth.fullName")} <span className="text-gray-400 text-xs">{t("auth.optional")}</span></FormLabel>
                         <FormControl>
                           <Input
-                            placeholder="John Doe"
+                            placeholder={t("auth.fullNamePlaceholder")}
                             type="text"
                             autoComplete="name"
                             {...field}
@@ -400,10 +402,10 @@ const Auth = () => {
                     name="username"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Username <span className="text-gray-400 text-xs">(optional)</span></FormLabel>
+                        <FormLabel>{t("auth.username")} <span className="text-gray-400 text-xs">{t("auth.optional")}</span></FormLabel>
                         <FormControl>
                           <Input
-                            placeholder="johndoe"
+                            placeholder={t("auth.usernamePlaceholder")}
                             type="text"
                             autoComplete="username"
                             {...field}
@@ -411,7 +413,7 @@ const Auth = () => {
                         </FormControl>
                         <FormMessage />
                         <p className="text-xs text-gray-500 mt-1">
-                          Letters, numbers, underscores, and hyphens only
+                          {t("auth.usernameHint")}
                         </p>
                       </FormItem>
                     )}
@@ -422,10 +424,10 @@ const Auth = () => {
                     name="phone"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Phone <span className="text-gray-400 text-xs">(optional)</span></FormLabel>
+                        <FormLabel>{t("auth.phone")} <span className="text-gray-400 text-xs">{t("auth.optional")}</span></FormLabel>
                         <FormControl>
                           <Input
-                            placeholder="+1234567890"
+                            placeholder={t("auth.phonePlaceholder")}
                             type="tel"
                             autoComplete="tel"
                             {...field}
@@ -441,10 +443,10 @@ const Auth = () => {
                     name="password"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Password</FormLabel>
+                        <FormLabel>{t("auth.password")}</FormLabel>
                         <FormControl>
                           <Input
-                            placeholder="••••••••"
+                            placeholder={t("auth.passwordPlaceholder")}
                             type="password"
                             autoComplete="new-password"
                             {...field}
@@ -452,7 +454,7 @@ const Auth = () => {
                         </FormControl>
                         <FormMessage />
                         <p className="text-xs text-gray-500 mt-1">
-                          Must be 8+ characters with uppercase, lowercase, and number
+                          {t("auth.passwordHint")}
                         </p>
                       </FormItem>
                     )}
@@ -463,10 +465,10 @@ const Auth = () => {
                     name="confirmPassword"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Confirm Password</FormLabel>
+                        <FormLabel>{t("auth.confirmPassword")}</FormLabel>
                         <FormControl>
                           <Input
-                            placeholder="••••••••"
+                            placeholder={t("auth.passwordPlaceholder")}
                             type="password"
                             autoComplete="new-password"
                             {...field}
@@ -485,10 +487,10 @@ const Auth = () => {
                     {loading ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Creating Account...
+                        {t("auth.creatingAccount")}
                       </>
                     ) : (
-                      "Create Account"
+                      t("auth.createAccount")
                     )}
                   </Button>
                 </form>
@@ -497,7 +499,7 @@ const Auth = () => {
 
             <div className="text-center text-sm">
               <span className="text-gray-600">
-                {isSignUp ? "Already have an account?" : "Don't have an account?"}
+                {isSignUp ? t("auth.alreadyHaveAccount") : t("auth.dontHaveAccount")}
               </span>
               <Button
                 variant="link"
@@ -505,7 +507,7 @@ const Auth = () => {
                 disabled={loading}
                 className="p-1 h-auto font-semibold text-green-600"
               >
-                {isSignUp ? "Sign in" : "Sign up"}
+                {isSignUp ? t("auth.signIn") : t("auth.signUp")}
               </Button>
             </div>
           </CardContent>

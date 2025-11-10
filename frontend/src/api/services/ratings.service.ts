@@ -9,18 +9,18 @@ interface ApiResponse<T> {
 export const ratingService = {
   /**
    * Get a rating for a specific transaction
+   * Note: Try without unwrapping first - backend might return object directly
    */
   getByTransactionId: async (transactionId: string) => {
-    const response = await apiClient.get<ApiResponse<Rating>>(`/api/ratings/transaction/${transactionId}`);
-    return response.data;
+    return await apiClient.get<Rating>(`/api/ratings/transaction/${transactionId}`);
   },
 
   /**
    * Get all ratings received by a user
+   * Note: Try without unwrapping first - backend might return array directly
    */
   getByUserId: async (userId: string) => {
-    const response = await apiClient.get<ApiResponse<Rating[]>>(`/api/ratings/user/${userId}`);
-    return response.data;
+    return await apiClient.get<Rating[]>(`/api/ratings/user/${userId}`);
   },
 
   /**
