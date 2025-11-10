@@ -1,10 +1,12 @@
 using BottleBuddy.Application.Dtos;
 using BottleBuddy.Application.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BottleBuddy.Api.Controllers;
 
 [ApiController]
+[AllowAnonymous]
 [Route("api/[controller]")]
 public class StatisticsController(IStatisticsService statisticsService, ILogger<StatisticsController> logger) : ControllerBase
 {
