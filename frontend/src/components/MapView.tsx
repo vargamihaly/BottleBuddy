@@ -21,6 +21,7 @@ import type { Map as LeafletMap } from 'leaflet';
 import { useAuth } from "@/contexts/AuthContext.tsx";
 import { useTranslation } from "react-i18next";
 import { useCreatePickupRequest } from "@/hooks/api";
+import { useMapViewData } from "@/hooks/useMapViewData";
 
 
 interface BottleListingWithDistance extends BottleListing {
@@ -69,6 +70,9 @@ export const MapView = ({ listings, onBackToHome }: MapViewProps) => {
   const { toast } = useToast();
   const mapRef = useRef<LeafletMap | null>(null);
   const createPickupRequest = useCreatePickupRequest();
+
+  // Use custom hook to get pickup request data and helper functions
+  const { hasActivePickupRequest, getPickupRequestStatus } = useMapViewData(listings);
 
   // Get user's location on mount
   useEffect(() => {
@@ -267,6 +271,15 @@ export const MapView = ({ listings, onBackToHome }: MapViewProps) => {
                         >
                           {t("listing.yourListing")}
                         </Button>
+                      ) : hasActivePickupRequest(listing.id) ? (
+                        <Button
+                          size="sm"
+                          className="w-full bg-yellow-100 text-yellow-800 border-yellow-300"
+                          variant="outline"
+                          disabled
+                        >
+                          {getPickupRequestStatus(listing.id) === 'pending' ? t("listing.pending") : t("listing.accepted")}
+                        </Button>
                       ) : (
                         <Button
                           size="sm"
@@ -383,6 +396,15 @@ export const MapView = ({ listings, onBackToHome }: MapViewProps) => {
                                 disabled
                               >
                                 {t("listing.yourListing")}
+                              </Button>
+                            ) : hasActivePickupRequest(listing.id) ? (
+                              <Button
+                                size="sm"
+                                className="w-full bg-yellow-100 text-yellow-800 border-yellow-300"
+                                variant="outline"
+                                disabled
+                              >
+                                {getPickupRequestStatus(listing.id) === 'pending' ? t("listing.pending") : t("listing.accepted")}
                               </Button>
                             ) : (
                               <Button

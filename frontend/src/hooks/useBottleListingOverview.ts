@@ -2,7 +2,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useBottleListings as useAllBottleListings, useMyPickupRequests } from "@/hooks/api";
 
 /**
- * Legacy hook that combines listings and pickup requests with filtering logic
+ * Hook that combines listings and pickup requests with filtering logic
  * Uses the new service layer underneath
  */
 export const useBottleListingOverview = () => {
