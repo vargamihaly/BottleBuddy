@@ -14,7 +14,7 @@ export const WelcomeWidget = () => {
     return "dashboard.welcome.greetings.evening";
   };
 
-  const userName = user?.username || user?.email?.split("@")[0] || t("dashboard.welcome.defaultName");
+  const userName = user?.fullName || user?.email?.split("@")[0] || t("dashboard.welcome.defaultName");
 
   return (
     <Card className="bg-gradient-to-r from-green-600 to-emerald-600 text-white border-0 shadow-lg">

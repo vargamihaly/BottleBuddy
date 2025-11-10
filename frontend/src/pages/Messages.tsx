@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { BottomNav } from "@/components/ui/bottom-nav";
 import { ArrowLeft, MessageSquare } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
@@ -144,9 +145,9 @@ const Messages = () => {
       </header>
 
       {/* Main Content - Two Panel Layout */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-20 md:pb-8">
         <Card className="overflow-hidden">
-          <div className="flex h-[calc(100vh-200px)]">
+          <div className="flex h-[calc(100vh-200px)] md:h-[calc(100vh-200px)]">
             {/* Left Panel - Conversations List */}
             <div className="w-full md:w-1/3 border-r border-gray-200 bg-white">
               {isLoading ? (
@@ -226,6 +227,7 @@ const Messages = () => {
           </div>
         </Card>
       </div>
+      <BottomNav />
     </div>
   );
 };

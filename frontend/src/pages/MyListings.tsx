@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { BottomNav } from "@/components/ui/bottom-nav";
 import { ArrowLeft, Plus } from "lucide-react";
 import { BottleListingCard } from "@/components/BottleListingCard";
 import { BottleListingsGridSkeleton } from "@/components/BottleListingSkeleton";
@@ -72,7 +73,7 @@ const MyListings = () => {
       </header>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-20 md:pb-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-3 mb-8">
             <TabsTrigger value="active" className="relative">
@@ -192,6 +193,7 @@ const MyListings = () => {
           </TabsContent>
         </Tabs>
       </div>
+      <BottomNav />
     </div>
   );
 };

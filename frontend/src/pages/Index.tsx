@@ -3,6 +3,7 @@ import { UserDashboard } from "@/components/UserDashboard";
 import { MapView } from "@/components/MapView";
 import { FullPageLoader } from "@/components/LoadingSpinner";
 import { Button } from "@/components/ui/button";
+import { BottomNav } from "@/components/ui/bottom-nav";
 import { useBottleListingOverview } from "@/hooks/useBottleListingOverview";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -38,7 +39,17 @@ const Index = () => {
   } = useBottleListingOverview();
 
   if (activeTab === "dashboard") {
-    return <UserDashboard onBackToHome={() => setActiveTab("home")} />;
+    return (
+      <>
+        <UserDashboard onBackToHome={() => setActiveTab("home")} />
+        <BottomNav
+          onHomeClick={() => setActiveTab("home")}
+          onMapClick={() => setActiveTab("map")}
+          onDashboardClick={() => setActiveTab("dashboard")}
+          activeTab={activeTab}
+        />
+      </>
+    );
   }
 
   if (activeTab === "map") {
@@ -58,10 +69,18 @@ const Index = () => {
       );
     }
     return (
-      <MapView
-        listings={bottleListings}
-        onBackToHome={() => setActiveTab("home")}
-      />
+      <>
+        <MapView
+          listings={bottleListings}
+          onBackToHome={() => setActiveTab("home")}
+        />
+        <BottomNav
+          onHomeClick={() => setActiveTab("home")}
+          onMapClick={() => setActiveTab("map")}
+          onDashboardClick={() => setActiveTab("dashboard")}
+          activeTab={activeTab}
+        />
+      </>
     );
   }
 
@@ -74,7 +93,7 @@ const Index = () => {
           onDashboardClick={() => setActiveTab("dashboard")}
         />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-20 md:pb-8">
           <div className="space-y-6">
             {/* Welcome Section */}
             <WelcomeWidget />
@@ -112,6 +131,12 @@ const Index = () => {
         </div>
 
         <Footer />
+        <BottomNav
+          onHomeClick={() => setActiveTab("home")}
+          onMapClick={() => setActiveTab("map")}
+          onDashboardClick={() => setActiveTab("dashboard")}
+          activeTab={activeTab}
+        />
       </div>
     );
   }
@@ -133,6 +158,12 @@ const Index = () => {
       <CTASection onDashboardClick={() => setActiveTab("dashboard")} />
 
       <Footer />
+      <BottomNav
+        onHomeClick={() => setActiveTab("home")}
+        onMapClick={() => setActiveTab("map")}
+        onDashboardClick={() => setActiveTab("dashboard")}
+        activeTab={activeTab}
+      />
     </div>
   );
 };
