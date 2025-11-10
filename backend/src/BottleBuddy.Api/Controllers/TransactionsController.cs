@@ -78,50 +78,50 @@ public class TransactionsController(ITransactionService transactionService, ILog
         }
     }
 
-    /// <summary>
-    /// Create a transaction (automatically called when pickup is completed)
-    /// </summary>
-    [HttpPost]
-    public async Task<ActionResult<TransactionResponseDto>> CreateTransaction([FromBody] CreateTransactionDto dto)
-    {
-        //TODO Investigate removing this endpoint entirely.
-        //this endpoint should NOT BE called by the frontend.
-        //Transaction creation happens automatically when the pickuprequest changes to complete state.
-
-        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (string.IsNullOrEmpty(userId))
-        {
-            logger.LogWarning("Transaction creation attempted without authenticated user");
-            return Unauthorized(new { error = "User not authenticated" });
-        }
-
-        try
-        {
-            logger.LogInformation("User {UserId} creating transaction for pickup request {PickupRequestId}", userId, dto.PickupRequestId);
-            
-            var transaction = await transactionService.CreateTransactionAsync(dto.PickupRequestId, userId);
-            logger.LogInformation("Transaction {TransactionId} created for pickup request {PickupRequestId} by user {UserId}", transaction.Id, dto.PickupRequestId, userId);
-            
-            return CreatedAtAction(
-                nameof(GetTransactionByPickupRequest),
-                new { pickupRequestId = dto.PickupRequestId },
-                transaction
-            );
-        }
-        catch (InvalidOperationException ex)
-        {
-            logger.LogWarning(ex, "Invalid operation creating transaction for pickup request {PickupRequestId}", dto.PickupRequestId);
-            return BadRequest(new { error = ex.Message });
-        }
-        catch (UnauthorizedAccessException ex)
-        {
-            logger.LogWarning(ex, "Unauthorized transaction creation attempt for pickup request {PickupRequestId}", dto.PickupRequestId);
-            return Forbid(ex.Message);
-        }
-    }
+    // /// <summary>
+    // /// Create a transaction (automatically called when pickup is completed)
+    // /// </summary>
+    // [HttpPost]
+    // public async Task<ActionResult<TransactionResponseDto>> CreateTransaction([FromBody] CreateTransactionDto dto)
+    // {
+    //     //TODO Investigate removing this endpoint entirely.
+    //     //this endpoint should NOT BE called by the frontend.
+    //     //Transaction creation happens automatically when the pickuprequest changes to complete state.
+    //
+    //     var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+    //     if (string.IsNullOrEmpty(userId))
+    //     {
+    //         logger.LogWarning("Transaction creation attempted without authenticated user");
+    //         return Unauthorized(new { error = "User not authenticated" });
+    //     }
+    //
+    //     try
+    //     {
+    //         logger.LogInformation("User {UserId} creating transaction for pickup request {PickupRequestId}", userId, dto.PickupRequestId);
+    //         
+    //         var transaction = await transactionService.CreateTransactionAsync(dto.PickupRequestId, userId);
+    //         logger.LogInformation("Transaction {TransactionId} created for pickup request {PickupRequestId} by user {UserId}", transaction.Id, dto.PickupRequestId, userId);
+    //         
+    //         return CreatedAtAction(
+    //             nameof(GetTransactionByPickupRequest),
+    //             new { pickupRequestId = dto.PickupRequestId },
+    //             transaction
+    //         );
+    //     }
+    //     catch (InvalidOperationException ex)
+    //     {
+    //         logger.LogWarning(ex, "Invalid operation creating transaction for pickup request {PickupRequestId}", dto.PickupRequestId);
+    //         return BadRequest(new { error = ex.Message });
+    //     }
+    //     catch (UnauthorizedAccessException ex)
+    //     {
+    //         logger.LogWarning(ex, "Unauthorized transaction creation attempt for pickup request {PickupRequestId}", dto.PickupRequestId);
+    //         return Forbid(ex.Message);
+    //     }
+    // }
 }
 
-public class CreateTransactionDto
-{
-    public Guid PickupRequestId { get; set; }
-}
+// public class CreateTransactionDto
+// {
+//     public Guid PickupRequestId { get; set; }
+// }

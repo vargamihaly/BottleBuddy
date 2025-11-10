@@ -10,6 +10,10 @@ namespace BottleBuddy.Api.Controllers;
 [Route("api/[controller]")]
 public class BottleListingsController(IBottleListingService bottleListingService, ILogger<BottleListingsController> logger) : ControllerBase
 {
+    
+    //TODO add [Authorize] to GetListings
+    
+    
     /// <summary>
     /// Get paginated list of bottle listings
     /// </summary>
