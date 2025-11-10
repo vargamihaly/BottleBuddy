@@ -377,81 +377,6 @@ npm run dev
 **React Query Devtools:**
 The TanStack Query Devtools are automatically available in development mode. Look for the TanStack logo in the bottom-left corner of your browser to inspect queries, mutations, and cache state.
 
-### Testing
-
-The backend includes comprehensive unit tests using xUnit, Moq, and FluentAssertions.
-
-**Test Project Location:** `backend/tests/BottleBuddy.Tests`
-
-**Run All Tests:**
-```bash
-cd backend/tests/BottleBuddy.Tests
-dotnet test
-```
-
-**Run Tests with Detailed Output:**
-```bash
-dotnet test --verbosity detailed
-```
-
-**Run Specific Test Class:**
-```bash
-dotnet test --filter "FullyQualifiedName~MessageServiceTests"
-```
-
-**Run Tests with Code Coverage:**
-```bash
-dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
-```
-
-**Test Coverage:**
-- **MessageServiceTests** (31 tests) - Messaging logic, SignalR integration, authorization
-- **ImageStorageServiceTests** (18 tests) - Image upload, validation, resizing, storage
-- **PickupRequestServiceTests** (23 tests) - Pickup request CRUD, status management, authorization
-- **TransactionServiceTests** (17 tests) - Transaction creation, refund calculations
-- **RatingServiceTests** (17 tests) - Rating validation, average calculations
-
-**Total Tests:** 106 (All passing ✅)
-
-**Testing Stack:**
-- **xUnit** - Test framework
-- **Moq** - Mocking framework for dependencies
-- **FluentAssertions** - Expressive assertions
-- **InMemory Database** - Fast, isolated database tests
-
-**Test Patterns:**
-- AAA (Arrange-Act-Assert) pattern
-- Independent test isolation
-- Comprehensive coverage of happy paths and edge cases
-- Authorization and validation testing
-- Business logic verification
-
-### Database Access
-
-```bash
-# Connect to PostgreSQL
-docker exec -it bottlebuddy-db psql -U postgres -d bottlebuddy
-
-# View tables
-\dt
-
-# View table structure
-\d "BottleListings"
-```
-
-### View Logs
-
-```bash
-cd docker
-
-# All services
-docker-compose logs -f
-
-# Specific service
-docker-compose logs -f api
-docker-compose logs -f frontend
-docker-compose logs -f db
-```
 
 ### Rebuild Everything
 
@@ -521,7 +446,7 @@ docker-compose up -d
 See `.env.example` for all required variables.
 
 **Required:**
-- `DB_PASSWORD` - PostgreSQL password
+- `DB_PASSWORD` - SQL password
 - `JWT_SECRET` - JWT signing key (min 32 characters)
 - `GOOGLE_CLIENT_ID` - Google OAuth client ID
 - `GOOGLE_CLIENT_SECRET` - Google OAuth client secret
@@ -529,13 +454,6 @@ See `.env.example` for all required variables.
 **Optional:**
 - `ASPNETCORE_ENVIRONMENT` - Development/Production (default: Development)
 
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open Pull Request
 
 ## 📄 License
 
