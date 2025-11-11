@@ -8,7 +8,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { SignalRProvider } from "@/contexts/SignalRContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-// import { ProtectedRoute } from "@/components/ProtectedRoute"; // Available for protected pages
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import About from "./pages/About";
@@ -48,10 +48,10 @@ const App = () => (
                 <Route path="/about" element={<About />} />
                 <Route path="/faq" element={<FAQ />} />
                 <Route path="/terms" element={<TermsOfService />} />
-                <Route path="/create-listing" element={<CreateListing />} />
-                <Route path="/my-listings" element={<MyListings />} />
-                <Route path="/my-pickup-tasks" element={<MyPickupTasks />} />
-                <Route path="/messages" element={<Messages />} />
+                <Route path="/create-listing" element={<ProtectedRoute><CreateListing /></ProtectedRoute>} />
+                <Route path="/my-listings" element={<ProtectedRoute><MyListings /></ProtectedRoute>} />
+                <Route path="/my-pickup-tasks" element={<ProtectedRoute><MyPickupTasks /></ProtectedRoute>} />
+                <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

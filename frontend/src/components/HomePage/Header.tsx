@@ -58,10 +58,12 @@ export const Header = ({ onMapClick, onDashboardClick }: HeaderProps) => {
             <Button variant="ghost" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="text-gray-700 hover:text-green-600">
               {t("common.home")}
             </Button>
-            <Button variant="ghost" onClick={onMapClick} className="text-gray-700 hover:text-green-600">
-              <MapPin className="w-4 h-4 mr-2" />
-              {t("common.exploreMap")}
-            </Button>
+            {user && (
+              <Button variant="ghost" onClick={onMapClick} className="text-gray-700 hover:text-green-600">
+                <MapPin className="w-4 h-4 mr-2" />
+                {t("common.exploreMap")}
+              </Button>
+            )}
             <Button variant="ghost" onClick={() => navigate("/about")} className="text-gray-700 hover:text-green-600">
               <Info className="w-4 h-4 mr-2" />
               {t("common.about")}
@@ -88,10 +90,12 @@ export const Header = ({ onMapClick, onDashboardClick }: HeaderProps) => {
                     {t("common.home")}
                   </Button>
 
-                  <Button variant="ghost" onClick={() => { onMapClick(); setMobileMenuOpen(false); }} className="justify-start">
-                    <MapPin className="w-4 h-4 mr-2" />
-                    {t("common.exploreMap")}
-                  </Button>
+                  {user && (
+                    <Button variant="ghost" onClick={() => { onMapClick(); setMobileMenuOpen(false); }} className="justify-start">
+                      <MapPin className="w-4 h-4 mr-2" />
+                      {t("common.exploreMap")}
+                    </Button>
+                  )}
 
                   <Button variant="ghost" onClick={() => { navigate("/about"); setMobileMenuOpen(false); }} className="justify-start">
                     <Info className="w-4 h-4 mr-2" />
