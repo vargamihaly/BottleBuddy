@@ -11,8 +11,10 @@ import { ConversationList } from "@/components/ConversationList";
 import { ChatBox } from "@/components/ChatBox";
 import { useBottleListings, useMyPickupRequests } from "@/hooks/api";
 import { pickupRequestService } from "@/api/services";
+import { useTranslation } from "react-i18next";
 
 const Messages = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -92,18 +94,18 @@ const Messages = () => {
 
   // Determine other party name
   const getOtherPartyName = () => {
-    if (!selectedConversation) return "User";
+    if (!selectedConversation) return t("messages.user");
 
     // Find the listing for this pickup request
     const listing = allListings.find((listing) => listing.id === selectedConversation.listingId);
 
     // If current user is the volunteer, show the listing owner's name
     if (selectedConversation.volunteerId === user?.id) {
-      return listing?.createdByUserName || listing?.createdByUserEmail || "Listing Owner";
+      return listing?.createdByUserName || listing?.createdByUserEmail || t("messages.listingOwner");
     }
 
     // If current user is the owner, show the volunteer's name
-    return selectedConversation.volunteerName || selectedConversation.volunteerEmail || "Volunteer";
+    return selectedConversation.volunteerName || selectedConversation.volunteerEmail || t("messages.volunteer");
   };
 
   if (!user) {
@@ -111,10 +113,10 @@ const Messages = () => {
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center">
         <Card className="max-w-md w-full mx-4 p-6">
           <div className="text-center">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Sign In Required</h2>
-            <p className="text-gray-600 mb-6">Please sign in to view your messages.</p>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">{t("messages.signInRequired")}</h2>
+            <p className="text-gray-600 mb-6">{t("messages.signInMessage")}</p>
             <Button onClick={() => navigate("/auth")} className="w-full">
-              Sign In
+              {t("messages.signIn")}
             </Button>
           </div>
         </Card>
@@ -135,9 +137,9 @@ const Messages = () => {
               <div>
                 <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
                   <MessageSquare className="w-6 h-6 text-green-600" />
-                  Messages
+                  {t("messages.title")}
                 </h1>
-                <p className="text-sm text-gray-600">Chat with your pickup partners</p>
+                <p className="text-sm text-gray-600">{t("messages.subtitle")}</p>
               </div>
             </div>
           </div>
@@ -154,7 +156,7 @@ const Messages = () => {
                 <div className="flex items-center justify-center h-full">
                   <div className="text-center">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto mb-2"></div>
-                    <p className="text-sm text-gray-600">Loading conversations...</p>
+                    <p className="text-sm text-gray-600">{t("messages.loadingConversations")}</p>
                   </div>
                 </div>
               ) : (
@@ -186,10 +188,10 @@ const Messages = () => {
                   <div className="text-center p-8">
                     <MessageSquare className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                     <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                      Select a Conversation
+                      {t("messages.selectConversation")}
                     </h3>
                     <p className="text-sm text-gray-600">
-                      Choose a conversation from the left to start chatting
+                      {t("messages.selectConversationDescription")}
                     </p>
                   </div>
                 </div>

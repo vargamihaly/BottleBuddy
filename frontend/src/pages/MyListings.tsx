@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -13,6 +14,7 @@ import { useMyBottleListings } from "@/hooks/api";
 
 const MyListings = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("active");
 
@@ -35,10 +37,10 @@ const MyListings = () => {
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center">
         <Card className="max-w-md w-full mx-4">
           <CardContent className="pt-6 text-center">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Sign In Required</h2>
-            <p className="text-gray-600 mb-6">Please sign in to view your listings.</p>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">{t("myListingsPage.signInRequired")}</h2>
+            <p className="text-gray-600 mb-6">{t("myListingsPage.signInMessage")}</p>
             <Button onClick={() => navigate("/auth")} className="w-full">
-              Sign In
+              {t("myListingsPage.signIn")}
             </Button>
           </CardContent>
         </Card>
@@ -57,8 +59,8 @@ const MyListings = () => {
                 <ArrowLeft className="w-5 h-5" />
               </Button>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">My Listings</h1>
-                <p className="text-sm text-gray-600">Manage all your bottle listings</p>
+                <h1 className="text-2xl font-bold text-gray-900">{t("myListingsPage.title")}</h1>
+                <p className="text-sm text-gray-600">{t("myListingsPage.subtitle")}</p>
               </div>
             </div>
             <Button
@@ -66,7 +68,7 @@ const MyListings = () => {
               className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
             >
               <Plus className="w-4 h-4 mr-2" />
-              New Listing
+              {t("myListingsPage.newListing")}
             </Button>
           </div>
         </div>
@@ -77,7 +79,7 @@ const MyListings = () => {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-3 mb-8">
             <TabsTrigger value="active" className="relative">
-              Active
+              {t("myListingsPage.tabs.active")}
               {activeListings.length > 0 && (
                 <Badge variant="secondary" className="ml-2 bg-green-100 text-green-700">
                   {activeListings.length}
@@ -85,7 +87,7 @@ const MyListings = () => {
               )}
             </TabsTrigger>
             <TabsTrigger value="claimed" className="relative">
-              Claimed
+              {t("myListingsPage.tabs.claimed")}
               {claimedListings.length > 0 && (
                 <Badge variant="secondary" className="ml-2 bg-blue-100 text-blue-700">
                   {claimedListings.length}
@@ -93,7 +95,7 @@ const MyListings = () => {
               )}
             </TabsTrigger>
             <TabsTrigger value="completed" className="relative">
-              Completed
+              {t("myListingsPage.tabs.completed")}
               {completedListings.length > 0 && (
                 <Badge variant="secondary" className="ml-2 bg-gray-100 text-gray-700">
                   {completedListings.length}
@@ -105,29 +107,29 @@ const MyListings = () => {
           <TabsContent value="active" className="space-y-4">
             <div className="flex items-center justify-between mb-4">
               <p className="text-sm text-gray-600">
-                Listings available for pickup requests
+                {t("myListingsPage.descriptions.active")}
               </p>
             </div>
             {isLoading ? (
               <BottleListingsGridSkeleton count={6} />
             ) : isError ? (
               <div className="text-center py-12">
-                <p className="text-red-600 mb-4">Failed to load listings.</p>
+                <p className="text-red-600 mb-4">{t("myListingsPage.error.title")}</p>
                 <Button onClick={() => window.location.reload()} variant="outline">
-                  Try Again
+                  {t("myListingsPage.error.button")}
                 </Button>
               </div>
             ) : activeListings.length === 0 ? (
               <Card>
                 <CardContent className="py-12 text-center">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No active listings</h3>
-                  <p className="text-gray-600 mb-4">Create a new listing to get started!</p>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{t("myListingsPage.empty.active.title")}</h3>
+                  <p className="text-gray-600 mb-4">{t("myListingsPage.empty.active.message")}</p>
                   <Button
                     onClick={() => navigate("/create-listing")}
                     className="bg-gradient-to-r from-green-600 to-emerald-600"
                   >
                     <Plus className="w-4 h-4 mr-2" />
-                    Create Listing
+                    {t("myListingsPage.empty.active.button")}
                   </Button>
                 </CardContent>
               </Card>
@@ -143,7 +145,7 @@ const MyListings = () => {
           <TabsContent value="claimed" className="space-y-4">
             <div className="flex items-center justify-between mb-4">
               <p className="text-sm text-gray-600">
-                Listings with accepted pickup requests
+                {t("myListingsPage.descriptions.claimed")}
               </p>
             </div>
             {isLoading ? (
@@ -151,9 +153,9 @@ const MyListings = () => {
             ) : claimedListings.length === 0 ? (
               <Card>
                 <CardContent className="py-12 text-center">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No claimed listings</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{t("myListingsPage.empty.claimed.title")}</h3>
                   <p className="text-gray-600">
-                    Listings appear here when you accept a pickup request.
+                    {t("myListingsPage.empty.claimed.message")}
                   </p>
                 </CardContent>
               </Card>
@@ -169,7 +171,7 @@ const MyListings = () => {
           <TabsContent value="completed" className="space-y-4">
             <div className="flex items-center justify-between mb-4">
               <p className="text-sm text-gray-600">
-                Successfully completed bottle exchanges
+                {t("myListingsPage.descriptions.completed")}
               </p>
             </div>
             {isLoading ? (
@@ -177,9 +179,9 @@ const MyListings = () => {
             ) : completedListings.length === 0 ? (
               <Card>
                 <CardContent className="py-12 text-center">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No completed listings</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{t("myListingsPage.empty.completed.title")}</h3>
                   <p className="text-gray-600">
-                    Completed exchanges will appear here.
+                    {t("myListingsPage.empty.completed.message")}
                   </p>
                 </CardContent>
               </Card>

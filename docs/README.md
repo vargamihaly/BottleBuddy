@@ -5,13 +5,16 @@ A community-driven platform for sharing and returning plastic bottles in Hungary
 [![.NET](https://img.shields.io/badge/.NET-9.0-512BD4?logo=dotnet)](https://dotnet.microsoft.com/)
 [![React](https://img.shields.io/badge/React-18-61DAFB?logo=react)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript)](https://www.typescriptlang.org/)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql)](https://www.postgresql.org/)
+[![SQL Server](https://img.shields.io/badge/SQL%20Server-2022-CC2927?logo=microsoftSqlServer)](https://www.microsoft.com/sql-server)
+[![Azure](https://img.shields.io/badge/Azure-Deploy-0078D4?logo=microsoftazure)](https://azure.microsoft.com/)
 [![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker)](https://www.docker.com/)
 [![Tests](https://img.shields.io/badge/Tests-106%20Passing-success?logo=xunit)](https://github.com/xunit/xunit)
 
 ## 🌟 Overview
 
 BottleBuddy connects people who have bottles to return with volunteers who can help return them, splitting the 50 HUF refund per bottle. The platform makes recycling easier, more profitable, and builds community connections across Hungary.
+
+**🌐 Live Demo:** https://victorious-water-0d5f77603.3.azurestaticapps.net/
 
 ## 📁 Project Structure
 
@@ -62,8 +65,8 @@ BottleBuddy/
 - **Docker & Docker Compose** (recommended)
 - OR manually:
   - Node.js 18+
-  - .NET 9 SDK
-  - PostgreSQL 16
+  - .NET 9.0 SDK
+  - SQL Server 2022 (or Azure SQL Database)
 
 ### Setup with Docker (Recommended)
 
@@ -90,7 +93,7 @@ BottleBuddy/
    - 🔌 Backend API: http://localhost:3668
    - 📚 API Documentation (Swagger): http://localhost:3668/swagger
    - 🔍 Jaeger Tracing UI: http://localhost:16686
-   - 🗄️ PostgreSQL: localhost:5432
+   - 🗄️ SQL Server: localhost:1433
 
 ### Google OAuth Setup
 
@@ -107,32 +110,39 @@ BottleBuddy/
 ## 🏗️ Tech Stack
 
 ### Backend
-- **.NET 9** with ASP.NET Core
-- **PostgreSQL 16** with Entity Framework Core
+- **.NET 9.0** with ASP.NET Core
+- **SQL Server 2022** (or Azure SQL Database) with Entity Framework Core 9.0
+- **SignalR** for real-time WebSocket communication
 - **ASP.NET Core Identity** for user management
 - **JWT** + **Google OAuth** authentication
+- **SixLabors.ImageSharp** for image processing and optimization
+- **Serilog** for structured logging with Application Insights integration
 - **OpenTelemetry** + **Jaeger** for distributed tracing
 - **Swagger/OpenAPI** for API documentation
 
 ### Frontend
 - **React 18** with **TypeScript**
 - **Vite** for fast builds and HMR
-- **TanStack Query** (React Query) for data fetching & caching
+- **TanStack Query v5** (React Query) for data fetching & caching
 - **TanStack Query Devtools** for debugging queries
-- **React Router** for navigation
+- **@microsoft/signalr** for real-time WebSocket connections
+- **React Router v6** for navigation
+- **react-i18next** for internationalization (English/Hungarian)
 - **Tailwind CSS** + **shadcn/ui** components
 - **Leaflet** + **React Leaflet** for interactive maps
 - **Lucide Icons**
 - **React Hook Form** + **Zod** for authentication flows; controlled inputs for listing creation
 - **Google OAuth** (@react-oauth/google)
-- **Sonner** + shadcn `<Toaster />` for toast notifications
+- **Sonner** for toast notifications
+- **date-fns** for date/time formatting
 
 ### Infrastructure
 - **Docker** with multi-stage builds
 - **Docker Compose** for orchestration
 - **Nginx** as reverse proxy
-- **PostgreSQL 16** Alpine
-- **Jaeger** all-in-one for tracing
+- **SQL Server 2022** for local development
+- **Azure** for cloud hosting (production)
+- **Jaeger** all-in-one for distributed tracing
 
 ## 📋 Features
 
@@ -188,7 +198,6 @@ BottleBuddy/
 
 ### 🚧 In Progress
 - Push notifications
-- Payment integration
 
 ### 📝 Planned
 - Advanced search and filters
@@ -344,17 +353,83 @@ Potential improvements planned for the messaging system:
 - `/auth` - Authentication page (login/register with email or Google OAuth)
 - `/auth/success` - OAuth callback success page
 - `/about` - About page
+- `/faq` - Frequently Asked Questions
+- `/terms` - Terms of Service
 
 ### Optional Protected Routes
 Routes are public by default. Wrap them in `<ProtectedRoute>` once authentication gating is required:
 - `/create-listing` - Create a new bottle listing
-- `/my-listings` - View and manage user's bottle listings
+- `/my-listings` - View and manage user's bottle listings (Active/Claimed/Completed tabs)
 - `/my-pickup-tasks` - View active and completed pickup tasks (with status tabs)
 - `/messages` - Dedicated messaging page with conversation list and chat interface
 
 ### In-App Views (Accessible from Home)
 - **User Dashboard** - View user stats, earnings, recent activity, and profile
 - **Map View** - Interactive map showing all bottle listings with markers
+
+## 🌍 Internationalization (i18n)
+
+BottleBuddy supports **English** and **Hungarian** languages with full internationalization.
+
+### Language Support
+
+- **English** (`en`) - Default language
+- **Hungarian** (`hu`) - Complete translations for all user-facing text
+- **Language Switcher** - Available in header for easy switching
+- **Persistent Preference** - Language choice saved to localStorage
+
+### Translation Coverage
+
+- ✅ All pages and components
+- ✅ Form validation messages
+- ✅ Error messages and notifications
+- ✅ Dashboard and statistics
+- ✅ Messaging interface
+- ✅ FAQ and about pages
+- ✅ Terms of service
+- ⚠️ Some components still need Hungarian translations (see [Translation Report](#) for details)
+
+### Implementation Details
+
+- **Library**: react-i18next with i18next
+- **Configuration**: `frontend/src/lib/i18n.ts`
+- **Usage**: `useTranslation()` hook in components
+- **Format**: JSON-based translation keys with support for:
+  - Pluralization (count-based)
+  - Variable interpolation (`{{variable}}`)
+  - Nested keys for organization
+
+### Adding New Translations
+
+1. Add translation keys to `frontend/src/lib/i18n.ts`:
+   ```typescript
+   en: {
+     translation: {
+       myFeature: {
+         title: "My Feature",
+         description: "Description here"
+       }
+     }
+   },
+   hu: {
+     translation: {
+       myFeature: {
+         title: "Saját Funkció",
+         description: "Leírás itt"
+       }
+     }
+   }
+   ```
+
+2. Use in components:
+   ```typescript
+   import { useTranslation } from 'react-i18next';
+
+   const MyComponent = () => {
+     const { t } = useTranslation();
+     return <h1>{t("myFeature.title")}</h1>;
+   };
+   ```
 
 ## 🔧 Development
 
@@ -453,16 +528,19 @@ docker-compose up -d
 
 ## 🌍 Environment Variables
 
-See `.env.example` for all required variables.
+See `docker/.env.example` for all required variables.
 
 **Required:**
-- `DB_PASSWORD` - SQL password
+- `DB_PASSWORD` - SQL Server SA password (min 8 chars, must include uppercase, lowercase, digits, and special chars)
 - `JWT_SECRET` - JWT signing key (min 32 characters)
 - `GOOGLE_CLIENT_ID` - Google OAuth client ID
 - `GOOGLE_CLIENT_SECRET` - Google OAuth client secret
 
 **Optional:**
 - `ASPNETCORE_ENVIRONMENT` - Development/Production (default: Development)
+- `DB_USER` - SQL Server username (default: sa)
+- `DB_NAME` - Database name (default: BottleBuddy)
+
 
 
 ## 📄 License

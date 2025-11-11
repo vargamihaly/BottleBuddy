@@ -199,42 +199,53 @@ const resources = {
         signOutSuccess: "Signed out successfully",
         signOutDescription: "You have been successfully signed out from your BottleBuddy account.",
         signOutError: "Sign out failed. Please try again.",
-          backToHome: "Back to Home",
-          welcomeBack: "Welcome Back",
-          joinBottleBuddy: "Join BottleBuddy",
-          or: "or",
-          emailPlaceholder: "your@email.com",
-          passwordPlaceholder: "••••••••",
-          fullName: "Full Name",
-          fullNamePlaceholder: "John Doe",
-          optional: "(optional)",
-          username: "Username",
-          usernamePlaceholder: "johndoe",
-          usernameHint: "Letters, numbers, underscores, and hyphens only",
-          phone: "Phone",
-          phonePlaceholder: "+1234567890",
-          confirmPassword: "Confirm Password",
-          passwordHint: "Must be 8+ characters with uppercase, lowercase, and number",
-          signIn: "Sign In",
-          signUp: "Sign up",
-          createAccount: "Create Account",
-          signingIn: "Signing In...",
-          creatingAccount: "Creating Account...",
-          alreadyHaveAccount: "Already have an account?",
-          dontHaveAccount: "Don't have an account?",
-          // Validation messages
-          emailRequired: "Email is required",
-          emailInvalid: "Please enter a valid email address",
-          passwordRequired: "Password is required",
-          passwordMin: "Password must be at least 8 characters",
-          passwordUppercase: "Password must contain at least one uppercase letter",
-          passwordLowercase: "Password must contain at least one lowercase letter",
-          passwordNumber: "Password must contain at least one number",
-          passwordsDontMatch: "Passwords don't match",
-          fullNameMax: "Full name cannot exceed 100 characters",
-          usernameMax: "Username cannot exceed 50 characters",
-          usernameInvalid: "Username can only contain letters, numbers, underscores, and hyphens",
-          phoneInvalid: "Please enter a valid phone number"
+        backToHome: "Back to Home",
+        welcomeBack: "Welcome Back",
+        joinBottleBuddy: "Join BottleBuddy",
+        or: "or",
+        emailPlaceholder: "your@email.com",
+        passwordPlaceholder: "••••••••",
+        fullName: "Full Name",
+        fullNamePlaceholder: "John Doe",
+        optional: "(optional)",
+        username: "Username",
+        usernamePlaceholder: "johndoe",
+        usernameHint: "Letters, numbers, underscores, and hyphens only",
+        phone: "Phone",
+        phonePlaceholder: "+1234567890",
+        confirmPassword: "Confirm Password",
+        passwordHint: "Must be 8+ characters with uppercase, lowercase, and number",
+        signIn: "Sign In",
+        signUp: "Sign up",
+        createAccount: "Create Account",
+        signingIn: "Signing In...",
+        creatingAccount: "Creating Account...",
+        alreadyHaveAccount: "Already have an account?",
+        dontHaveAccount: "Don't have an account?",
+        // Validation messages
+        emailRequired: "Email is required",
+        emailInvalid: "Please enter a valid email address",
+        passwordRequired: "Password is required",
+        passwordMin: "Password must be at least 8 characters",
+        passwordUppercase: "Password must contain at least one uppercase letter",
+        passwordLowercase: "Password must contain at least one lowercase letter",
+        passwordNumber: "Password must contain at least one number",
+        passwordsDontMatch: "Passwords don't match",
+        fullNameMax: "Full name cannot exceed 100 characters",
+        usernameMax: "Username cannot exceed 50 characters",
+        usernameInvalid: "Username can only contain letters, numbers, underscores, and hyphens",
+        phoneInvalid: "Please enter a valid phone number",
+        // Toast messages
+        googleSignInSuccess: "Welcome!",
+        googleSignInSuccessDesc: "Successfully signed in with Google",
+        googleSignInError: "Authentication Failed",
+        googleSignInErrorDesc: "Could not complete Google sign-in",
+        signInSuccess: "Welcome back!",
+        signInSuccessDesc: "Successfully signed in",
+        signInError: "Sign in failed",
+        signUpSuccess: "Account created!",
+        signUpSuccessDesc: "Welcome to BottleBuddy",
+        signUpError: "Sign up failed"
       },
       listing: {
         createTitle: "List Your Bottles",
@@ -317,6 +328,43 @@ const resources = {
         confirmReject: "Reject this pickup request?",
         confirmComplete: "Mark this pickup as completed? This confirms the bottles were successfully exchanged."
       },
+      myListingsPage: {
+        title: "My Listings",
+        subtitle: "Manage all your bottle listings",
+        newListing: "New Listing",
+        signInRequired: "Sign In Required",
+        signInMessage: "Please sign in to view your listings.",
+        signIn: "Sign In",
+        tabs: {
+          active: "Active",
+          claimed: "Claimed",
+          completed: "Completed"
+        },
+        descriptions: {
+          active: "Listings available for pickup requests",
+          claimed: "Listings with accepted pickup requests",
+          completed: "Successfully completed bottle exchanges"
+        },
+        empty: {
+          active: {
+            title: "No active listings",
+            message: "Create a new listing to get started!",
+            button: "Create Listing"
+          },
+          claimed: {
+            title: "No claimed listings",
+            message: "Listings appear here when you accept a pickup request."
+          },
+          completed: {
+            title: "No completed listings",
+            message: "Completed exchanges will appear here."
+          }
+        },
+        error: {
+          title: "Failed to load listings.",
+          button: "Try Again"
+        }
+      },
       userDashboard: {
         title: "My Dashboard",
         trackImpact: "Track your recycling impact",
@@ -353,19 +401,78 @@ const resources = {
       },
       messages: {
         title: "Messages",
+        subtitle: "Chat with your pickup partners",
+        signInRequired: "Sign In Required",
+        signInMessage: "Please sign in to view your messages.",
+        signIn: "Sign In",
         conversations: "Conversations",
-        noConversations: "No conversations yet",
-        noConversationsDescription: "Start a pickup request to begin messaging",
-        selectConversation: "Select a conversation",
-        selectConversationDescription: "Choose a conversation from the list to view messages",
+        activeConversations: "active conversation(s)",
+        noConversations: "No Conversations",
+        noConversationsDescription: "You don't have any active pickup requests yet.",
+        createListingOrRequest: "Create a listing or request a pickup to start chatting!",
+        selectConversation: "Select a Conversation",
+        selectConversationDescription: "Choose a conversation from the left to start chatting",
+        loadingConversations: "Loading conversations...",
+        listingOwner: "Listing Owner",
+        volunteer: "Volunteer",
+        user: "User",
         typeMessage: "Type a message...",
         send: "Send",
+        sending: "Sending...",
         charactersLeft: "{{count}} characters left",
-        attachImage: "Attach Image",
+        characterLimit: "Message content must not exceed 1000 characters",
+        attachImage: "Attach image",
+        attachImageTitle: "Attach image",
         delivered: "Delivered",
-        read: "Read",
+        read: "Read {{time}}",
+        readAt: "Read at {{time}}",
         typing: "is typing...",
-        you: "You"
+        typingMultiple: "{{users}} are typing...",
+        typingOthers: "{{count}} others are typing...",
+        you: "You",
+        unknown: "Unknown",
+        imageLoadError: "Failed to load image",
+        noInitialMessage: "No initial message",
+        loadingMessages: "Loading messages...",
+        loadError: "Failed to load messages",
+        tryAgain: "Try Again",
+        noMessages: "No messages yet",
+        startConversation: "Start a conversation with {{name}}!",
+        conversationEnded: "This conversation is no longer active",
+        messagePlaceholder: "Message {{name}}...",
+        enterToSend: "Press Enter to send, Shift+Enter for new line",
+        theOtherParty: "the other party",
+        unreadMessages: "message(s)"
+      },
+      myPickupTasks: {
+        title: "My Pickup Tasks",
+        subtitle: "Manage all your pickup tasks",
+        signInRequired: "Sign In Required",
+        signInMessage: "Please sign in to view your pickup tasks.",
+        signIn: "Sign In",
+        tabs: {
+          active: "Active",
+          completed: "Completed"
+        },
+        descriptions: {
+          active: "Pickup tasks pending or in progress",
+          completed: "Successfully completed bottle pickups"
+        },
+        empty: {
+          active: {
+            title: "No active pickup tasks",
+            message: "Browse available bottles to start picking up!",
+            button: "Browse Bottles"
+          },
+          completed: {
+            title: "No completed pickup tasks",
+            message: "Completed pickups will appear here."
+          }
+        },
+        error: {
+          title: "Failed to load pickup tasks.",
+          button: "Try Again"
+        }
       },
       faq: {
         title: "Frequently Asked Questions",
@@ -878,6 +985,43 @@ const resources = {
         confirmReject: "Elutasítod ezt az átvételi kérelmet?",
         confirmComplete: "Befejezettként jelölöd meg ezt az átvételt? Ez megerősíti, hogy a palackok sikeresen cserélődtek."
       },
+      myListingsPage: {
+        title: "Hirdetéseim",
+        subtitle: "Kezeld az összes palackhirdetésedet",
+        newListing: "Új hirdetés",
+        signInRequired: "Bejelentkezés szükséges",
+        signInMessage: "Kérjük, jelentkezz be a hirdetéseid megtekintéséhez.",
+        signIn: "Bejelentkezés",
+        tabs: {
+          active: "Aktív",
+          claimed: "Lefoglalt",
+          completed: "Befejezett"
+        },
+        descriptions: {
+          active: "Átvételi kérelmekre váró hirdetések",
+          claimed: "Elfogadott átvételi kérelmekkel rendelkező hirdetések",
+          completed: "Sikeresen befejezett palackcserék"
+        },
+        empty: {
+          active: {
+            title: "Nincsenek aktív hirdetések",
+            message: "Hozz létre egy új hirdetést a kezdéshez!",
+            button: "Hirdetés létrehozása"
+          },
+          claimed: {
+            title: "Nincsenek lefoglalt hirdetések",
+            message: "A hirdetések itt jelennek meg, amikor elfogadsz egy átvételi kérelmet."
+          },
+          completed: {
+            title: "Nincsenek befejezett hirdetések",
+            message: "A befejezett cserék itt fognak megjelenni."
+          }
+        },
+        error: {
+          title: "A hirdetések betöltése sikertelen.",
+          button: "Próbáld újra"
+        }
+      },
       userDashboard: {
         title: "Irányítópultom",
         trackImpact: "Kövesd az újrahasznosítási hatásodat",
@@ -914,19 +1058,78 @@ const resources = {
       },
       messages: {
         title: "Üzenetek",
+        subtitle: "Beszélj az átvételi partnereddel",
+        signInRequired: "Bejelentkezés szükséges",
+        signInMessage: "Kérjük, jelentkezz be az üzeneteid megtekintéséhez.",
+        signIn: "Bejelentkezés",
         conversations: "Beszélgetések",
-        noConversations: "Még nincsenek beszélgetések",
-        noConversationsDescription: "Indíts egy átvételi kérelmet az üzenetküldés megkezdéséhez",
-        selectConversation: "Válassz egy beszélgetést",
-        selectConversationDescription: "Válassz egy beszélgetést a listából az üzenetek megtekintéséhez",
-        typeMessage: "Írj egy üzenetet...",
+        activeConversations: "aktív beszélgetés",
+        noConversations: "Nincsenek Beszélgetések",
+        noConversationsDescription: "Még nincsenek aktív átvételi kérelmeid.",
+        createListingOrRequest: "Hozz létre egy hirdetést vagy kérj átvételt a csevegés megkezdéséhez!",
+        selectConversation: "Válassz Beszélgetést",
+        selectConversationDescription: "Válassz egy beszélgetést a bal oldalon a csevegés megkezdéséhez",
+        loadingConversations: "Beszélgetések betöltése...",
+        listingOwner: "Hirdetés tulajdonosa",
+        volunteer: "Önkéntes",
+        user: "Felhasználó",
+        typeMessage: "Írj üzenetet...",
         send: "Küldés",
+        sending: "Küldés...",
         charactersLeft: "{{count}} karakter maradt",
+        characterLimit: "Az üzenet nem lehet hosszabb 1000 karakternél",
         attachImage: "Kép csatolása",
+        attachImageTitle: "Kép csatolása",
         delivered: "Kézbesítve",
-        read: "Olvasva",
+        read: "Elolvasva {{time}}",
+        readAt: "Elolvasva: {{time}}",
         typing: "gépel...",
-        you: "Te"
+        typingMultiple: "{{users}} gépelnek...",
+        typingOthers: "{{count}} másik személy gépel...",
+        you: "Te",
+        unknown: "Ismeretlen",
+        imageLoadError: "A kép betöltése sikertelen",
+        noInitialMessage: "Nincs kezdő üzenet",
+        loadingMessages: "Üzenetek betöltése...",
+        loadError: "Az üzenetek betöltése sikertelen",
+        tryAgain: "Próbáld újra",
+        noMessages: "Még nincsenek üzenetek",
+        startConversation: "Kezdj beszélgetést {{name}} felhasználóval!",
+        conversationEnded: "Ez a beszélgetés már nem aktív",
+        messagePlaceholder: "Üzenet {{name}} részére...",
+        enterToSend: "Enter a küldéshez, Shift+Enter az új sorhoz",
+        theOtherParty: "a másik fél",
+        unreadMessages: "üzenet"
+      },
+      myPickupTasks: {
+        title: "Átvételi feladataim",
+        subtitle: "Kezeld az összes átvételi feladatodat",
+        signInRequired: "Bejelentkezés szükséges",
+        signInMessage: "Kérjük, jelentkezz be az átvételi feladataid megtekintéséhez.",
+        signIn: "Bejelentkezés",
+        tabs: {
+          active: "Aktív",
+          completed: "Befejezett"
+        },
+        descriptions: {
+          active: "Függőben lévő vagy folyamatban lévő átvételi feladatok",
+          completed: "Sikeresen befejezett palackátvételek"
+        },
+        empty: {
+          active: {
+            title: "Nincsenek aktív átvételi feladatok",
+            message: "Böngéssz az elérhető palackok között az átvétel megkezdéséhez!",
+            button: "Palackok böngészése"
+          },
+          completed: {
+            title: "Nincsenek befejezett átvételi feladatok",
+            message: "A befejezett átvételek itt fognak megjelenni."
+          }
+        },
+        error: {
+          title: "Az átvételi feladatok betöltése sikertelen.",
+          button: "Próbáld újra"
+        }
       },
       faq: {
         title: "Gyakran Ismételt Kérdések",
@@ -1021,6 +1224,8 @@ const resources = {
         creatingAccount: "Fiók létrehozása...",
         alreadyHaveAccount: "Már van fiókod?",
         dontHaveAccount: "Nincs még fiókod?",
+        signInWithGoogle: "Bejelentkezés Google-lal",
+        signUpWithGoogle: "Regisztráció Google-lal",
         // Validációs üzenetek
         emailRequired: "E-mail cím megadása kötelező",
         emailInvalid: "Kérjük, adj meg egy érvényes e-mail címet",
@@ -1033,7 +1238,18 @@ const resources = {
         fullNameMax: "A teljes név nem lehet hosszabb 100 karakternél",
         usernameMax: "A felhasználónév nem lehet hosszabb 50 karakternél",
         usernameInvalid: "A felhasználónév csak betűket, számokat, aláhúzást és kötőjelet tartalmazhat",
-        phoneInvalid: "Kérjük, adj meg egy érvényes telefonszámot"
+        phoneInvalid: "Kérjük, adj meg egy érvényes telefonszámot",
+        // Toast üzenetek
+        googleSignInSuccess: "Üdvözlünk!",
+        googleSignInSuccessDesc: "Sikeresen bejelentkeztél Google-lal",
+        googleSignInError: "Hitelesítés sikertelen",
+        googleSignInErrorDesc: "A Google bejelentkezés nem sikerült",
+        signInSuccess: "Üdvözlünk vissza!",
+        signInSuccessDesc: "Sikeresen bejelentkeztél",
+        signInError: "Bejelentkezés sikertelen",
+        signUpSuccess: "Fiók létrehozva!",
+        signUpSuccessDesc: "Üdvözlünk a BottleBuddy-n",
+        signUpError: "Regisztráció sikertelen"
       },
       locationPicker: {
         title: "Válassz Helyet a Térképen",

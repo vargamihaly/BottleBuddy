@@ -6,6 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { MessageCircle, Inbox } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useMessages } from "@/hooks/useMessages";
+import { useTranslation } from "react-i18next";
 
 interface ConversationListProps {
   pickupRequests: PickupRequest[];
@@ -23,6 +24,7 @@ interface ConversationItemProps {
 }
 
 const ConversationItem = ({ pickupRequest, listings, isSelected, onClick, currentUserId }: ConversationItemProps) => {
+  const { t } = useTranslation();
   const { unreadCount } = useMessages(pickupRequest.id, { fetchMessages: false });
 
   // Find the listing for this pickup request
@@ -31,8 +33,8 @@ const ConversationItem = ({ pickupRequest, listings, isSelected, onClick, curren
   // Determine the other party's name
   const isUserVolunteer = pickupRequest.volunteerId === currentUserId;
   const otherPartyName = isUserVolunteer
-    ? listing?.createdByUserName || listing?.createdByUserEmail || "Listing Owner"
-    : pickupRequest.volunteerName || pickupRequest.volunteerEmail || "Volunteer";
+    ? listing?.createdByUserName || listing?.createdByUserEmail || t("messages.listingOwner")
+    : pickupRequest.volunteerName || pickupRequest.volunteerEmail || t("messages.volunteer");
 
   const getInitials = (name?: string) => {
     if (!name) return "?";
@@ -79,7 +81,7 @@ const ConversationItem = ({ pickupRequest, listings, isSelected, onClick, curren
           </div>
 
           <p className="text-xs text-gray-600 truncate mb-2">
-            {pickupRequest.message || "No initial message"}
+            {pickupRequest.message || t("messages.noInitialMessage")}
           </p>
 
           <div className="flex items-center justify-between">
@@ -99,6 +101,7 @@ export const ConversationList = ({
   selectedConversationId,
   onSelectConversation,
 }: ConversationListProps) => {
+  const { t } = useTranslation();
   const { user } = useAuth();
 
   // Filter active conversations (pending or accepted)
@@ -110,12 +113,12 @@ export const ConversationList = ({
     return (
       <div className="flex flex-col items-center justify-center h-full p-8 text-center">
         <Inbox className="w-16 h-16 text-gray-300 mb-4" />
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">No Conversations</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">{t("messages.noConversations")}</h3>
         <p className="text-sm text-gray-600">
-          You don't have any active pickup requests yet.
+          {t("messages.noConversationsDescription")}
         </p>
         <p className="text-xs text-gray-500 mt-2">
-          Create a listing or request a pickup to start chatting!
+          {t("messages.createListingOrRequest")}
         </p>
       </div>
     );
@@ -127,10 +130,10 @@ export const ConversationList = ({
       <div className="p-4 border-b border-gray-200 bg-white">
         <div className="flex items-center space-x-2">
           <MessageCircle className="w-5 h-5 text-green-600" />
-          <h2 className="text-lg font-semibold text-gray-900">Messages</h2>
+          <h2 className="text-lg font-semibold text-gray-900">{t("messages.conversations")}</h2>
         </div>
         <p className="text-xs text-gray-600 mt-1">
-          {activeConversations.length} active conversation{activeConversations.length !== 1 ? "s" : ""}
+          {t("messages.activeConversations")}
         </p>
       </div>
 

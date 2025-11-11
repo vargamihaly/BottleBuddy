@@ -11,6 +11,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { MessageCircle, Loader2, AlertCircle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CreateMessage } from "@/types";
+import { useTranslation } from "react-i18next";
 
 interface ChatBoxProps {
   pickupRequestId: string;
@@ -20,10 +21,12 @@ interface ChatBoxProps {
 
 export const ChatBox = ({
   pickupRequestId,
-  otherPartyName = "the other party",
+  otherPartyName,
   disabled = false,
 }: ChatBoxProps) => {
+  const { t } = useTranslation();
   const { user } = useAuth();
+  const defaultOtherPartyName = otherPartyName || t("messages.theOtherParty");
   const {
     messages,
     isLoading,
@@ -58,9 +61,9 @@ export const ChatBox = ({
   // Get names of typing users
   const typingUserNames = useMemo(() => {
     return typingUsers
-      .map((userId) => userNamesMap.get(userId) || otherPartyName)
+      .map((userId) => userNamesMap.get(userId) || defaultOtherPartyName)
       .filter((name) => name !== undefined);
-  }, [typingUsers, userNamesMap, otherPartyName]);
+  }, [typingUsers, userNamesMap, defaultOtherPartyName]);
 
   // Auto-scroll to bottom on new messages
   const scrollToBottom = (behavior: ScrollBehavior = "smooth") => {
@@ -116,7 +119,7 @@ export const ChatBox = ({
       <Card className="h-[500px] flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-8 h-8 animate-spin text-green-600 mx-auto mb-2" />
-          <p className="text-sm text-gray-600">Loading messages...</p>
+          <p className="text-sm text-gray-600">{t("messages.loadingMessages")}</p>
         </div>
       </Card>
     );
@@ -127,10 +130,10 @@ export const ChatBox = ({
       <Card className="h-[500px] flex items-center justify-center">
         <div className="text-center px-4">
           <AlertCircle className="w-8 h-8 text-red-600 mx-auto mb-2" />
-          <p className="text-sm text-gray-600 mb-4">Failed to load messages</p>
+          <p className="text-sm text-gray-600 mb-4">{t("messages.loadError")}</p>
           <Button onClick={() => refetch()} variant="outline" size="sm">
             <RefreshCw className="w-4 h-4 mr-2" />
-            Try Again
+            {t("messages.tryAgain")}
           </Button>
         </div>
       </Card>
@@ -144,11 +147,11 @@ export const ChatBox = ({
         <div className="flex items-center justify-between">
           <CardTitle className="text-base flex items-center gap-2">
             <MessageCircle className="w-5 h-5 text-green-600" />
-            <span>Chat with {otherPartyName}</span>
+            <span>{t("messages.title")}</span>
           </CardTitle>
           {messages.length > 0 && (
             <span className="text-xs text-gray-500">
-              {messages.length} message{messages.length !== 1 ? "s" : ""}
+              {t("messages.unreadMessages")}
             </span>
           )}
         </div>
@@ -161,9 +164,9 @@ export const ChatBox = ({
             <div className="flex items-center justify-center h-full py-12">
               <div className="text-center">
                 <MessageCircle className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                <p className="text-sm text-gray-500 mb-1">No messages yet</p>
+                <p className="text-sm text-gray-500 mb-1">{t("messages.noMessages")}</p>
                 <p className="text-xs text-gray-400">
-                  Start a conversation with {otherPartyName}
+                  {t("messages.startConversation", { name: defaultOtherPartyName })}
                 </p>
               </div>
             </div>
@@ -190,7 +193,7 @@ export const ChatBox = ({
           <Alert className="m-4 mb-0 border-amber-200 bg-amber-50">
             <AlertCircle className="h-4 w-4 text-amber-600" />
             <AlertDescription className="text-sm text-amber-800">
-              This conversation is no longer active
+              {t("messages.conversationEnded")}
             </AlertDescription>
           </Alert>
         )}
@@ -200,7 +203,7 @@ export const ChatBox = ({
           onSend={handleSendMessage}
           isSending={isSending}
           disabled={disabled}
-          placeholder={`Message ${otherPartyName}...`}
+          placeholder={t("messages.messagePlaceholder", { name: defaultOtherPartyName })}
           onTypingStart={startTyping}
           onTypingStop={stopTyping}
         />

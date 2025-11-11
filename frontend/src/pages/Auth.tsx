@@ -16,67 +16,63 @@ import { ArrowLeft, Loader2, Recycle, Sparkles } from "lucide-react";
 import config from "@/config";
 import { useTranslation } from "react-i18next";
 
-// Validation schemas
-const signInSchema = z.object({
-  email: z
-    .string()
-    .min(1, "Email is required")
-    .email("Please enter a valid email address"),
-  password: z
-    .string()
-    .min(1, "Password is required"),
-});
-
-const signUpSchema = z.object({
-  email: z
-    .string()
-    .min(1, "Email is required")
-    .email("Please enter a valid email address"),
-  password: z
-    .string()
-    .min(8, "Password must be at least 8 characters")
-    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
-    .regex(/[a-z]/, "Password must contain at least one lowercase letter")
-    .regex(/[0-9]/, "Password must contain at least one number"),
-  confirmPassword: z.string(),
-  // Optional profile fields
-  fullName: z.string().max(100, "Full name cannot exceed 100 characters").optional(),
-  username: z
-    .string()
-    .max(50, "Username cannot exceed 50 characters")
-    .regex(/^[a-zA-Z0-9_-]*$/, "Username can only contain letters, numbers, underscores, and hyphens")
-    .optional()
-    .or(z.literal("")),
-  phone: z
-    .string()
-    .regex(/^(\+?[0-9\s\-()]+)?$/, "Please enter a valid phone number")
-    .optional()
-    .or(z.literal("")),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-});
-
-type SignInFormData = z.infer<typeof signInSchema>;
-type SignUpFormData = z.infer<typeof signUpSchema>;
-
-const getErrorMessage = (error: unknown, fallback: string): string => {
-  if (error instanceof Error && error.message) {
-    return error.message;
-  }
-  return fallback;
-};
-
 const Auth = () => {
-  const [isSignUp, setIsSignUp] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const { signInWithGoogle, signUp, signIn } = useAuth();
-  const { toast } = useToast();
-  const navigate = useNavigate();
-  const location = useLocation();
   const { t } = useTranslation();
 
-  // Form for sign in
+  // Validation schemas using translated messages
+  const signInSchema = z.object({
+    email: z
+      .string()
+      .min(1, t("auth.emailRequired"))
+      .email(t("auth.emailInvalid")),
+    password: z
+      .string()
+      .min(1, t("auth.passwordRequired")),
+  });
+
+  const signUpSchema = z.object({
+    email: z
+      .string()
+      .min(1, t("auth.emailRequired"))
+      .email(t("auth.emailInvalid")),
+    password: z
+      .string()
+      .min(8, t("auth.passwordMin"))
+      .regex(/[A-Z]/, t("auth.passwordUppercase"))
+      .regex(/[a-z]/, t("auth.passwordLowercase"))
+      .regex(/[0-9]/, t("auth.passwordNumber")),
+    confirmPassword: z.string(),
+    // Optional profile fields
+    fullName: z.string().max(100, t("auth.fullNameMax")).optional(),
+    username: z
+      .string()
+      .max(50, t("auth.usernameMax"))
+      .regex(/^[a-zA-Z0-9_-]*$/, t("auth.usernameInvalid"))
+      .optional()
+      .or(z.literal("")),
+    phone: z
+      .string()
+      .regex(/^(\+?[0-9\s\-()]+)?$/, t("auth.phoneInvalid"))
+      .optional()
+      .or(z.literal("")),
+  }).refine((data) => data.password === data.confirmPassword, {
+    message: t("auth.passwordsDontMatch"),
+    path: ["confirmPassword"],
+  });
+
+  type SignInFormData = z.infer<typeof signInSchema>;
+  type SignUpFormData = z.infer<typeof signUpSchema>;
+
+  const [isSignUp, setIsSignUp] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { signIn, signUp, signInWithGoogle } = useAuth();
+  const { toast } = useToast();
+
+  // Redirect if coming from a specific page
+  const from = (location.state as any)?.from?.pathname || "/";
+
+  // Sign in form
   const signInForm = useForm<SignInFormData>({
     resolver: zodResolver(signInSchema),
     defaultValues: {
@@ -85,7 +81,7 @@ const Auth = () => {
     },
   });
 
-  // Form for sign up
+  // Sign up form
   const signUpForm = useForm<SignUpFormData>({
     resolver: zodResolver(signUpSchema),
     defaultValues: {
@@ -98,417 +94,407 @@ const Auth = () => {
     },
   });
 
-  const currentForm = isSignUp ? signUpForm : signInForm;
-
-  useEffect(() => {
-    // Handle legacy URL-based token (deprecated, for backwards compatibility)
-    const params = new URLSearchParams(location.search);
-    const token = params.get("token");
-    if (token) {
-      localStorage.setItem("token", token);
-      window.location.href = "/";
-      return;
-    }
-
-    // Handle cookie-based auth success from Google OAuth
-    if (location.pathname === "/auth/success") {
-      // Token is now in httpOnly cookie, need to fetch it via API
-      const checkAuth = async () => {
-        try {
-          // The cookie will be sent automatically with this request
-          const response = await fetch(`${config.api.baseUrl}/api/auth/me`, {
-            credentials: 'include' // Important: include cookies
-          });
-
-          if (response.ok) {
-            const userData = await response.json();
-            // Extract token from response headers if available, or rely on cookie
-            toast({
-              title: "Welcome!",
-              description: "Successfully signed in with Google",
-            });
-            navigate("/");
-          } else {
-            toast({
-              title: "Authentication Failed",
-              description: "Could not complete Google sign-in",
-              variant: "destructive",
-            });
-            navigate("/auth");
-          }
-        } catch (error) {
-          console.error("Auth check failed:", error);
-          navigate("/auth");
-        }
-      };
-
-      checkAuth();
-    }
-  }, [location, navigate, toast]);
-
-  // Reset form when switching between sign in/sign up
+  // Handle form switching - reset forms when switching
   useEffect(() => {
     signInForm.reset();
     signUpForm.reset();
-  }, [isSignUp, signInForm, signUpForm]);
+  }, [isSignUp]);
 
   const onSignInSubmit = async (data: SignInFormData) => {
-    setLoading(true);
-
     try {
       await signIn(data.email, data.password);
       toast({
-        title: "Welcome back!",
-        description: "You have successfully signed in.",
+        title: t("auth.signInSuccess"),
+        description: t("auth.signInSuccessDesc"),
       });
-      navigate("/");
-    } catch (error: unknown) {
+      navigate(from, { replace: true });
+    } catch (error: any) {
+      console.error("Sign in error:", error);
       toast({
-        title: "Sign In Failed",
-        description: getErrorMessage(error, "An unexpected error occurred. Please try again."),
+        title: t("auth.signInError"),
+        description: error?.response?.data?.error || error?.message || t("common.error"),
         variant: "destructive",
       });
-    } finally {
-      setLoading(false);
     }
   };
 
   const onSignUpSubmit = async (data: SignUpFormData) => {
-    setLoading(true);
-
     try {
-      await signUp(
-        data.email,
-        data.password,
-        data.fullName || undefined,
-        data.username || undefined,
-        data.phone || undefined
-      );
-      toast({
-        title: "Account created!",
-        description: "Welcome to BottleShare!",
+      await signUp({
+        email: data.email,
+        password: data.password,
+        fullName: data.fullName || undefined,
+        username: data.username || undefined,
+        phone: data.phone || undefined,
       });
-      navigate("/");
-    } catch (error: unknown) {
       toast({
-        title: "Sign Up Failed",
-        description: getErrorMessage(error, "An unexpected error occurred. Please try again."),
+        title: t("auth.signUpSuccess"),
+        description: t("auth.signUpSuccessDesc"),
+      });
+      navigate(from, { replace: true });
+    } catch (error: any) {
+      console.error("Sign up error:", error);
+      toast({
+        title: t("auth.signUpError"),
+        description: error?.response?.data?.error || error?.message || t("common.error"),
         variant: "destructive",
       });
-    } finally {
-      setLoading(false);
     }
   };
 
   const handleGoogleSuccess = async (credentialResponse: CredentialResponse) => {
-    if (!credentialResponse.credential) {
-      toast({
-        title: "Error",
-        description: "No credential received from Google",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setLoading(true);
     try {
-      await signInWithGoogle(credentialResponse.credential);
+      const idToken = credentialResponse.credential;
+      if (!idToken) {
+        throw new Error(t("auth.googleSignInErrorDesc"));
+      }
+
+      await signInWithGoogle(idToken);
+
       toast({
-        title: "Welcome!",
-        description: "Successfully signed in with Google",
+        title: t("auth.googleSignInSuccess"),
+        description: t("auth.googleSignInSuccessDesc"),
       });
-      navigate("/");
-    } catch (error: unknown) {
+
+      navigate(from, { replace: true });
+    } catch (error: any) {
+      console.error("Google sign-in error:", error);
       toast({
-        title: "Google Sign-In Failed",
-        description: getErrorMessage(error, "Failed to sign in with Google"),
+        title: t("auth.googleSignInError"),
+        description: error?.response?.data?.error || error?.message || t("auth.googleSignInErrorDesc"),
         variant: "destructive",
       });
-    } finally {
-      setLoading(false);
     }
   };
 
   const handleGoogleError = () => {
     toast({
-      title: "Error",
-      description: "Google sign-in was cancelled or failed",
+      title: t("auth.googleSignInError"),
+      description: t("auth.googleSignInErrorDesc"),
       variant: "destructive",
     });
   };
 
+  const isLoadingSignIn = signInForm.formState.isSubmitting;
+  const isLoadingSignUp = signUpForm.formState.isSubmitting;
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-purple-50 flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Animated Background Elements */}
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-10 w-72 h-72 bg-green-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob"></div>
-        <div className="absolute top-40 right-10 w-72 h-72 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-2000"></div>
-        <div className="absolute -bottom-8 left-1/2 w-72 h-72 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-4000"></div>
+        <div className="absolute top-40 right-10 w-72 h-72 bg-emerald-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-2000"></div>
+        <div className="absolute -bottom-8 left-1/2 w-72 h-72 bg-teal-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-4000"></div>
       </div>
 
+      <style>{`
+        @keyframes blob {
+          0%, 100% { transform: translate(0px, 0px) scale(1); }
+          33% { transform: translate(30px, -50px) scale(1.1); }
+          66% { transform: translate(-20px, 20px) scale(0.9); }
+        }
+        .animate-blob {
+          animation: blob 7s infinite;
+        }
+        .animation-delay-2000 {
+          animation-delay: 2s;
+        }
+        .animation-delay-4000 {
+          animation-delay: 4s;
+        }
+      `}</style>
+
       <div className="w-full max-w-md relative z-10">
+        {/* Back to Home Button */}
         <Button
-          variant="outline"
+          variant="ghost"
+          className="mb-4 text-gray-700 hover:text-gray-900 hover:bg-white/50"
           onClick={() => navigate("/")}
-          className="mb-4 bg-white/80 backdrop-blur-sm hover:bg-white"
         >
-          <ArrowLeft className="w-4 h-4 mr-2" />
+          <ArrowLeft className="mr-2 h-4 w-4" />
           {t("auth.backToHome")}
         </Button>
 
-        <Card className="shadow-2xl border-2 bg-white/90 backdrop-blur-md">
-          <CardHeader className="text-center">
-            <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-              <Recycle className="w-8 h-8 text-white" />
+        <Card className="backdrop-blur-sm bg-white/90 shadow-2xl border-0">
+          <CardHeader className="space-y-1 pb-6">
+            <div className="flex items-center justify-center mb-4">
+              <div className="rounded-full bg-gradient-to-r from-green-500 to-emerald-500 p-3">
+                {isSignUp ? (
+                  <Sparkles className="h-8 w-8 text-white" />
+                ) : (
+                  <Recycle className="h-8 w-8 text-white" />
+                )}
+              </div>
             </div>
-            <div className="flex items-center justify-center gap-2 mb-2">
-              <CardTitle className="text-3xl bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
-                {isSignUp ? t("auth.joinBottleBuddy") : t("auth.welcomeBack")}
-              </CardTitle>
-              {isSignUp && <Sparkles className="w-5 h-5 text-yellow-500" />}
-            </div>
-            <CardDescription className="text-base">
-              {isSignUp
-                ? t("auth.signUpSubtitle")
-                : t("auth.signInSubtitle")
-              }
+            <CardTitle className="text-3xl text-center font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+              {isSignUp ? t("auth.joinBottleBuddy") : t("auth.welcomeBack")}
+            </CardTitle>
+            <CardDescription className="text-center text-base">
+              {isSignUp ? t("auth.signUpSubtitle") : t("auth.signInSubtitle")}
             </CardDescription>
           </CardHeader>
 
-          <CardContent className="space-y-6">
-            <div className="w-full flex justify-center">
-              <GoogleLogin
-                onSuccess={handleGoogleSuccess}
-                onError={handleGoogleError}
-                useOneTap
-                text="continue_with"
-                shape="rectangular"
-                size="large"
-                width="384"
-              />
-            </div>
+          <CardContent>
+            <div className="space-y-4">
+              {/* Google Sign In */}
+              <div className="flex justify-center">
+                <GoogleLogin
+                  onSuccess={handleGoogleSuccess}
+                  onError={handleGoogleError}
+                  useOneTap={false}
+                  text={isSignUp ? "signup_with" : "signin_with"}
+                  size="large"
+                  width="100%"
+                  logo_alignment="left"
+                />
+              </div>
 
-            <div className="relative">
-              <Separator />
-              <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-white px-2 text-sm text-gray-500">
-                {t("auth.or")}
-              </span>
-            </div>
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <Separator />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-white px-2 text-muted-foreground">
+                    {t("auth.or")}
+                  </span>
+                </div>
+              </div>
 
-            {/* Sign In Form */}
-            {!isSignUp && (
-              <Form {...signInForm}>
-                <form onSubmit={signInForm.handleSubmit(onSignInSubmit)} className="space-y-4">
-                  <FormField
-                    control={signInForm.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t("auth.email")}</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder={t("auth.emailPlaceholder")}
-                            type="email"
-                            autoComplete="email"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+              {/* Sign In Form */}
+              {!isSignUp && (
+                <Form {...signInForm}>
+                  <form onSubmit={signInForm.handleSubmit(onSignInSubmit)} className="space-y-4">
+                    <FormField
+                      control={signInForm.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t("auth.email")}</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="email"
+                              placeholder={t("auth.emailPlaceholder")}
+                              {...field}
+                              disabled={isLoadingSignIn}
+                              className="transition-all"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                  <FormField
-                    control={signInForm.control}
-                    name="password"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t("auth.password")}</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder={t("auth.passwordPlaceholder")}
-                            type="password"
-                            autoComplete="current-password"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                    <FormField
+                      control={signInForm.control}
+                      name="password"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t("auth.password")}</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="password"
+                              placeholder={t("auth.passwordPlaceholder")}
+                              {...field}
+                              disabled={isLoadingSignIn}
+                              className="transition-all"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                  <Button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
-                  >
-                    {loading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        {t("auth.signingIn")}
-                      </>
-                    ) : (
-                      t("auth.signIn")
-                    )}
-                  </Button>
-                </form>
-              </Form>
-            )}
+                    <Button
+                      type="submit"
+                      className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold py-2 transition-all"
+                      disabled={isLoadingSignIn}
+                    >
+                      {isLoadingSignIn ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          {t("auth.signingIn")}
+                        </>
+                      ) : (
+                        t("auth.signIn")
+                      )}
+                    </Button>
+                  </form>
+                </Form>
+              )}
 
-            {/* Sign Up Form */}
-            {isSignUp && (
-              <Form {...signUpForm}>
-                <form onSubmit={signUpForm.handleSubmit(onSignUpSubmit)} className="space-y-4">
-                  <FormField
-                    control={signUpForm.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t("auth.email")}</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder={t("auth.emailPlaceholder")}
-                            type="email"
-                            autoComplete="email"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+              {/* Sign Up Form */}
+              {isSignUp && (
+                <Form {...signUpForm}>
+                  <form onSubmit={signUpForm.handleSubmit(onSignUpSubmit)} className="space-y-4">
+                    <FormField
+                      control={signUpForm.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t("auth.email")}</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="email"
+                              placeholder={t("auth.emailPlaceholder")}
+                              {...field}
+                              disabled={isLoadingSignUp}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                  <FormField
-                    control={signUpForm.control}
-                    name="fullName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t("auth.fullName")} <span className="text-gray-400 text-xs">{t("auth.optional")}</span></FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder={t("auth.fullNamePlaceholder")}
-                            type="text"
-                            autoComplete="name"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                    <FormField
+                      control={signUpForm.control}
+                      name="password"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t("auth.password")}</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="password"
+                              placeholder={t("auth.passwordPlaceholder")}
+                              {...field}
+                              disabled={isLoadingSignUp}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                          <p className="text-xs text-gray-500 mt-1">
+                            {t("auth.passwordHint")}
+                          </p>
+                        </FormItem>
+                      )}
+                    />
 
-                  <FormField
-                    control={signUpForm.control}
-                    name="username"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t("auth.username")} <span className="text-gray-400 text-xs">{t("auth.optional")}</span></FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder={t("auth.usernamePlaceholder")}
-                            type="text"
-                            autoComplete="username"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                        <p className="text-xs text-gray-500 mt-1">
-                          {t("auth.usernameHint")}
-                        </p>
-                      </FormItem>
-                    )}
-                  />
+                    <FormField
+                      control={signUpForm.control}
+                      name="confirmPassword"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t("auth.confirmPassword")}</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="password"
+                              placeholder={t("auth.passwordPlaceholder")}
+                              {...field}
+                              disabled={isLoadingSignUp}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                  <FormField
-                    control={signUpForm.control}
-                    name="phone"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t("auth.phone")} <span className="text-gray-400 text-xs">{t("auth.optional")}</span></FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder={t("auth.phonePlaceholder")}
-                            type="tel"
-                            autoComplete="tel"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                    {/* Optional Profile Fields */}
+                    <div className="space-y-3 pt-2 border-t">
+                      <p className="text-sm text-gray-600">{t("auth.optional")}</p>
 
-                  <FormField
-                    control={signUpForm.control}
-                    name="password"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t("auth.password")}</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder={t("auth.passwordPlaceholder")}
-                            type="password"
-                            autoComplete="new-password"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                        <p className="text-xs text-gray-500 mt-1">
-                          {t("auth.passwordHint")}
-                        </p>
-                      </FormItem>
-                    )}
-                  />
+                      <FormField
+                        control={signUpForm.control}
+                        name="fullName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>
+                              {t("auth.fullName")} <span className="text-gray-400 text-xs">{t("auth.optional")}</span>
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder={t("auth.fullNamePlaceholder")}
+                                {...field}
+                                disabled={isLoadingSignUp}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-                  <FormField
-                    control={signUpForm.control}
-                    name="confirmPassword"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t("auth.confirmPassword")}</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder={t("auth.passwordPlaceholder")}
-                            type="password"
-                            autoComplete="new-password"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                      <FormField
+                        control={signUpForm.control}
+                        name="username"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>
+                              {t("auth.username")} <span className="text-gray-400 text-xs">{t("auth.optional")}</span>
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder={t("auth.usernamePlaceholder")}
+                                {...field}
+                                disabled={isLoadingSignUp}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                            <p className="text-xs text-gray-500">{t("auth.usernameHint")}</p>
+                          </FormItem>
+                        )}
+                      />
 
-                  <Button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
-                  >
-                    {loading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        {t("auth.creatingAccount")}
-                      </>
-                    ) : (
-                      t("auth.createAccount")
-                    )}
-                  </Button>
-                </form>
-              </Form>
-            )}
+                      <FormField
+                        control={signUpForm.control}
+                        name="phone"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>
+                              {t("auth.phone")} <span className="text-gray-400 text-xs">{t("auth.optional")}</span>
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                type="tel"
+                                placeholder={t("auth.phonePlaceholder")}
+                                {...field}
+                                disabled={isLoadingSignUp}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
 
-            <div className="text-center text-sm">
-              <span className="text-gray-600">
-                {isSignUp ? t("auth.alreadyHaveAccount") : t("auth.dontHaveAccount")}
-              </span>
-              <Button
-                variant="link"
-                onClick={() => setIsSignUp(!isSignUp)}
-                disabled={loading}
-                className="p-1 h-auto font-semibold text-green-600"
-              >
-                {isSignUp ? t("auth.signIn") : t("auth.signUp")}
-              </Button>
+                    <Button
+                      type="submit"
+                      className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold py-2 transition-all"
+                      disabled={isLoadingSignUp}
+                    >
+                      {isLoadingSignUp ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          {t("auth.creatingAccount")}
+                        </>
+                      ) : (
+                        t("auth.createAccount")
+                      )}
+                    </Button>
+                  </form>
+                </Form>
+              )}
+
+              {/* Switch between Sign In and Sign Up */}
+              <div className="text-center text-sm">
+                {isSignUp ? (
+                  <>
+                    {t("auth.alreadyHaveAccount")}{" "}
+                    <button
+                      onClick={() => setIsSignUp(false)}
+                      className="text-green-600 hover:text-green-700 font-semibold underline-offset-4 hover:underline"
+                    >
+                      {t("auth.signIn")}
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    {t("auth.dontHaveAccount")}{" "}
+                    <button
+                      onClick={() => setIsSignUp(true)}
+                      className="text-green-600 hover:text-green-700 font-semibold underline-offset-4 hover:underline"
+                    >
+                      {t("auth.signUp")}
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
           </CardContent>
         </Card>
