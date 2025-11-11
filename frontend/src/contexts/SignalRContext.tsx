@@ -14,6 +14,37 @@ const SignalRContext = createContext<SignalRContextValue | undefined>(undefined)
 
 const HUB_URL = `${config.api.baseUrl}/hubs/messages`;
 
+/**
+ * Creates a SignalR connection with proper configuration
+ * Always fetches the latest token to handle token refresh scenarios
+ */
+const createSignalRConnection = (initialToken: string) => {
+  return new signalR.HubConnectionBuilder()
+    .withUrl(HUB_URL, {
+      accessTokenFactory: () => {
+        // Always get the latest token from localStorage to handle token refresh
+        return localStorage.getItem("token") || initialToken || "";
+      },
+      withCredentials: false,
+    })
+    .withAutomaticReconnect({
+      nextRetryDelayInMilliseconds: (retryContext) => {
+        // Custom retry delays: 0s, 2s, 10s, 30s, then 60s
+        if (retryContext.previousRetryCount === 0) return 0;
+        if (retryContext.previousRetryCount === 1) return 2000;
+        if (retryContext.previousRetryCount === 2) return 10000;
+        if (retryContext.previousRetryCount === 3) return 30000;
+        return 60000;
+      },
+    })
+    .configureLogging(
+      import.meta.env.DEV
+        ? signalR.LogLevel.Information
+        : signalR.LogLevel.Warning
+    )
+    .build();
+};
+
 export const SignalRProvider = ({ children }: { children: ReactNode }) => {
   const { token } = useAuth();
   const [connection, setConnection] = useState<signalR.HubConnection | null>(null);
@@ -61,22 +92,7 @@ export const SignalRProvider = ({ children }: { children: ReactNode }) => {
 
     setConnectionError(null);
 
-    const newConnection = new signalR.HubConnectionBuilder()
-      .withUrl(HUB_URL, {
-        accessTokenFactory: () => token,
-        withCredentials: false,
-      })
-      .withAutomaticReconnect({
-        nextRetryDelayInMilliseconds: (retryContext) => {
-          if (retryContext.previousRetryCount === 0) return 0;
-          if (retryContext.previousRetryCount === 1) return 2000;
-          if (retryContext.previousRetryCount === 2) return 10000;
-          if (retryContext.previousRetryCount === 3) return 30000;
-          return 60000;
-        },
-      })
-      .configureLogging(signalR.LogLevel.Information)
-      .build();
+    const newConnection = createSignalRConnection(token);
 
     connectionRef.current = newConnection;
     setConnection(newConnection);

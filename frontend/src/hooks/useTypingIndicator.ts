@@ -26,6 +26,7 @@ export const useTypingIndicator = ({
   const isCurrentlyTypingRef = useRef(false);
   const typingUsersMapRef = useRef<Map<string, TypingUser>>(new Map());
 
+  // Clean up typing users that have exceeded the timeout
   useEffect(() => {
     const cleanupInterval = setInterval(() => {
       const now = Date.now();

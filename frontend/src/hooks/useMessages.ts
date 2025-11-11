@@ -68,11 +68,14 @@ export const useMessages = (
     }
 
     let joinedConversation = false;
+    let isCleaningUp = false;
 
     connection
       .invoke("JoinConversation", conversationId)
       .then(() => {
-        joinedConversation = true;
+        if (!isCleaningUp) {
+          joinedConversation = true;
+        }
       })
       .catch((err) => console.error("Error joining conversation:", err));
 
@@ -131,6 +134,7 @@ export const useMessages = (
     connection.on("MessageRead", handleMessageRead);
 
     return () => {
+      isCleaningUp = true;
       connection.off("ReceiveMessage", handleReceiveMessage);
       connection.off("MessageRead", handleMessageRead);
 
@@ -146,7 +150,6 @@ export const useMessages = (
     fetchUnreadCount,
     isConnected,
     pickupRequestId,
-    queryClient,
     shouldSubscribeToHub,
   ]);
 
