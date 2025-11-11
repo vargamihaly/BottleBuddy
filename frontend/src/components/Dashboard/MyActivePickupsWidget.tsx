@@ -25,7 +25,7 @@ interface PickupCardProps {
 const PickupCard = ({ pickup, listing, statusColor, onComplete, isUpdating }: PickupCardProps) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { unreadCount } = useMessages(pickup.id, true);
+  const { unreadCount } = useMessages(pickup.id, { fetchMessages: false });
 
   const handleCardClick = () => {
     navigate(`/messages?conversation=${pickup.id}`);

@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState, useMemo } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useMessages } from "@/hooks/useMessages";
-import { useSignalR } from "@/hooks/useSignalR";
 import { useTypingIndicator } from "@/hooks/useTypingIndicator";
 import { ChatMessage } from "./ChatMessage";
 import { MessageInput } from "./MessageInput";
@@ -33,13 +32,10 @@ export const ChatBox = ({
     isSending,
     markAllAsRead,
     refetch,
-  } = useMessages(pickupRequestId, true);
+  } = useMessages(pickupRequestId);
 
-  const { connection, isConnected } = useSignalR();
   const { typingUsers, startTyping, stopTyping } = useTypingIndicator({
     pickupRequestId,
-    connection,
-    isConnected,
     currentUserId: user?.id || null,
   });
 
