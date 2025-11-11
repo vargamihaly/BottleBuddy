@@ -317,6 +317,43 @@ const resources = {
         confirmReject: "Reject this pickup request?",
         confirmComplete: "Mark this pickup as completed? This confirms the bottles were successfully exchanged."
       },
+      myListingsPage: {
+        title: "My Listings",
+        subtitle: "Manage all your bottle listings",
+        newListing: "New Listing",
+        signInRequired: "Sign In Required",
+        signInMessage: "Please sign in to view your listings.",
+        signIn: "Sign In",
+        tabs: {
+          active: "Active",
+          claimed: "Claimed",
+          completed: "Completed"
+        },
+        descriptions: {
+          active: "Listings available for pickup requests",
+          claimed: "Listings with accepted pickup requests",
+          completed: "Successfully completed bottle exchanges"
+        },
+        empty: {
+          active: {
+            title: "No active listings",
+            message: "Create a new listing to get started!",
+            button: "Create Listing"
+          },
+          claimed: {
+            title: "No claimed listings",
+            message: "Listings appear here when you accept a pickup request."
+          },
+          completed: {
+            title: "No completed listings",
+            message: "Completed exchanges will appear here."
+          }
+        },
+        error: {
+          title: "Failed to load listings.",
+          button: "Try Again"
+        }
+      },
       userDashboard: {
         title: "My Dashboard",
         trackImpact: "Track your recycling impact",
@@ -877,6 +914,43 @@ const resources = {
         confirmAccept: "Elfogadod ezt az átvételi kérelmet? Ez lefoglaltként jelöli meg a hirdetést.",
         confirmReject: "Elutasítod ezt az átvételi kérelmet?",
         confirmComplete: "Befejezettként jelölöd meg ezt az átvételt? Ez megerősíti, hogy a palackok sikeresen cserélődtek."
+      },
+      myListingsPage: {
+        title: "Hirdetéseim",
+        subtitle: "Kezeld az összes palackhirdetésedet",
+        newListing: "Új hirdetés",
+        signInRequired: "Bejelentkezés szükséges",
+        signInMessage: "Kérjük, jelentkezz be a hirdetéseid megtekintéséhez.",
+        signIn: "Bejelentkezés",
+        tabs: {
+          active: "Aktív",
+          claimed: "Lefoglalt",
+          completed: "Befejezett"
+        },
+        descriptions: {
+          active: "Átvételi kérelmekre váró hirdetések",
+          claimed: "Elfogadott átvételi kérelmekkel rendelkező hirdetések",
+          completed: "Sikeresen befejezett palackcserék"
+        },
+        empty: {
+          active: {
+            title: "Nincsenek aktív hirdetések",
+            message: "Hozz létre egy új hirdetést a kezdéshez!",
+            button: "Hirdetés létrehozása"
+          },
+          claimed: {
+            title: "Nincsenek lefoglalt hirdetések",
+            message: "A hirdetések itt jelennek meg, amikor elfogadsz egy átvételi kérelmet."
+          },
+          completed: {
+            title: "Nincsenek befejezett hirdetések",
+            message: "A befejezett cserék itt fognak megjelenni."
+          }
+        },
+        error: {
+          title: "A hirdetések betöltése sikertelen.",
+          button: "Próbáld újra"
+        }
       },
       userDashboard: {
         title: "Irányítópultom",
