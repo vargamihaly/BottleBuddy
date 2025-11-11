@@ -10,8 +10,10 @@ import { BottleListingCard } from "@/components/BottleListingCard";
 import { BottleListingsGridSkeleton } from "@/components/BottleListingSkeleton";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBottleListingOverview } from "@/hooks/useBottleListingOverview";
+import { useTranslation } from "react-i18next";
 
 const MyPickupTasks = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("active");
@@ -29,10 +31,10 @@ const MyPickupTasks = () => {
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center">
         <Card className="max-w-md w-full mx-4">
           <CardContent className="pt-6 text-center">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Sign In Required</h2>
-            <p className="text-gray-600 mb-6">Please sign in to view your pickup tasks.</p>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">{t("myPickupTasks.signInRequired")}</h2>
+            <p className="text-gray-600 mb-6">{t("myPickupTasks.signInMessage")}</p>
             <Button onClick={() => navigate("/auth")} className="w-full">
-              Sign In
+              {t("myPickupTasks.signIn")}
             </Button>
           </CardContent>
         </Card>
@@ -51,8 +53,8 @@ const MyPickupTasks = () => {
                 <ArrowLeft className="w-5 h-5" />
               </Button>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">My Pickup Tasks</h1>
-                <p className="text-sm text-gray-600">Manage all your pickup tasks</p>
+                <h1 className="text-2xl font-bold text-gray-900">{t("myPickupTasks.title")}</h1>
+                <p className="text-sm text-gray-600">{t("myPickupTasks.subtitle")}</p>
               </div>
             </div>
           </div>
@@ -64,7 +66,7 @@ const MyPickupTasks = () => {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-8">
             <TabsTrigger value="active" className="relative">
-              Active
+              {t("myPickupTasks.tabs.active")}
               {myPickupTaskListings.length > 0 && (
                 <Badge variant="secondary" className="ml-2 bg-emerald-100 text-emerald-700">
                   {myPickupTaskListings.length}
@@ -72,7 +74,7 @@ const MyPickupTasks = () => {
               )}
             </TabsTrigger>
             <TabsTrigger value="completed" className="relative">
-              Completed
+              {t("myPickupTasks.tabs.completed")}
               {myCompletedPickupTaskListings.length > 0 && (
                 <Badge variant="secondary" className="ml-2 bg-gray-100 text-gray-700">
                   {myCompletedPickupTaskListings.length}
@@ -84,28 +86,28 @@ const MyPickupTasks = () => {
           <TabsContent value="active" className="space-y-4">
             <div className="flex items-center justify-between mb-4">
               <p className="text-sm text-gray-600">
-                Pickup tasks pending or in progress
+                {t("myPickupTasks.descriptions.active")}
               </p>
             </div>
             {isLoading ? (
               <BottleListingsGridSkeleton count={6} />
             ) : isError ? (
               <div className="text-center py-12">
-                <p className="text-red-600 mb-4">Failed to load pickup tasks.</p>
+                <p className="text-red-600 mb-4">{t("myPickupTasks.error.title")}</p>
                 <Button onClick={() => window.location.reload()} variant="outline">
-                  Try Again
+                  {t("myPickupTasks.error.button")}
                 </Button>
               </div>
             ) : myPickupTaskListings.length === 0 ? (
               <Card>
                 <CardContent className="py-12 text-center">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No active pickup tasks</h3>
-                  <p className="text-gray-600 mb-4">Browse available bottles to start picking up!</p>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{t("myPickupTasks.empty.active.title")}</h3>
+                  <p className="text-gray-600 mb-4">{t("myPickupTasks.empty.active.message")}</p>
                   <Button
                     onClick={() => navigate("/")}
                     className="bg-gradient-to-r from-green-600 to-emerald-600"
                   >
-                    Browse Bottles
+                    {t("myPickupTasks.empty.active.button")}
                   </Button>
                 </CardContent>
               </Card>
@@ -126,7 +128,7 @@ const MyPickupTasks = () => {
           <TabsContent value="completed" className="space-y-4">
             <div className="flex items-center justify-between mb-4">
               <p className="text-sm text-gray-600">
-                Successfully completed bottle pickups
+                {t("myPickupTasks.descriptions.completed")}
               </p>
             </div>
             {isLoading ? (
@@ -134,9 +136,9 @@ const MyPickupTasks = () => {
             ) : myCompletedPickupTaskListings.length === 0 ? (
               <Card>
                 <CardContent className="py-12 text-center">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No completed pickup tasks</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{t("myPickupTasks.empty.completed.title")}</h3>
                   <p className="text-gray-600">
-                    Completed pickups will appear here.
+                    {t("myPickupTasks.empty.completed.message")}
                   </p>
                 </CardContent>
               </Card>
