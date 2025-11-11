@@ -4,7 +4,7 @@
 **Stack**: React 18 + TypeScript + Vite
 **State Management**: TanStack Query (React Query) v5
 **UI Framework**: Radix UI + Tailwind CSS + shadcn/ui
-**Forms**: React Hook Form + Zod
+**Forms**: Controlled inputs managed with React state; shadcn/ui + React Hook Form helpers available when needed
 **Real-time**: SignalR (@microsoft/signalr)
 **i18n**: i18next + react-i18next
 
@@ -41,42 +41,53 @@ frontend/
 │   │       └── index.ts       # Barrel export
 │   │
 │   ├── components/
-│   │   ├── ui/                # shadcn/ui primitives (Radix UI)
+│   │   ├── ui/                    # shadcn/ui primitives (Radix UI)
 │   │   │   ├── button.tsx
-│   │   │   ├── dialog.tsx
 │   │   │   ├── form.tsx
-│   │   │   └── ...            # 30+ components
-│   │   ├── HomePage/          # Page-specific components
-│   │   │   ├── HeroSection.tsx
-│   │   │   ├── StatsSection.tsx
-│   │   │   ├── HowItWorksSection.tsx
-│   │   │   └── ...
-│   │   ├── Dashboard/         # Dashboard widgets
-│   │   │   ├── WelcomeWidget.tsx
-│   │   │   ├── QuickActionsBar.tsx
-│   │   │   └── EarningsWidget.tsx
+│   │   │   ├── toaster.tsx
+│   │   │   └── ...                # generated primitives reused across views
+│   │   ├── HomePage/              # Landing page sections
+│   │   ├── Dashboard/             # Authenticated dashboard widgets
+│   │   ├── UserDashboard.tsx      # Authenticated overview shell
 │   │   ├── BottleListingCard.tsx
+│   │   ├── BottleListingSkeleton.tsx
 │   │   ├── MapView.tsx
 │   │   ├── LocationPicker.tsx
+│   │   ├── ConversationList.tsx
 │   │   ├── ChatBox.tsx
+│   │   ├── ChatMessage.tsx
+│   │   ├── MessageInput.tsx
+│   │   ├── TypingIndicator.tsx
+│   │   ├── ReadReceipt.tsx
+│   │   ├── ImagePreview.tsx
+│   │   ├── ImageModal.tsx
 │   │   ├── RatingDialog.tsx
-│   │   ├── ProtectedRoute.tsx # Route guard
-│   │   └── ErrorBoundary.tsx  # Error handling
+│   │   ├── LoadingSpinner.tsx
+│   │   ├── ProtectedRoute.tsx     # Optional route guard
+│   │   ├── LanguageSwitcher.tsx
+│   │   └── ErrorBoundary.tsx      # Error handling
 │   │
 │   ├── contexts/
-│   │   └── AuthContext.tsx    # Global auth state
+│   │   ├── AuthContext.tsx        # Auth state + credential flows
+│   │   └── SignalRContext.tsx     # Shared SignalR hub connection
 │   │
 │   ├── hooks/
-│   │   ├── api/               # React Query custom hooks
+│   │   ├── api/                   # React Query custom hooks
 │   │   │   ├── useBottleListings.ts
 │   │   │   ├── usePickupRequests.ts
 │   │   │   ├── useTransactions.ts
+│   │   │   ├── useStatistics.ts
 │   │   │   ├── useRatings.ts
-│   │   │   ├── index.ts       # Barrel export
-│   │   │   └── README.md      # Hook documentation
+│   │   │   ├── index.ts           # Barrel export
+│   │   │   └── README.md          # Hook documentation
+│   │   ├── useMessages.ts         # SignalR + React Query chat bridge
+│   │   ├── useTypingIndicator.ts  # SignalR typing events
+│   │   ├── useSignalR.ts          # SignalR context accessor
+│   │   ├── useSignalRStatus.ts    # Connection state helpers
+│   │   ├── useMapViewData.ts      # Listings + pickup request synthesis
 │   │   ├── useBottleListingOverview.ts  # Legacy composite hook
-│   │   ├── useMessages.ts     # SignalR hook
-│   │   └── use-toast.ts       # Toast notifications
+│   │   ├── use-mobile.tsx         # Responsive breakpoint helper
+│   │   └── use-toast.ts           # Toast notifications
 │   │
 │   ├── lib/
 │   │   ├── apiClient.ts       # HTTP client + error handling
@@ -120,7 +131,7 @@ frontend/
 | **api/services/** | Centralized HTTP endpoints. Single source of truth for all API calls. | Backend Team API contract | Never import from `hooks/`. Only uses `apiClient`. |
 | **components/ui/** | Reusable Radix UI primitives (shadcn/ui). Design system foundation. | Frontend Team | Never imports from `pages/` or `hooks/api/`. |
 | **components/** | Feature components. Stateful, domain-specific. | Feature Teams | Can import from `hooks/api/`, `ui/`, `contexts/`. |
-| **contexts/** | Global state (auth, theme). React Context API for cross-cutting concerns. | Core Team | Minimal dependencies. No API calls (use hooks). |
+| **contexts/** | Auth session and SignalR connection providers. React Context API for cross-cutting concerns. | Core Team | Keep side effects inside providers; consumers must use exported hooks. |
 | **hooks/api/** | React Query hooks wrapping services. Data fetching layer. | Frontend Team | Only imports from `api/services/`. Exports to components. |
 | **hooks/** | Reusable logic (non-data). Custom hooks for side effects, state, effects. | Frontend Team | Can import from `hooks/api/`. No direct `apiClient` calls. |
 | **lib/** | Pure utilities, no side effects. | Core Team | Zero external deps (except tiny libs like `clsx`). |
@@ -234,19 +245,19 @@ export class ApiRequestError extends Error {
     message: string,
     public statusCode?: number,
     public code?: string,
-    public errors?: Record<string, string[]>
+    public errors?: Record<string, string[]>,
   ) {
     super(message);
     this.name = "ApiRequestError";
   }
 
-  public getUserMessage(): string {
-    if (this.statusCode === 401) return 'Invalid credentials.';
-    if (this.statusCode === 403) return 'Permission denied.';
-    if (this.statusCode === 404) return 'Resource not found.';
-    if (this.statusCode === 429) return 'Too many requests.';
-    if (this.statusCode && this.statusCode >= 500) return 'Server error.';
-    return this.message || 'An unexpected error occurred.';
+  getUserMessage() {
+    if (this.statusCode === 401) return "Invalid credentials. Please check your email and password.";
+    if (this.statusCode === 403) return "You do not have permission to perform this action.";
+    if (this.statusCode === 404) return "The requested resource was not found.";
+    if (this.statusCode === 429) return "Too many requests. Please try again later.";
+    if (this.statusCode && this.statusCode >= 500) return "Server error. Please try again later.";
+    return this.message || "An unexpected error occurred.";
   }
 }
 ```
@@ -283,57 +294,118 @@ await queryClient.cancelQueries({
 ```typescript
 // File: lib/apiClient.ts
 import config from "@/config";
+import type { ApiError } from "@/types";
 
-const API_BASE_URL = config.api.baseUrl; // Vite env var
+const API_BASE_URL = config.api.baseUrl;
+
+export class ApiRequestError extends Error {
+  constructor(
+    message: string,
+    public statusCode?: number,
+    public code?: string,
+    public errors?: Record<string, string[]>,
+  ) {
+    super(message);
+    this.name = "ApiRequestError";
+  }
+
+  static fromResponse(response: Response, body?: unknown) {
+    const data = (typeof body === "object" && body !== null)
+      ? (body as Partial<ApiError>)
+      : undefined;
+    const message =
+      data?.message ||
+      (data as { error?: string })?.error ||
+      `Request failed with status ${response.status}`;
+    return new ApiRequestError(message ?? "Request failed", response.status, data?.code, data?.errors);
+  }
+
+  getUserMessage() {
+    if (this.statusCode === 401) return "Invalid credentials. Please check your email and password.";
+    if (this.statusCode === 403) return "You do not have permission to perform this action.";
+    if (this.statusCode === 404) return "The requested resource was not found.";
+    if (this.statusCode === 429) return "Too many requests. Please try again later.";
+    if (this.statusCode && this.statusCode >= 500) return "Server error. Please try again later.";
+    return this.message || "An unexpected error occurred.";
+  }
+}
 
 interface RequestOptions extends RequestInit {
   token?: string;
   skipAuth?: boolean;
 }
 
-async function request<T>(
-  endpoint: string,
-  options: RequestOptions = {}
-): Promise<T> {
-  const { token, skipAuth, ...fetchOptions } = options;
-  const headers = new Headers(fetchOptions.headers ?? {});
+const isFormData = (value: unknown): value is FormData =>
+  typeof FormData !== "undefined" && value instanceof FormData;
+const isBlob = (value: unknown): value is Blob =>
+  typeof Blob !== "undefined" && value instanceof Blob;
+const isArrayBufferView = (value: unknown): value is ArrayBufferView =>
+  typeof ArrayBuffer !== "undefined" && ArrayBuffer.isView(value as ArrayBufferView);
 
-  // Add auth header
+function resolveRequestBody(data?: unknown): BodyInit | undefined {
+  if (data === undefined || data === null) return undefined;
+  if (isFormData(data) || isBlob(data) || data instanceof URLSearchParams) return data;
+  if (data instanceof ArrayBuffer || isArrayBufferView(data)) return data as BodyInit;
+  if (typeof data === "string") return data;
+  return JSON.stringify(data);
+}
+
+async function request<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
+  const { token, skipAuth, ...fetchOptions } = options;
+  const { headers: initialHeaders, body: requestBody, ...restFetchOptions } = fetchOptions;
+
+  const headers = new Headers(initialHeaders ?? {});
   if (!skipAuth) {
-    const authToken = token || localStorage.getItem('token');
+    const authToken = token || localStorage.getItem("token");
     if (authToken) {
-      headers.set('Authorization', `Bearer ${authToken}`);
+      headers.set("Authorization", `Bearer ${authToken}`);
     }
   }
 
-  // Set content type
-  if (!headers.has('Content-Type')) {
-    headers.set('Content-Type', 'application/json');
+  const hasFormDataBody = isFormData(requestBody);
+  if (hasFormDataBody) {
+    headers.delete("Content-Type");
+  } else if (!headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
   }
 
   const url = `${API_BASE_URL}${endpoint}`;
 
-  const response = await fetch(url, {
-    ...fetchOptions,
-    headers,
-  });
+  try {
+    const response = await fetch(url, {
+      ...restFetchOptions,
+      body: requestBody,
+      headers,
+    });
 
-  // Parse response
-  let body: unknown;
-  const contentType = response.headers.get("content-type");
-  if (contentType?.includes("application/json")) {
-    body = await response.json();
-  } else {
-    const text = await response.text();
-    body = text ? JSON.parse(text) : { message: text };
+    let body: unknown;
+    const contentType = response.headers.get("content-type");
+    if (contentType?.includes("application/json")) {
+      body = await response.json();
+    } else {
+      const text = await response.text();
+      if (text) {
+        try {
+          body = JSON.parse(text);
+        } catch {
+          body = { message: text } satisfies Partial<ApiError>;
+        }
+      }
+    }
+
+    if (!response.ok) {
+      throw ApiRequestError.fromResponse(response, body);
+    }
+
+    return body as T;
+  } catch (error) {
+    if (error instanceof ApiRequestError) throw error;
+    if (error instanceof TypeError && error.message.includes("fetch")) {
+      throw new ApiRequestError("Network error. Please check your internet connection.");
+    }
+    if (error instanceof Error) throw new ApiRequestError(error.message);
+    throw new ApiRequestError("An unexpected error occurred. Please try again.");
   }
-
-  // Handle errors
-  if (!response.ok) {
-    throw ApiRequestError.fromResponse(response, body);
-  }
-
-  return body as T;
 }
 ```
 
@@ -343,7 +415,7 @@ async function request<T>(
 async function requestWithRetry<T>(
   endpoint: string,
   options: RequestOptions = {},
-  maxRetries = 3
+  maxRetries = 3,
 ): Promise<T> {
   let lastError: ApiRequestError;
 
@@ -353,15 +425,13 @@ async function requestWithRetry<T>(
     } catch (error) {
       lastError = error as ApiRequestError;
 
-      // Don't retry client errors (4xx)
       if (lastError.statusCode && lastError.statusCode >= 400 && lastError.statusCode < 500) {
         throw lastError;
       }
 
-      // Don't retry on last attempt
       if (attempt < maxRetries - 1) {
         const delay = Math.pow(2, attempt) * 1000; // 1s, 2s, 4s
-        await new Promise(resolve => setTimeout(resolve, delay));
+        await new Promise((resolve) => setTimeout(resolve, delay));
         continue;
       }
     }
@@ -378,25 +448,31 @@ export const apiClient = {
     requestWithRetry<T>(endpoint, {
       ...options,
       method: "POST",
-      body: JSON.stringify(data),
+      body: resolveRequestBody(data),
+    }),
+
+  put: <T>(endpoint: string, data?: unknown, options?: RequestOptions) =>
+    requestWithRetry<T>(endpoint, {
+      ...options,
+      method: "PUT",
+      body: resolveRequestBody(data),
     }),
 
   patch: <T>(endpoint: string, data?: unknown, options?: RequestOptions) =>
     requestWithRetry<T>(endpoint, {
       ...options,
       method: "PATCH",
-      body: JSON.stringify(data),
+      body: resolveRequestBody(data),
     }),
 
   delete: <T>(endpoint: string, options?: RequestOptions) =>
     requestWithRetry<T>(endpoint, { ...options, method: "DELETE" }),
 
-  // Non-retrying version for auth
   postNoRetry: <T>(endpoint: string, data?: unknown, options?: RequestOptions) =>
     request<T>(endpoint, {
       ...options,
       method: "POST",
-      body: JSON.stringify(data),
+      body: resolveRequestBody(data),
     }),
 };
 ```
@@ -526,16 +602,19 @@ export const useAuth = () => {
 // File: components/ProtectedRoute.tsx
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { LoadingSpinner } from "@/components/LoadingSpinner";
 
 export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, loading } = useAuth();
+  const { user, loading } = useAuth();
 
   if (loading) {
-    return <LoadingSpinner />;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+      </div>
+    );
   }
 
-  if (!isAuthenticated) {
+  if (!user) {
     return <Navigate to="/auth" replace />;
   }
 
@@ -543,17 +622,24 @@ export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 };
 ```
 
-Usage in `App.tsx`:
+`App.tsx` currently keeps the guard import commented so all routes render publicly until wrapped:
 
 ```typescript
-<Route
-  path="/create-listing"
-  element={
-    <ProtectedRoute>
-      <CreateListing />
-    </ProtectedRoute>
-  }
-/>
+// import { ProtectedRoute } from "@/components/ProtectedRoute"; // Enable when gating routes
+
+<Routes>
+  <Route path="/" element={<Index />} />
+  <Route path="/auth" element={<Auth />} />
+  <Route path="/auth/success" element={<Auth />} />
+  <Route path="/about" element={<About />} />
+  <Route path="/faq" element={<FAQ />} />
+  <Route path="/terms" element={<TermsOfService />} />
+  <Route path="/create-listing" element={<CreateListing />} />
+  <Route path="/my-listings" element={<MyListings />} />
+  <Route path="/my-pickup-tasks" element={<MyPickupTasks />} />
+  <Route path="/messages" element={<Messages />} />
+  <Route path="*" element={<NotFound />} />
+</Routes>
 ```
 
 ### Google OAuth
@@ -582,7 +668,7 @@ const handleGoogleSuccess = async (credentialResponse) => {
 
 ```typescript
 // File: App.tsx
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 function App() {
   return (
@@ -590,37 +676,14 @@ function App() {
       <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/auth" element={<Auth />} />
+        <Route path="/auth/success" element={<Auth />} />
         <Route path="/about" element={<About />} />
         <Route path="/faq" element={<FAQ />} />
         <Route path="/terms" element={<TermsOfService />} />
-
-        {/* Protected Routes */}
-        <Route
-          path="/create-listing"
-          element={
-            <ProtectedRoute>
-              <CreateListing />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/my-listings"
-          element={
-            <ProtectedRoute>
-              <MyListings />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/messages"
-          element={
-            <ProtectedRoute>
-              <Messages />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Catch-all */}
+        <Route path="/create-listing" element={<CreateListing />} />
+        <Route path="/my-listings" element={<MyListings />} />
+        <Route path="/my-pickup-tasks" element={<MyPickupTasks />} />
+        <Route path="/messages" element={<Messages />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
@@ -669,174 +732,101 @@ const { isAuthenticated } = useAuth();
 
 ## Forms & Validation
 
-### React Hook Form + Zod
+### Authentication forms (React Hook Form)
+
+`Auth.tsx` drives sign-in, sign-up, and Google OAuth flows using React Hook Form + Zod while delegating auth side effects to `AuthContext` and the toast helper:
 
 ```typescript
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-
-// 1. Define validation schema
-const createListingSchema = z.object({
-  bottleCount: z
-    .number()
-    .min(1, "Must have at least 1 bottle")
-    .max(1000, "Cannot exceed 1000 bottles"),
-
-  locationAddress: z
-    .string()
-    .min(5, "Address must be at least 5 characters"),
-
-  description: z
-    .string()
-    .max(500, "Description cannot exceed 500 characters")
-    .optional(),
-
-  estimatedRefund: z
-    .number()
-    .min(0, "Refund cannot be negative"),
-
-  splitPercentage: z
-    .number()
-    .min(0, "Percentage cannot be negative")
-    .max(100, "Percentage cannot exceed 100"),
+const signInForm = useForm<SignInFormData>({
+  resolver: zodResolver(signInSchema),
+  defaultValues: { email: "", password: "" },
 });
 
-type CreateListingFormData = z.infer<typeof createListingSchema>;
-
-// 2. Create form component
-const CreateListingForm = () => {
-  const navigate = useNavigate();
-  const createMutation = useCreateBottleListing();
-
-  const form = useForm<CreateListingFormData>({
-    resolver: zodResolver(createListingSchema),
-    defaultValues: {
-      bottleCount: 10,
-      locationAddress: "",
-      description: "",
-      estimatedRefund: 500,
-      splitPercentage: 50,
-    },
-  });
-
-  const onSubmit = (data: CreateListingFormData) => {
-    createMutation.mutate(data, {
-      onSuccess: () => {
-        navigate("/my-listings");
-      },
+const onSignInSubmit = async (data: SignInFormData) => {
+  setLoading(true);
+  try {
+    await signIn(data.email, data.password);
+    toast({
+      title: "Welcome back!",
+      description: "You have successfully signed in.",
     });
-  };
-
-  return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        {/* Bottle Count */}
-        <FormField
-          control={form.control}
-          name="bottleCount"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Bottle Count</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  placeholder="10"
-                  {...field}
-                  onChange={(e) => field.onChange(parseInt(e.target.value))}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Location Address */}
-        <FormField
-          control={form.control}
-          name="locationAddress"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Location</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="123 Main St, Budapest"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Split Percentage */}
-        <FormField
-          control={form.control}
-          name="splitPercentage"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Your Share (%)</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  placeholder="50"
-                  {...field}
-                  onChange={(e) => field.onChange(parseInt(e.target.value))}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Submit Button */}
-        <Button
-          type="submit"
-          disabled={createMutation.isPending}
-          className="w-full"
-        >
-          {createMutation.isPending ? "Creating..." : "Create Listing"}
-        </Button>
-      </form>
-    </Form>
-  );
+    navigate("/");
+  } catch (error) {
+    toast({
+      title: "Sign In Failed",
+      description: getErrorMessage(error, "An unexpected error occurred. Please try again."),
+      variant: "destructive",
+    });
+  } finally {
+    setLoading(false);
+  }
 };
 ```
 
-### Dynamic Forms
+The component maintains a parallel `signUpForm`, shares input primitives, and sends Google credentials from `/auth/success` to `signInWithGoogle` for token exchange.
+
+### Create Listing (controlled inputs)
+
+`CreateListing.tsx` opts for controlled inputs to handle derived totals, geolocation, and conditional validation before invoking `useCreateBottleListing`:
 
 ```typescript
-import { useFieldArray } from "react-hook-form";
-
-const form = useForm({
-  defaultValues: {
-    items: [{ name: "", quantity: 0 }],
-  },
+const [formData, setFormData] = useState({
+  title: "",
+  bottleCount: "",
+  locationAddress: "",
+  description: "",
+  latitude: 0,
+  longitude: 0,
+  pickupDeadline: "",
 });
 
-const { fields, append, remove } = useFieldArray({
-  control: form.control,
-  name: "items",
-});
+const handleSubmit = async (event: React.FormEvent) => {
+  event.preventDefault();
 
-return (
-  <>
-    {fields.map((field, index) => (
-      <div key={field.id}>
-        <Input {...form.register(`items.${index}.name`)} />
-        <Input {...form.register(`items.${index}.quantity`)} />
-        <Button onClick={() => remove(index)}>Remove</Button>
-      </div>
-    ))}
-    <Button onClick={() => append({ name: "", quantity: 0 })}>
-      Add Item
-    </Button>
-  </>
-);
+  if (!user) {
+    toast({
+      title: t("auth.authenticationRequired"),
+      description: t("auth.pleaseSignIn"),
+      variant: "destructive",
+    });
+    navigate("/auth");
+    return;
+  }
+
+  if (!hasLocation || !formData.locationAddress) {
+    toast({
+      title: t("listing.locationRequired"),
+      description: t("listing.pleaseSelectLocation"),
+      variant: "destructive",
+    });
+    return;
+  }
+
+  const payload = {
+    bottleCount,
+    locationAddress: formData.locationAddress,
+    estimatedRefund,
+    splitPercentage,
+    title: formData.title || undefined,
+    description: formData.description || undefined,
+    latitude: hasLocation ? formData.latitude : undefined,
+    longitude: hasLocation ? formData.longitude : undefined,
+    pickupDeadline: formData.pickupDeadline
+      ? new Date(formData.pickupDeadline).toISOString()
+      : undefined,
+  } satisfies CreateBottleListingRequest;
+
+  createListingMutation.mutate(payload, {
+    onSuccess: () => navigate("/"),
+  });
+};
 ```
+
+`LocationPicker` updates `formData.latitude`/`longitude`, the toast helper surfaces server errors via `ApiRequestError.getUserMessage()`, and success redirects to the dashboard.
+
+### Dynamic forms
+
+No current screen uses `useFieldArray`. Introduce it only when a feature truly requires dynamic lists (e.g., multiple pickup windows) and follow the shadcn `<FormField>` pattern for consistency.
 
 ---
 
@@ -1680,202 +1670,59 @@ const MyComponent = () => {
 
 ## Code Samples
 
-### Add New Query Hook
+### Display unread message badges
 
 ```typescript
-// 1. Create service (api/services/notifications.service.ts)
-export const notificationService = {
-  getAll: async () => {
-    return await apiClient.get<Notification[]>('/api/notifications');
-  },
+// File: components/ConversationList.tsx
+const { unreadCount } = useMessages(pickupRequest.id, { fetchMessages: false });
 
-  markAsRead: async (id: string) => {
-    return await apiClient.patch(`/api/notifications/${id}/read`);
-  },
-};
-
-// 2. Create hook (hooks/api/useNotifications.ts)
-export const notificationKeys = {
-  all: ['notifications'] as const,
-  list: () => [...notificationKeys.all, 'list'] as const,
-};
-
-export const useNotifications = () => {
-  return useQuery({
-    queryKey: notificationKeys.list(),
-    queryFn: notificationService.getAll,
-    staleTime: 10000, // 10 seconds
-  });
-};
-
-// 3. Export from index (hooks/api/index.ts)
-export { useNotifications } from './useNotifications';
-
-// 4. Use in component
-const { data: notifications, isLoading } = useNotifications();
+return (
+  <Badge className="ml-2 bg-red-500 text-white text-xs px-2">
+    {unreadCount}
+  </Badge>
+);
 ```
 
-### Add New Mutation Hook
+### Join a SignalR conversation with live updates
 
 ```typescript
-// In hooks/api/useNotifications.ts
-export const useMarkNotificationAsRead = () => {
-  const queryClient = useQueryClient();
-  const { toast } = useToast();
-
-  return useMutation({
-    mutationFn: (id: string) => notificationService.markAsRead(id),
-
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: notificationKeys.all });
-      toast({ title: "Marked as read" });
-    },
-
-    onError: (error: unknown) => {
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Unknown error",
-        variant: "destructive",
-      });
-    },
-  });
-};
-
-// Usage
-const markAsReadMutation = useMarkNotificationAsRead();
-markAsReadMutation.mutate(notificationId);
-```
-
-### Create Route Guard
-
-```typescript
-// File: components/AdminRoute.tsx
-import { Navigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
-
-export const AdminRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, loading } = useAuth();
-
-  if (loading) return <LoadingSpinner />;
-
-  if (!user || user.role !== 'admin') {
-    return <Navigate to="/" replace />;
+// File: hooks/useMessages.ts
+useEffect(() => {
+  if (!shouldSubscribeToHub || !connection || !isConnected || !pickupRequestId) {
+    return;
   }
 
-  return <>{children}</>;
-};
-
-// Usage in App.tsx
-<Route
-  path="/admin"
-  element={
-    <AdminRoute>
-      <AdminDashboard />
-    </AdminRoute>
-  }
-/>
-```
-
-### Form with RHF + Zod (Complete Example)
-
-```typescript
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-
-const signUpSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
-  confirmPassword: z.string(),
-  fullName: z.string().max(100).optional(),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-});
-
-type SignUpFormData = z.infer<typeof signUpSchema>;
-
-const SignUpForm = () => {
-  const { signUp } = useAuth();
-  const navigate = useNavigate();
-
-  const form = useForm<SignUpFormData>({
-    resolver: zodResolver(signUpSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-      confirmPassword: "",
-      fullName: "",
-    },
-  });
-
-  const onSubmit = async (data: SignUpFormData) => {
-    try {
-      await signUp(data.email, data.password, data.fullName);
-      navigate("/");
-    } catch (error) {
-      form.setError("root", {
-        message: error instanceof Error ? error.message : "Sign up failed",
-      });
-    }
+  const handleReceiveMessage = (message: Message) => {
+    queryClient.setQueryData(
+      messageKeys.byPickupRequest(pickupRequestId),
+      (old = []) => (old.some((m) => m.id === message.id) ? old : [...old, message]),
+    );
   };
 
-  return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)}>
-        <FormField
-          control={form.control}
-          name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Email</FormLabel>
-              <FormControl>
-                <Input type="email" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+  connection.invoke("JoinConversation", pickupRequestId);
+  connection.on("ReceiveMessage", handleReceiveMessage);
 
-        <FormField
-          control={form.control}
-          name="password"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Password</FormLabel>
-              <FormControl>
-                <Input type="password" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+  return () => {
+    connection.off("ReceiveMessage", handleReceiveMessage);
+    connection.invoke("LeaveConversation", pickupRequestId);
+  };
+}, [connection, isConnected, pickupRequestId, queryClient, shouldSubscribeToHub]);
+```
 
-        <FormField
-          control={form.control}
-          name="confirmPassword"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Confirm Password</FormLabel>
-              <FormControl>
-                <Input type="password" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+### Use QueryClient defaults to tune caching
 
-        {form.formState.errors.root && (
-          <p className="text-red-500">{form.formState.errors.root.message}</p>
-        )}
-
-        <Button type="submit" disabled={form.formState.isSubmitting}>
-          {form.formState.isSubmitting ? "Creating account..." : "Sign Up"}
-        </Button>
-      </form>
-    </Form>
-  );
-};
+```typescript
+// File: App.tsx
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 3,
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+      staleTime: 5 * 60 * 1000,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 ```
 
 ---
@@ -1888,25 +1735,20 @@ const SignUpForm = () => {
 // Use custom hooks from hooks/api/
 const { data: listings } = useBottleListings();
 
-// Use enabled flag for conditional queries
-const { data } = useTransaction(id, !!id);
+// Check auth before invoking protected mutations
+const { user } = useAuth();
+if (!user) navigate("/auth");
 
-// Use mutation callbacks for navigation
+// Use mutation callbacks for navigation/toasts
 createMutation.mutate(data, {
-  onSuccess: () => navigate('/'),
+  onSuccess: () => navigate("/"),
 });
 
-// Destructure only what you need
+// Derive loading & error state from React Query
 const { data, isLoading, isError } = useQuery(...);
 
-// Use proper TypeScript types
-const listings: BottleListing[] = data ?? [];
-
 // Use translation keys
-{t('listing.createSuccess')}
-
-// Use shadcn/ui components
-<Button variant="outline" size="lg">Click me</Button>
+{t("listing.createSuccess")}
 ```
 
 ### ❌ DON'T
@@ -1939,18 +1781,16 @@ setState({ count: state.count + 1 }); // ✅
 
 ### Code Review Checklist
 
-- [ ] All API calls use custom hooks from `hooks/api/`
-- [ ] Query keys follow naming convention
-- [ ] Mutations invalidate correct caches
-- [ ] Forms use React Hook Form + Zod validation
-- [ ] Components use i18n translation keys
-- [ ] TypeScript types are properly defined
-- [ ] Error handling with `ApiRequestError`
-- [ ] Loading states handled with `isLoading`
-- [ ] Protected routes use `<ProtectedRoute>`
-- [ ] No direct `apiClient` calls in components
-- [ ] shadcn/ui components used consistently
-- [ ] Tailwind classes follow conventions (`cn()` utility)
+- [ ] Components call APIs via hooks in `hooks/api/`
+- [ ] Cache keys follow the exported `*Keys` helpers
+- [ ] Mutations invalidate relevant caches and surface toasts
+- [ ] Forms use React Hook Form (e.g., `Auth.tsx`) or equivalent controlled patterns (e.g., `CreateListing.tsx`)
+- [ ] Routes requiring auth are wrapped with `<ProtectedRoute>`
+- [ ] i18n strings come from `t()` / `lib/i18n.ts`
+- [ ] TypeScript types align with `src/types`
+- [ ] Errors surface `ApiRequestError.getUserMessage()` when possible
+- [ ] shadcn/ui primitives are applied consistently
+- [ ] Tailwind utilities leverage the shared `cn()` helper
 
 ---
 
@@ -1959,46 +1799,31 @@ setState({ count: state.count + 1 }); // ✅
 ### React Query Optimizations
 
 ```typescript
-// Prefetch data
+// Prefetch detail data before navigation
 const queryClient = useQueryClient();
-queryClient.prefetchQuery({
+await queryClient.prefetchQuery({
   queryKey: bottleListingKeys.detail(id),
   queryFn: () => bottleListingService.getById(id),
 });
 
-// Set stale time to reduce refetches
-const { data } = useBottleListings({
-  staleTime: 60000, // 1 minute
+// Override defaults for a specific key
+queryClient.setQueryDefaults(bottleListingKeys.all, {
+  staleTime: 60_000,
 });
 
-// Use select to derive state
-const { data: bottleCount } = useBottleListings({
-  select: (data) => data.length,
-});
+// Memoise derived data inside components
+const { data: listings } = useBottleListings();
+const ownedListings = useMemo(
+  () => (listings ?? []).filter((listing) => listing.createdByUserEmail === user?.email),
+  [listings, user?.email],
+);
 
-// Disable refetch on window focus for static data
-const { data } = useGlobalStatistics({
-  refetchOnWindowFocus: false,
-});
+// Global defaults live in App.tsx (see QueryClient snippet above)
 ```
 
 ### Code Splitting
 
-```typescript
-// Lazy load pages
-import { lazy, Suspense } from "react";
-
-const Messages = lazy(() => import("./pages/Messages"));
-
-<Route
-  path="/messages"
-  element={
-    <Suspense fallback={<LoadingSpinner />}>
-      <Messages />
-    </Suspense>
-  }
-/>
-```
+Lazy loading is not yet implemented. Introduce React `lazy`/`Suspense` around heavier routes (e.g., chat or dashboard modules) once bundle analysis indicates a need.
 
 ---
 
