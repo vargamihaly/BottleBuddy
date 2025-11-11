@@ -46,10 +46,10 @@ public static class CorsExtensions
             }
             else
             {
-                // Fallback: Allow any origin (NOT recommended for production)
-                policy.AllowAnyOrigin()
-                    .AllowAnyMethod()
-                    .AllowAnyHeader();
+                // SECURITY: Fail fast if CORS origins are not configured in production
+                throw new InvalidOperationException(
+                    "CORS origins must be configured in production. " +
+                    "Please set 'Cors:AllowedOrigins' in appsettings.json or environment variables.");
             }
         }
     }

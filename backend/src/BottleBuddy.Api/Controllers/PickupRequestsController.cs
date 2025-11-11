@@ -9,7 +9,10 @@ namespace BottleBuddy.Api.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class PickupRequestsController(PickupRequestService pickupRequestService, ILogger<PickupRequestsController> logger) 
+public class PickupRequestsController(
+    PickupRequestService pickupRequestService,
+    ILogger<PickupRequestsController> logger,
+    IWebHostEnvironment environment)
     : ControllerBase
 {
     // POST: api/pickuprequests
@@ -45,8 +48,11 @@ public class PickupRequestsController(PickupRequestService pickupRequestService,
         catch (Exception ex)
         {
             logger.LogError(ex, "Unexpected error while creating pickup request for listing {ListingId}", dto.ListingId);
-            
-            return StatusCode(500, new { error = "An error occurred while creating the pickup request", details = ex.Message });
+
+            var errorResponse = new { error = "An error occurred while creating the pickup request" };
+            return environment.IsDevelopment() ? 
+                StatusCode(500, new { errorResponse.error, details = ex.Message }) : 
+                StatusCode(500, errorResponse);
         }
     }
 
@@ -78,14 +84,20 @@ public class PickupRequestsController(PickupRequestService pickupRequestService,
         catch (UnauthorizedAccessException ex)
         {
             logger.LogWarning(ex, "Unauthorized access retrieving pickup requests for listing {ListingId}", listingId);
-            
-            return Forbid(ex.Message);
+
+            return StatusCode(403, new { error = ex.Message });
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "Unexpected error retrieving pickup requests for listing {ListingId}", listingId);
-            
-            return StatusCode(500, new { error = "An error occurred while retrieving pickup requests", details = ex.Message });
+
+            // SECURITY: Only return detailed error information in development
+            var errorResponse = new { error = "An error occurred while retrieving pickup requests" };
+            if (environment.IsDevelopment())
+            {
+                return StatusCode(500, new { errorResponse.error, details = ex.Message });
+            }
+            return StatusCode(500, errorResponse);
         }
     }
 
@@ -112,8 +124,14 @@ public class PickupRequestsController(PickupRequestService pickupRequestService,
         catch (Exception ex)
         {
             logger.LogError(ex, "Unexpected error retrieving pickup requests for volunteer {VolunteerId}", User.FindFirstValue(ClaimTypes.NameIdentifier));
-            
-            return StatusCode(500, new { error = "An error occurred while retrieving your pickup requests", details = ex.Message });
+
+            // SECURITY: Only return detailed error information in development
+            var errorResponse = new { error = "An error occurred while retrieving your pickup requests" };
+            if (environment.IsDevelopment())
+            {
+                return StatusCode(500, new { errorResponse.error, details = ex.Message });
+            }
+            return StatusCode(500, errorResponse);
         }
     }
 
@@ -153,14 +171,17 @@ public class PickupRequestsController(PickupRequestService pickupRequestService,
         catch (UnauthorizedAccessException ex)
         {
             logger.LogWarning(ex, "Unauthorized status update attempt for pickup request {PickupRequestId}", id);
-            
-            return Forbid(ex.Message);
+
+            return StatusCode(403, new { error = ex.Message });
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "Unexpected error updating pickup request {PickupRequestId}", id);
-            
-            return StatusCode(500, new { error = "An error occurred while updating the pickup request", details = ex.Message });
+
+            var errorResponse = new { error = "An error occurred while updating the pickup request" };
+            return environment.IsDevelopment() ? 
+                StatusCode(500, new { errorResponse.error, details = ex.Message }) : 
+                StatusCode(500, errorResponse);
         }
     }
 }

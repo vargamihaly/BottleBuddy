@@ -80,7 +80,7 @@ public class MessagesController(IMessageService messageService, ILogger<Messages
         catch (UnauthorizedAccessException ex)
         {
             logger.LogWarning(ex, "Unauthorized message send attempt for pickup request {PickupRequestId}", pickupRequestId);
-            return Forbid(ex.Message);
+            return StatusCode(403, new { error = ex.Message });
         }
     }
 
@@ -124,7 +124,7 @@ public class MessagesController(IMessageService messageService, ILogger<Messages
         catch (UnauthorizedAccessException ex)
         {
             logger.LogWarning(ex, "Unauthorized message retrieval attempt for pickup request {PickupRequestId}", pickupRequestId);
-            return Forbid(ex.Message);
+            return StatusCode(403, new { error = ex.Message });
         }
     }
 
@@ -168,7 +168,7 @@ public class MessagesController(IMessageService messageService, ILogger<Messages
         catch (UnauthorizedAccessException ex)
         {
             logger.LogWarning(ex, "Unauthorized mark as read attempt for pickup request {PickupRequestId}", pickupRequestId);
-            return Forbid(ex.Message);
+            return StatusCode(403, new { error = ex.Message });
         }
     }
 
@@ -282,7 +282,7 @@ public class UserMessagesController(IMessageService messageService, ILogger<User
         catch (UnauthorizedAccessException ex)
         {
             logger.LogWarning(ex, "Unauthorized mark as read attempt for message {MessageId}", messageId);
-            return Forbid(ex.Message);
+            return StatusCode(403, new { error = ex.Message });
         }
     }
 }

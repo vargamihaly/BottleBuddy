@@ -23,14 +23,14 @@ public class GlobalExceptionHandler(RequestDelegate next, ILogger<GlobalExceptio
         context.Response.ContentType = "application/json";
         context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
 
+        var environment = context.RequestServices.GetRequiredService<IWebHostEnvironment>();
+        var isDevelopment = environment.IsDevelopment();
+
         var response = new
         {
             error = "An internal server error occurred. Please try again later.",
-            message = exception.Message,
-            // Only include stack trace in development
-            stackTrace = context.RequestServices.GetRequiredService<IWebHostEnvironment>().IsDevelopment()
-                ? exception.StackTrace
-                : null
+            message = isDevelopment ? exception.Message : "An error occurred while processing your request.",
+            stackTrace = isDevelopment ? exception.StackTrace : null
         };
 
         var jsonResponse = JsonSerializer.Serialize(response, new JsonSerializerOptions

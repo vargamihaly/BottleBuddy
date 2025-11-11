@@ -73,8 +73,8 @@ public class TransactionsController(ITransactionService transactionService, ILog
         catch (UnauthorizedAccessException ex)
         {
             logger.LogWarning(ex, "Unauthorized transaction access attempt for pickup request {PickupRequestId}", pickupRequestId);
-            
-            return Forbid(ex.Message);
+
+            return StatusCode(403, new { error = ex.Message });
         }
     }
 

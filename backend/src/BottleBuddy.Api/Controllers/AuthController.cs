@@ -17,7 +17,8 @@ public class AuthController(
     UserManager<User> userManager,
     ApplicationDbContext dbContext,
     IConfiguration configuration,
-    ILogger<AuthController> logger) : ControllerBase
+    ILogger<AuthController> logger,
+    IWebHostEnvironment environment) : ControllerBase
 {
 
     /// <summary>
@@ -190,7 +191,6 @@ public class AuthController(
                 logger.LogInformation("Existing user found. UserId: {UserId}, Email: {Email}", user.Id, user.Email);
             }
 
-            // Generate JWT token
             logger.LogInformation("Generating JWT token for UserId: {UserId}", user.Id);
             var jwt = authService.GenerateJwtToken(user);
             logger.LogInformation("JWT token generated successfully (length: {TokenLength})", jwt?.Length ?? 0);
@@ -201,13 +201,21 @@ public class AuthController(
         catch (InvalidJwtException ex)
         {
             logger.LogError(ex, "Invalid Google JWT token");
-            return BadRequest(new { error = "Invalid Google token", details = ex.Message });
+
+            var errorResponse = new { error = "Invalid Google token" };
+            return environment.IsDevelopment() ? 
+                BadRequest(new { errorResponse.error, details = ex.Message }) : 
+                BadRequest(errorResponse);
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "Google sign-in failed with exception: {ExceptionType}", ex.GetType().Name);
             logger.LogError("Exception details - Message: {Message}, StackTrace: {StackTrace}", ex.Message, ex.StackTrace);
-            return BadRequest(new { error = "Failed to sign in with Google", details = ex.Message, type = ex.GetType().Name });
+
+            var errorResponse = new { error = "Failed to sign in with Google" };
+            return environment.IsDevelopment() ? 
+                BadRequest(new { errorResponse.error, details = ex.Message, type = ex.GetType().Name }) : 
+                BadRequest(errorResponse);
         }
     }
 }

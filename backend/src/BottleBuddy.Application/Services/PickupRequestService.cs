@@ -221,9 +221,16 @@ public class PickupRequestService(
             throw new UnauthorizedAccessException("You do not have permission to update this pickup request");
         }
 
-        Enum.TryParse<PickupRequestStatus>(status, true, out var statusEnum);
-        
-         // Only owner can accept/reject, both can complete
+        if (!Enum.TryParse<PickupRequestStatus>(status, true, out var statusEnum))
+        {
+            logger.LogWarning(
+                "Invalid status value {Status} provided for pickup request {PickupRequestId}",
+                status,
+                requestId);
+            throw new ArgumentException($"Invalid status value: {status}");
+        }
+
+        // Only owner can accept/reject, both can complete
         if (statusEnum is PickupRequestStatus.Accepted or PickupRequestStatus.Rejected && !isOwner)
         {
             logger.LogWarning(

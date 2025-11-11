@@ -53,7 +53,7 @@ public class RatingsController(IRatingService ratingService, ILogger<RatingsCont
         catch (UnauthorizedAccessException ex)
         {
             logger.LogWarning(ex, "Unauthorized rating attempt for transaction {TransactionId}", dto.TransactionId);
-            return Forbid(ex.Message);
+            return StatusCode(403, new { error = ex.Message });
         }
     }
 
