@@ -15,10 +15,32 @@ const messageKeys = {
   totalUnread: () => [...messageKeys.all, 'total-unread'] as const,
 };
 
-export const useMessages = (pickupRequestId: string | null, enabled = true) => {
+export interface UseMessagesOptions {
+  enabled?: boolean;
+  subscribeToHub?: boolean;
+  fetchMessages?: boolean;
+  fetchUnreadCount?: boolean;
+}
+
+export const useMessages = (
+  pickupRequestId: string | null,
+  options: UseMessagesOptions = {}
+) => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { connection, isConnected } = useSignalR();
+
+  const {
+    enabled = true,
+    subscribeToHub = true,
+    fetchMessages = true,
+    fetchUnreadCount = true,
+  } = options;
+
+  const hasPickupRequest = !!pickupRequestId;
+  const shouldFetchMessages = Boolean(fetchMessages && enabled && hasPickupRequest);
+  const shouldFetchUnreadCount = Boolean(fetchUnreadCount && enabled && hasPickupRequest);
+  const shouldSubscribeToHub = Boolean(subscribeToHub && enabled && hasPickupRequest);
 
   const {
     data: messages = [],
@@ -28,61 +50,83 @@ export const useMessages = (pickupRequestId: string | null, enabled = true) => {
   } = useQuery({
     queryKey: messageKeys.byPickupRequest(pickupRequestId ?? ''),
     queryFn: () => messageService.getByPickupRequestId(pickupRequestId ?? ''),
-    enabled: enabled && !!pickupRequestId,
+    enabled: shouldFetchMessages,
     staleTime: 30000,
   });
 
   const { data: unreadCount = 0 } = useQuery({
     queryKey: messageKeys.unreadCount(pickupRequestId ?? ''),
     queryFn: () => messageService.getUnreadCount(pickupRequestId ?? ''),
-    enabled: enabled && !!pickupRequestId,
+    enabled: shouldFetchUnreadCount,
   });
 
   useEffect(() => {
-    if (!connection || !isConnected || !pickupRequestId) {
+    const conversationId = pickupRequestId;
+
+    if (!shouldSubscribeToHub || !connection || !isConnected || !conversationId) {
       return;
     }
 
+    let joinedConversation = false;
+    let isCleaningUp = false;
+
     connection
-      .invoke("JoinConversation", pickupRequestId)
+      .invoke("JoinConversation", conversationId)
+      .then(() => {
+        if (!isCleaningUp) {
+          joinedConversation = true;
+        }
+      })
       .catch((err) => console.error("Error joining conversation:", err));
 
     const handleReceiveMessage = (message: Message) => {
-      queryClient.setQueryData<Message[] | undefined>(
-        messageKeys.byPickupRequest(pickupRequestId),
-        (oldMessages) => {
-          if (!oldMessages) {
-            return [message];
+      if (fetchMessages) {
+        queryClient.setQueryData<Message[] | undefined>(
+          messageKeys.byPickupRequest(conversationId),
+          (oldMessages) => {
+            if (!oldMessages) {
+              return [message];
+            }
+
+            const exists = oldMessages.some((m) => m.id === message.id);
+            if (exists) {
+              return oldMessages;
+            }
+
+            return [...oldMessages, message];
           }
+        );
+      } else {
+        queryClient.invalidateQueries({ queryKey: messageKeys.byPickupRequest(conversationId) });
+      }
 
-          const exists = oldMessages.some((m) => m.id === message.id);
-          if (exists) {
-            return oldMessages;
-          }
-
-          return [...oldMessages, message];
-        }
-      );
-
-      queryClient.invalidateQueries({ queryKey: messageKeys.unreadCount(pickupRequestId) });
+      if (fetchUnreadCount) {
+        queryClient.invalidateQueries({ queryKey: messageKeys.unreadCount(conversationId) });
+      }
       queryClient.invalidateQueries({ queryKey: messageKeys.totalUnread() });
     };
 
     const handleMessageRead = (data: { messageId: string; readAtUtc?: string }) => {
-      queryClient.setQueryData<Message[] | undefined>(
-        messageKeys.byPickupRequest(pickupRequestId),
-        (oldMessages) => {
-          if (!oldMessages) {
-            return oldMessages;
+      if (fetchMessages) {
+        queryClient.setQueryData<Message[] | undefined>(
+          messageKeys.byPickupRequest(conversationId),
+          (oldMessages) => {
+            if (!oldMessages) {
+              return oldMessages;
+            }
+
+            return oldMessages.map((msg) =>
+              msg.id === data.messageId ? { ...msg, isRead: true, readAtUtc: data.readAtUtc } : msg,
+            );
           }
+        );
+      } else {
+        queryClient.invalidateQueries({ queryKey: messageKeys.byPickupRequest(conversationId) });
+      }
 
-          return oldMessages.map((msg) =>
-            msg.id === data.messageId ? { ...msg, isRead: true, readAtUtc: data.readAtUtc } : msg,
-          );
-        }
-      );
-
-      queryClient.invalidateQueries({ queryKey: messageKeys.unreadCount(pickupRequestId) });
+      if (fetchUnreadCount) {
+        queryClient.invalidateQueries({ queryKey: messageKeys.unreadCount(conversationId) });
+      }
       queryClient.invalidateQueries({ queryKey: messageKeys.totalUnread() });
     };
 
@@ -90,14 +134,24 @@ export const useMessages = (pickupRequestId: string | null, enabled = true) => {
     connection.on("MessageRead", handleMessageRead);
 
     return () => {
+      isCleaningUp = true;
       connection.off("ReceiveMessage", handleReceiveMessage);
       connection.off("MessageRead", handleMessageRead);
 
-      connection
-        .invoke("LeaveConversation", pickupRequestId)
-        .catch((err) => console.error("Error leaving conversation:", err));
+      if (joinedConversation) {
+        connection
+          .invoke("LeaveConversation", conversationId)
+          .catch((err) => console.error("Error leaving conversation:", err));
+      }
     };
-  }, [connection, isConnected, pickupRequestId, queryClient]);
+  }, [
+    connection,
+    fetchMessages,
+    fetchUnreadCount,
+    isConnected,
+    pickupRequestId,
+    shouldSubscribeToHub,
+  ]);
 
   const sendMessageMutation = useMutation({
     mutationFn: (data: CreateMessage) => messageService.sendMessage(pickupRequestId ?? '', data),

@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { SignalRProvider } from "@/contexts/SignalRContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 // import { ProtectedRoute } from "@/components/ProtectedRoute"; // Available for protected pages
 import Index from "./pages/Index";
@@ -36,24 +37,26 @@ const App = () => (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <AuthProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/auth/success" element={<Auth />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/faq" element={<FAQ />} />
-              <Route path="/terms" element={<TermsOfService />} />
-              <Route path="/create-listing" element={<CreateListing />} />
-              <Route path="/my-listings" element={<MyListings />} />
-              <Route path="/my-pickup-tasks" element={<MyPickupTasks />} />
-              <Route path="/messages" element={<Messages />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
+          <SignalRProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/auth/success" element={<Auth />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/faq" element={<FAQ />} />
+                <Route path="/terms" element={<TermsOfService />} />
+                <Route path="/create-listing" element={<CreateListing />} />
+                <Route path="/my-listings" element={<MyListings />} />
+                <Route path="/my-pickup-tasks" element={<MyPickupTasks />} />
+                <Route path="/messages" element={<Messages />} />
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </SignalRProvider>
         </AuthProvider>
       </TooltipProvider>
       <ReactQueryDevtools initialIsOpen={false} />

@@ -42,7 +42,10 @@ const PickupRequestItem = ({
 }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { unreadCount } = useMessages(request.id, request.status === 'accepted' || request.status === 'pending');
+  const { unreadCount } = useMessages(request.id, {
+    enabled: request.status === 'accepted' || request.status === 'pending',
+    fetchMessages: false,
+  });
   const canMessage = request.status === 'accepted' || request.status === 'pending';
 
   return (

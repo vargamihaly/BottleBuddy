@@ -1,5 +1,6 @@
 import { useEffect, useRef, useCallback, useState } from "react";
-import * as signalR from "@microsoft/signalr";
+
+import { useSignalR } from "@/hooks/useSignalR";
 
 interface TypingUser {
   userId: string;
@@ -8,20 +9,17 @@ interface TypingUser {
 
 interface UseTypingIndicatorOptions {
   pickupRequestId: string | null;
-  connection: signalR.HubConnection | null;
-  isConnected: boolean;
   currentUserId: string | null;
 }
 
-const TYPING_DEBOUNCE_DELAY = 500; // Wait 500ms before sending typing status
-const TYPING_TIMEOUT = 3000; // Auto-stop typing after 3 seconds of inactivity
+const TYPING_DEBOUNCE_DELAY = 500;
+const TYPING_TIMEOUT = 3000;
 
 export const useTypingIndicator = ({
   pickupRequestId,
-  connection,
-  isConnected,
   currentUserId,
 }: UseTypingIndicatorOptions) => {
+  const { connection, isConnected } = useSignalR();
   const [typingUsers, setTypingUsers] = useState<string[]>([]);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const sendTypingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -51,7 +49,6 @@ export const useTypingIndicator = ({
     return () => clearInterval(cleanupInterval);
   }, []);
 
-  // Listen for typing events from SignalR
   useEffect(() => {
     if (!connection || !isConnected || !pickupRequestId) {
       return;
@@ -60,7 +57,6 @@ export const useTypingIndicator = ({
     const handleUserTyping = (data: { userId: string; isTyping: boolean }) => {
       console.log("Received typing indicator:", data);
 
-      // Don't show current user's typing status
       if (data.userId === currentUserId) {
         return;
       }
@@ -68,13 +64,11 @@ export const useTypingIndicator = ({
       const updatedMap = new Map(typingUsersMapRef.current);
 
       if (data.isTyping) {
-        // Add user to typing list
         updatedMap.set(data.userId, {
           userId: data.userId,
           timestamp: Date.now(),
         });
       } else {
-        // Remove user from typing list
         updatedMap.delete(data.userId);
       }
 
@@ -89,7 +83,6 @@ export const useTypingIndicator = ({
     };
   }, [connection, isConnected, pickupRequestId, currentUserId]);
 
-  // Send typing indicator to SignalR
   const sendTypingIndicator = useCallback(
     async (isTyping: boolean) => {
       if (!connection || !isConnected || !pickupRequestId) {
@@ -106,14 +99,11 @@ export const useTypingIndicator = ({
     [connection, isConnected, pickupRequestId]
   );
 
-  // Start typing - debounced
   const startTyping = useCallback(() => {
-    // Clear existing debounce timeout
     if (sendTypingTimeoutRef.current) {
       clearTimeout(sendTypingTimeoutRef.current);
     }
 
-    // If not currently typing, wait for debounce delay before sending
     if (!isCurrentlyTypingRef.current) {
       sendTypingTimeoutRef.current = setTimeout(() => {
         isCurrentlyTypingRef.current = true;
@@ -121,12 +111,10 @@ export const useTypingIndicator = ({
       }, TYPING_DEBOUNCE_DELAY);
     }
 
-    // Reset the auto-stop timer
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
     }
 
-    // Auto-stop after 3 seconds of inactivity
     typingTimeoutRef.current = setTimeout(() => {
       if (isCurrentlyTypingRef.current) {
         isCurrentlyTypingRef.current = false;
@@ -135,9 +123,7 @@ export const useTypingIndicator = ({
     }, TYPING_TIMEOUT);
   }, [sendTypingIndicator]);
 
-  // Stop typing - immediate
   const stopTyping = useCallback(() => {
-    // Clear all timeouts
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
       typingTimeoutRef.current = null;
@@ -148,14 +134,12 @@ export const useTypingIndicator = ({
       sendTypingTimeoutRef.current = null;
     }
 
-    // Send stop typing if currently typing
     if (isCurrentlyTypingRef.current) {
       isCurrentlyTypingRef.current = false;
       sendTypingIndicator(false);
     }
   }, [sendTypingIndicator]);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (typingTimeoutRef.current) {
@@ -164,7 +148,6 @@ export const useTypingIndicator = ({
       if (sendTypingTimeoutRef.current) {
         clearTimeout(sendTypingTimeoutRef.current);
       }
-      // Send stop typing on unmount if currently typing
       if (isCurrentlyTypingRef.current) {
         isCurrentlyTypingRef.current = false;
         if (connection && isConnected && pickupRequestId) {

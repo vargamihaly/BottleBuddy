@@ -23,7 +23,7 @@ interface ConversationItemProps {
 }
 
 const ConversationItem = ({ pickupRequest, listings, isSelected, onClick, currentUserId }: ConversationItemProps) => {
-  const { unreadCount } = useMessages(pickupRequest.id, true);
+  const { unreadCount } = useMessages(pickupRequest.id, { fetchMessages: false });
 
   // Find the listing for this pickup request
   const listing = listings.find((l) => l.id === pickupRequest.listingId);

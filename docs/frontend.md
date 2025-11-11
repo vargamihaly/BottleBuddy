@@ -840,65 +840,761 @@ return (
 
 ---
 
-## Real-time Features
+## Real-time Features (SignalR)
 
-### SignalR Integration
+### Architecture Overview
+
+The BottleBuddy frontend uses **SignalR (@microsoft/signalr)** for real-time messaging and notifications. The architecture follows a **Context Provider pattern** to maintain a **single global WebSocket connection** shared across all components.
+
+#### Key Components
+
+| Component | Purpose | Location |
+|-----------|---------|----------|
+| `SignalRProvider` | Maintains global WebSocket connection | `contexts/SignalRContext.tsx` |
+| `useSignalR` | Hook to access connection | `hooks/useSignalR.ts` |
+| `useMessages` | React Query + SignalR integration for messages | `hooks/useMessages.ts` |
+| `useTypingIndicator` | Real-time typing indicators | `hooks/useTypingIndicator.ts` |
+| `useSignalRStatus` | Connection status helper | `hooks/useSignalRStatus.ts` |
+
+---
+
+### SignalR Context Provider
+
+The `SignalRProvider` creates and manages a **single global WebSocket connection** that all components share. This prevents multiple connections from being created when multiple components need real-time updates.
+
+```typescript
+// File: contexts/SignalRContext.tsx
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
+import * as signalR from "@microsoft/signalr";
+import config from "@/config";
+import { useAuth } from "@/contexts/AuthContext";
+
+interface SignalRContextValue {
+  connection: signalR.HubConnection | null;
+  isConnected: boolean;
+  connectionError: string | null;
+}
+
+const SignalRContext = createContext<SignalRContextValue | undefined>(undefined);
+
+/**
+ * Creates a SignalR connection with proper configuration
+ * Always fetches the latest token to handle token refresh scenarios
+ */
+const createSignalRConnection = (initialToken: string) => {
+  return new signalR.HubConnectionBuilder()
+    .withUrl(`${config.api.baseUrl}/hubs/messages`, {
+      accessTokenFactory: () => {
+        // Always get the latest token to handle token refresh
+        return localStorage.getItem("token") || initialToken || "";
+      },
+      withCredentials: false,
+    })
+    .withAutomaticReconnect({
+      nextRetryDelayInMilliseconds: (retryContext) => {
+        // Exponential backoff: 0s, 2s, 10s, 30s, then 60s
+        if (retryContext.previousRetryCount === 0) return 0;
+        if (retryContext.previousRetryCount === 1) return 2000;
+        if (retryContext.previousRetryCount === 2) return 10000;
+        if (retryContext.previousRetryCount === 3) return 30000;
+        return 60000;
+      },
+    })
+    .configureLogging(
+      import.meta.env.DEV
+        ? signalR.LogLevel.Information
+        : signalR.LogLevel.Warning
+    )
+    .build();
+};
+
+export const SignalRProvider = ({ children }: { children: ReactNode }) => {
+  const { token } = useAuth();
+  const [connection, setConnection] = useState<signalR.HubConnection | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
+  const [connectionError, setConnectionError] = useState<string | null>(null);
+  const connectionRef = useRef<signalR.HubConnection | null>(null);
+  const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isStartingRef = useRef(false);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const cleanupConnection = () => {
+      if (retryTimeoutRef.current) {
+        clearTimeout(retryTimeoutRef.current);
+        retryTimeoutRef.current = null;
+      }
+
+      isStartingRef.current = false;
+
+      const currentConnection = connectionRef.current;
+      if (currentConnection) {
+        currentConnection.stop()
+          .then(() => console.log("SignalR connection stopped"))
+          .catch((error) => console.error("Error stopping SignalR:", error));
+      }
+
+      connectionRef.current = null;
+      if (isMounted) {
+        setConnection(null);
+        setIsConnected(false);
+      }
+    };
+
+    if (!token) {
+      setConnectionError("No authentication token found");
+      cleanupConnection();
+      return () => {
+        isMounted = false;
+      };
+    }
+
+    setConnectionError(null);
+
+    const newConnection = createSignalRConnection(token);
+    connectionRef.current = newConnection;
+    setConnection(newConnection);
+
+    // Event handlers
+    newConnection.onreconnecting((error) => {
+      console.log("SignalR reconnecting...", error);
+      setIsConnected(false);
+      setConnectionError("Connection lost, attempting to reconnect...");
+    });
+
+    newConnection.onreconnected((connectionId) => {
+      console.log("SignalR reconnected:", connectionId);
+      setIsConnected(true);
+      setConnectionError(null);
+    });
+
+    newConnection.onclose((error) => {
+      console.log("SignalR connection closed:", error);
+      setIsConnected(false);
+      if (error) {
+        setConnectionError(`Connection closed: ${error.message}`);
+      }
+    });
+
+    // Start connection
+    const startConnection = async () => {
+      if (!connectionRef.current || isStartingRef.current) {
+        return;
+      }
+
+      isStartingRef.current = true;
+      try {
+        await connectionRef.current.start();
+        if (!isMounted) return;
+
+        console.log("SignalR connected successfully");
+        setIsConnected(true);
+        setConnectionError(null);
+      } catch (error) {
+        console.error("SignalR connection failed:", error);
+        if (!isMounted) return;
+
+        setConnectionError(
+          error instanceof Error ? error.message : "Failed to connect"
+        );
+
+        // Retry after 5 seconds
+        retryTimeoutRef.current = setTimeout(() => {
+          isStartingRef.current = false;
+          startConnection();
+        }, 5000);
+        return;
+      }
+      isStartingRef.current = false;
+    };
+
+    startConnection();
+
+    return () => {
+      isMounted = false;
+      cleanupConnection();
+    };
+  }, [token]);
+
+  const value = useMemo(
+    () => ({ connection, isConnected, connectionError }),
+    [connection, isConnected, connectionError]
+  );
+
+  return (
+    <SignalRContext.Provider value={value}>
+      {children}
+    </SignalRContext.Provider>
+  );
+};
+
+export const useSignalRContext = () => {
+  const context = useContext(SignalRContext);
+  if (!context) {
+    throw new Error("useSignalRContext must be used within a SignalRProvider");
+  }
+  return context;
+};
+```
+
+#### Key Features:
+1. **Single Global Connection**: Only one WebSocket connection for the entire app
+2. **Token Refresh Support**: Always fetches latest token from localStorage
+3. **Automatic Reconnection**: Exponential backoff (0s → 2s → 10s → 30s → 60s)
+4. **Environment-aware Logging**: Verbose in dev, warnings only in prod
+5. **Proper Cleanup**: Handles unmount, token changes, and connection errors
+
+---
+
+### useSignalR Hook
+
+Simple hook to access the global SignalR connection from any component.
+
+```typescript
+// File: hooks/useSignalR.ts
+import { useContext } from "react";
+import { SignalRContext } from "@/contexts/SignalRContext";
+
+export const useSignalR = () => {
+  const context = useContext(SignalRContext);
+
+  if (!context) {
+    throw new Error("useSignalR must be used within a SignalRProvider");
+  }
+
+  return context;
+};
+```
+
+**Usage:**
+```typescript
+const { connection, isConnected, connectionError } = useSignalR();
+```
+
+---
+
+### useMessages Hook (React Query + SignalR Integration)
+
+The `useMessages` hook combines **React Query** for HTTP requests with **SignalR** for real-time updates.
 
 ```typescript
 // File: hooks/useMessages.ts
-import { useEffect, useState } from "react";
-import * as signalR from "@microsoft/signalr";
-import config from "@/config";
+import { useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Message, CreateMessage } from "@/types";
+import { useToast } from "@/hooks/use-toast";
+import { useSignalR } from "@/hooks/useSignalR";
+import { messageService } from "@/api/services";
+import { ApiRequestError } from "@/lib/apiClient";
 
-export const useMessages = (conversationId: string, enabled = true) => {
-  const [connection, setConnection] = useState<signalR.HubConnection | null>(null);
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
+const messageKeys = {
+  all: ['messages'] as const,
+  byPickupRequest: (pickupRequestId: string) =>
+    [...messageKeys.all, 'pickup-request', pickupRequestId] as const,
+  unreadCount: (pickupRequestId: string) =>
+    [...messageKeys.byPickupRequest(pickupRequestId), 'unread-count'] as const,
+  totalUnread: () => [...messageKeys.all, 'total-unread'] as const,
+};
 
+export interface UseMessagesOptions {
+  enabled?: boolean;
+  subscribeToHub?: boolean;
+  fetchMessages?: boolean;
+  fetchUnreadCount?: boolean;
+}
+
+export const useMessages = (
+  pickupRequestId: string | null,
+  options: UseMessagesOptions = {}
+) => {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  const { connection, isConnected } = useSignalR();
+
+  const {
+    enabled = true,
+    subscribeToHub = true,
+    fetchMessages = true,
+    fetchUnreadCount = true,
+  } = options;
+
+  const hasPickupRequest = !!pickupRequestId;
+  const shouldFetchMessages = Boolean(fetchMessages && enabled && hasPickupRequest);
+  const shouldFetchUnreadCount = Boolean(fetchUnreadCount && enabled && hasPickupRequest);
+  const shouldSubscribeToHub = Boolean(subscribeToHub && enabled && hasPickupRequest);
+
+  // Fetch messages via HTTP
+  const {
+    data: messages = [],
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery({
+    queryKey: messageKeys.byPickupRequest(pickupRequestId ?? ''),
+    queryFn: () => messageService.getByPickupRequestId(pickupRequestId ?? ''),
+    enabled: shouldFetchMessages,
+    staleTime: 30000,
+  });
+
+  // Fetch unread count
+  const { data: unreadCount = 0 } = useQuery({
+    queryKey: messageKeys.unreadCount(pickupRequestId ?? ''),
+    queryFn: () => messageService.getUnreadCount(pickupRequestId ?? ''),
+    enabled: shouldFetchUnreadCount,
+  });
+
+  // Subscribe to SignalR events
   useEffect(() => {
-    if (!enabled || !conversationId) return;
+    const conversationId = pickupRequestId;
 
-    const newConnection = new signalR.HubConnectionBuilder()
-      .withUrl(`${config.api.baseUrl}/messageHub`, {
-        accessTokenFactory: () => localStorage.getItem('token') || '',
-      })
-      .withAutomaticReconnect()
-      .build();
+    if (!shouldSubscribeToHub || !connection || !isConnected || !conversationId) {
+      return;
+    }
 
-    newConnection.start()
+    let joinedConversation = false;
+    let isCleaningUp = false;
+
+    // Join conversation
+    connection
+      .invoke("JoinConversation", conversationId)
       .then(() => {
-        console.log("SignalR Connected");
-        newConnection.invoke("JoinConversation", conversationId);
+        if (!isCleaningUp) {
+          joinedConversation = true;
+        }
       })
-      .catch((err) => console.error("SignalR Connection Error:", err));
+      .catch((err) => console.error("Error joining conversation:", err));
 
-    // Listen for new messages
-    newConnection.on("ReceiveMessage", (message: Message) => {
-      setMessages((prev) => [...prev, message]);
-      setUnreadCount((prev) => prev + 1);
-    });
+    // Handle incoming messages
+    const handleReceiveMessage = (message: Message) => {
+      if (fetchMessages) {
+        queryClient.setQueryData<Message[] | undefined>(
+          messageKeys.byPickupRequest(conversationId),
+          (oldMessages) => {
+            if (!oldMessages) return [message];
 
-    // Listen for typing indicators
-    newConnection.on("UserTyping", (userId: string) => {
-      console.log(`${userId} is typing...`);
-    });
+            const exists = oldMessages.some((m) => m.id === message.id);
+            if (exists) return oldMessages;
 
-    setConnection(newConnection);
+            return [...oldMessages, message];
+          }
+        );
+      } else {
+        queryClient.invalidateQueries({ queryKey: messageKeys.byPickupRequest(conversationId) });
+      }
+
+      if (fetchUnreadCount) {
+        queryClient.invalidateQueries({ queryKey: messageKeys.unreadCount(conversationId) });
+      }
+      queryClient.invalidateQueries({ queryKey: messageKeys.totalUnread() });
+    };
+
+    // Handle message read events
+    const handleMessageRead = (data: { messageId: string; readAtUtc?: string }) => {
+      if (fetchMessages) {
+        queryClient.setQueryData<Message[] | undefined>(
+          messageKeys.byPickupRequest(conversationId),
+          (oldMessages) => {
+            if (!oldMessages) return oldMessages;
+
+            return oldMessages.map((msg) =>
+              msg.id === data.messageId
+                ? { ...msg, isRead: true, readAtUtc: data.readAtUtc }
+                : msg
+            );
+          }
+        );
+      } else {
+        queryClient.invalidateQueries({ queryKey: messageKeys.byPickupRequest(conversationId) });
+      }
+
+      if (fetchUnreadCount) {
+        queryClient.invalidateQueries({ queryKey: messageKeys.unreadCount(conversationId) });
+      }
+      queryClient.invalidateQueries({ queryKey: messageKeys.totalUnread() });
+    };
+
+    connection.on("ReceiveMessage", handleReceiveMessage);
+    connection.on("MessageRead", handleMessageRead);
 
     return () => {
-      newConnection.stop();
+      isCleaningUp = true;
+      connection.off("ReceiveMessage", handleReceiveMessage);
+      connection.off("MessageRead", handleMessageRead);
+
+      if (joinedConversation) {
+        connection
+          .invoke("LeaveConversation", conversationId)
+          .catch((err) => console.error("Error leaving conversation:", err));
+      }
     };
-  }, [conversationId, enabled]);
+  }, [
+    connection,
+    fetchMessages,
+    fetchUnreadCount,
+    isConnected,
+    pickupRequestId,
+    shouldSubscribeToHub,
+  ]);
 
-  const sendMessage = async (content: string) => {
-    if (connection && connection.state === signalR.HubConnectionState.Connected) {
-      await connection.invoke("SendMessage", conversationId, content);
-    }
+  // Send message mutation
+  const sendMessageMutation = useMutation({
+    mutationFn: (data: CreateMessage) => messageService.sendMessage(pickupRequestId ?? '', data),
+    onSuccess: () => {
+      if (!pickupRequestId) return;
+      queryClient.invalidateQueries({ queryKey: messageKeys.byPickupRequest(pickupRequestId) });
+      queryClient.invalidateQueries({ queryKey: messageKeys.unreadCount(pickupRequestId) });
+      queryClient.invalidateQueries({ queryKey: messageKeys.totalUnread() });
+    },
+    onError: (error: unknown) => {
+      const description = error instanceof ApiRequestError
+        ? error.getUserMessage()
+        : error instanceof Error
+          ? error.message
+          : "Please try again.";
+
+      toast({
+        title: "Failed to send message",
+        description,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Mark all as read mutation
+  const markAllAsReadMutation = useMutation({
+    mutationFn: () => messageService.markAsRead(pickupRequestId ?? ''),
+    onSuccess: () => {
+      if (!pickupRequestId) return;
+      queryClient.invalidateQueries({ queryKey: messageKeys.byPickupRequest(pickupRequestId) });
+      queryClient.invalidateQueries({ queryKey: messageKeys.unreadCount(pickupRequestId) });
+      queryClient.invalidateQueries({ queryKey: messageKeys.totalUnread() });
+    },
+  });
+
+  return {
+    messages,
+    isLoading,
+    isError,
+    unreadCount,
+    sendMessage: sendMessageMutation.mutate,
+    isSending: sendMessageMutation.isPending,
+    markAllAsRead: markAllAsReadMutation.mutate,
+    refetch,
   };
+};
 
-  return { connection, messages, unreadCount, sendMessage };
+export const useTotalUnreadCount = () => {
+  const { data: totalUnreadCount = 0 } = useQuery({
+    queryKey: messageKeys.totalUnread(),
+    queryFn: messageService.getTotalUnreadCount,
+    staleTime: 60000,
+  });
+
+  return totalUnreadCount;
 };
 ```
+
+#### Options API:
+
+| Option | Default | Purpose |
+|--------|---------|---------|
+| `enabled` | `true` | Enable/disable all queries |
+| `subscribeToHub` | `true` | Subscribe to SignalR events |
+| `fetchMessages` | `true` | Fetch full message list |
+| `fetchUnreadCount` | `true` | Fetch unread count |
+
+**Usage Examples:**
+
+```typescript
+// Full messages view (ChatBox)
+const { messages, sendMessage, unreadCount } = useMessages(pickupRequestId);
+
+// Only unread count (ConversationList)
+const { unreadCount } = useMessages(pickupRequest.id, { fetchMessages: false });
+
+// Disabled until user selects conversation
+const { messages } = useMessages(selectedId, { enabled: !!selectedId });
+```
+
+---
+
+### useTypingIndicator Hook
+
+Real-time typing indicators for chat conversations.
+
+```typescript
+// File: hooks/useTypingIndicator.ts
+import { useEffect, useRef, useCallback, useState } from "react";
+import { useSignalR } from "@/hooks/useSignalR";
+
+interface UseTypingIndicatorOptions {
+  pickupRequestId: string | null;
+  currentUserId: string | null;
+}
+
+const TYPING_DEBOUNCE_DELAY = 500; // ms
+const TYPING_TIMEOUT = 3000; // ms
+
+export const useTypingIndicator = ({
+  pickupRequestId,
+  currentUserId,
+}: UseTypingIndicatorOptions) => {
+  const { connection, isConnected } = useSignalR();
+  const [typingUsers, setTypingUsers] = useState<string[]>([]);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const sendTypingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isCurrentlyTypingRef = useRef(false);
+  const typingUsersMapRef = useRef<Map<string, { userId: string; timestamp: number }>>(new Map());
+
+  // Clean up stale typing indicators
+  useEffect(() => {
+    const cleanupInterval = setInterval(() => {
+      const now = Date.now();
+      const updatedMap = new Map(typingUsersMapRef.current);
+      let hasChanges = false;
+
+      updatedMap.forEach((typingUser, userId) => {
+        if (now - typingUser.timestamp > TYPING_TIMEOUT + 1000) {
+          updatedMap.delete(userId);
+          hasChanges = true;
+        }
+      });
+
+      if (hasChanges) {
+        typingUsersMapRef.current = updatedMap;
+        setTypingUsers(Array.from(updatedMap.keys()));
+      }
+    }, 1000);
+
+    return () => clearInterval(cleanupInterval);
+  }, []);
+
+  // Listen for typing events
+  useEffect(() => {
+    if (!connection || !isConnected || !pickupRequestId) {
+      return;
+    }
+
+    const handleUserTyping = (data: { userId: string; isTyping: boolean }) => {
+      // Don't show current user's typing status
+      if (data.userId === currentUserId) {
+        return;
+      }
+
+      const updatedMap = new Map(typingUsersMapRef.current);
+
+      if (data.isTyping) {
+        updatedMap.set(data.userId, {
+          userId: data.userId,
+          timestamp: Date.now(),
+        });
+      } else {
+        updatedMap.delete(data.userId);
+      }
+
+      typingUsersMapRef.current = updatedMap;
+      setTypingUsers(Array.from(updatedMap.keys()));
+    };
+
+    connection.on("UserTyping", handleUserTyping);
+
+    return () => {
+      connection.off("UserTyping", handleUserTyping);
+    };
+  }, [connection, isConnected, pickupRequestId, currentUserId]);
+
+  // Send typing indicator (debounced)
+  const startTyping = useCallback(() => {
+    if (!connection || !isConnected || !pickupRequestId) return;
+
+    // Clear existing debounce timeout
+    if (sendTypingTimeoutRef.current) {
+      clearTimeout(sendTypingTimeoutRef.current);
+    }
+
+    // If not currently typing, wait for debounce delay
+    if (!isCurrentlyTypingRef.current) {
+      sendTypingTimeoutRef.current = setTimeout(() => {
+        isCurrentlyTypingRef.current = true;
+        connection
+          .invoke("SendTypingIndicator", pickupRequestId, true)
+          .catch((err) => console.error("Error sending typing indicator:", err));
+      }, TYPING_DEBOUNCE_DELAY);
+    }
+
+    // Reset auto-stop timer
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+
+    typingTimeoutRef.current = setTimeout(() => {
+      if (isCurrentlyTypingRef.current) {
+        isCurrentlyTypingRef.current = false;
+        connection
+          .invoke("SendTypingIndicator", pickupRequestId, false)
+          .catch((err) => console.error("Error stopping typing:", err));
+      }
+    }, TYPING_TIMEOUT);
+  }, [connection, isConnected, pickupRequestId]);
+
+  // Stop typing immediately
+  const stopTyping = useCallback(() => {
+    if (!connection || !isConnected || !pickupRequestId) return;
+
+    // Clear all timeouts
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+      typingTimeoutRef.current = null;
+    }
+
+    if (sendTypingTimeoutRef.current) {
+      clearTimeout(sendTypingTimeoutRef.current);
+      sendTypingTimeoutRef.current = null;
+    }
+
+    // Send stop typing if currently typing
+    if (isCurrentlyTypingRef.current) {
+      isCurrentlyTypingRef.current = false;
+      connection
+        .invoke("SendTypingIndicator", pickupRequestId, false)
+        .catch((err) => console.error("Error stopping typing:", err));
+    }
+  }, [connection, isConnected, pickupRequestId]);
+
+  return {
+    typingUsers,
+    startTyping,
+    stopTyping,
+  };
+};
+```
+
+**Usage:**
+```typescript
+const { typingUsers, startTyping, stopTyping } = useTypingIndicator({
+  pickupRequestId,
+  currentUserId: user?.id || null,
+});
+
+<Input
+  onChange={(e) => {
+    startTyping();
+    // ... handle input change
+  }}
+  onBlur={stopTyping}
+/>
+
+{typingUsers.length > 0 && (
+  <div>{typingUsers.join(", ")} is typing...</div>
+)}
+```
+
+---
+
+### useSignalRStatus Hook
+
+Helper hook for connection status UI indicators.
+
+```typescript
+// File: hooks/useSignalRStatus.ts
+import { useSignalR } from "./useSignalR";
+
+export const useSignalRStatus = () => {
+  const { isConnected, connectionError } = useSignalR();
+
+  return {
+    isConnected,
+    hasError: !!connectionError,
+    errorMessage: connectionError,
+    isDisconnected: !isConnected && !connectionError,
+    isReconnecting: !isConnected && !!connectionError,
+  };
+};
+```
+
+**Usage:**
+```typescript
+const { isConnected, hasError, errorMessage, isReconnecting } = useSignalRStatus();
+
+{isReconnecting && (
+  <Alert variant="warning">
+    <AlertCircle className="h-4 h-4" />
+    <AlertDescription>Reconnecting to chat...</AlertDescription>
+  </Alert>
+)}
+```
+
+---
+
+### App Setup
+
+The `SignalRProvider` must wrap the entire app and be placed **inside** `AuthProvider` (so it can access the token).
+
+```typescript
+// File: App.tsx
+import { AuthProvider } from "@/contexts/AuthContext";
+import { SignalRProvider } from "@/contexts/SignalRContext";
+
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <AuthProvider>
+      <SignalRProvider>
+        <BrowserRouter>
+          <Routes>
+            {/* ... routes */}
+          </Routes>
+        </BrowserRouter>
+      </SignalRProvider>
+    </AuthProvider>
+  </QueryClientProvider>
+);
+```
+
+**Provider Hierarchy:**
+```
+ErrorBoundary
+└── QueryClientProvider
+    └── AuthProvider (provides token)
+        └── SignalRProvider (uses token)
+            └── BrowserRouter
+                └── Routes
+```
+
+---
+
+### Backend SignalR Events
+
+| Event | Direction | Purpose |
+|-------|-----------|---------|
+| `JoinConversation` | Client → Server | Join a conversation group |
+| `LeaveConversation` | Client → Server | Leave a conversation group |
+| `SendTypingIndicator` | Client → Server | Send typing status |
+| `ReceiveMessage` | Server → Client | Receive new message |
+| `MessageRead` | Server → Client | Message marked as read |
+| `UserTyping` | Server → Client | Other user typing status |
+
+---
+
+### Performance Considerations
+
+1. **Single Connection**: Only one WebSocket connection for entire app (not per component)
+2. **Optimistic Updates**: Messages appear instantly via `setQueryData` before HTTP response
+3. **Conditional Fetching**: Components can opt-out of fetching messages (`fetchMessages: false`)
+4. **Debounced Typing**: 500ms debounce prevents excessive SignalR calls
+5. **Environment Logging**: Verbose logs only in development
+
+---
+
+### Troubleshooting
+
+| Issue | Solution |
+|-------|----------|
+| **Multiple connections** | Ensure `SignalRProvider` wraps app only once |
+| **401 Unauthorized** | Check `accessTokenFactory` returns valid token |
+| **Connection keeps retrying** | Token likely expired, check auth flow |
+| **Messages not updating** | Verify `queryClient.invalidateQueries` is called |
+| **Typing indicator stuck** | Check TYPING_TIMEOUT (3s) cleanup logic |
 
 ---
 
