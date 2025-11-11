@@ -19,35 +19,43 @@ BottleBuddy connects people who have bottles to return with volunteers who can h
 ## 📁 Project Structure
 
 ```
-bottle-buddy-share/
-├── backend/              # .NET 9 Web API
+BottleBuddy/
+├── backend/              # .NET 9 Web API + application layer
 │   ├── src/
 │   │   ├── BottleBuddy.Api/
 │   │   └── BottleBuddy.Application/
 │   ├── tests/
-│   │   └── BottleBuddy.Tests/  # xUnit tests (106 tests)
+│   │   └── BottleBuddy.Tests/   # xUnit tests (106 tests)
 │   ├── Dockerfile
 │   ├── Dockerfile.dev
 │   └── BottleBuddyApi.sln
 │
-├── frontend/             # React + TypeScript + Vite
+├── frontend/             # React + TypeScript + Vite SPA
 │   ├── src/
+│   │   ├── components/
+│   │   ├── contexts/
+│   │   ├── hooks/
+│   │   ├── api/
+│   │   └── pages/
 │   ├── public/
 │   ├── package.json
-│   ├── vite.config.ts
-│   └── ...
+│   └── vite.config.ts
 │
-├── docker/               # Docker orchestration
-│   ├── docker-compose.yml       # Production setup
-│   ├── docker-compose.dev.yml   # Development with hot-reload
-│   ├── Dockerfile               # Frontend production image
-│   ├── Dockerfile.dev          # Frontend dev image
-│   ├── nginx.conf              # Nginx reverse proxy config
-│   ├── .env.docker.example     # Environment variables template
-│   ├── Makefile                # Docker shortcuts
-│   └── README.md               # Detailed Docker documentation
+├── docs/                 # Architecture & feature documentation
+│   ├── README.md         # This file
+│   └── frontend.md       # Detailed frontend guide
 │
-└── README.md             # This file
+├── docker/               # Docker orchestration & frontend image
+│   ├── docker-compose.yml
+│   ├── docker-compose.dev.yml
+│   ├── Dockerfile
+│   ├── Dockerfile.dev
+│   ├── nginx.conf
+│   ├── .env.docker.example
+│   └── README.md
+│
+├── infrastructure/       # IaC (Bicep, Terraform, GitHub Actions helpers)
+└── scripts/              # Utility scripts (migrations, seeding, etc.)
 ```
 
 ## 🚀 Quick Start
@@ -65,7 +73,7 @@ bottle-buddy-share/
 1. **Clone the repository:**
    ```bash
    git clone <repository-url>
-   cd bottle-buddy-share
+   cd BottleBuddy
    ```
 
 2. **Create environment file:**
@@ -123,7 +131,7 @@ bottle-buddy-share/
 - **Tailwind CSS** + **shadcn/ui** components
 - **Leaflet** + **React Leaflet** for interactive maps
 - **Lucide Icons**
-- **React Hook Form** + **Zod** for form validation
+- **React Hook Form** + **Zod** for authentication flows; controlled inputs for listing creation
 - **Google OAuth** (@react-oauth/google)
 - **Sonner** for toast notifications
 - **date-fns** for date/time formatting
@@ -145,7 +153,8 @@ bottle-buddy-share/
 - Delete bottle listings
 - Interactive map view with markers
 - Responsive design (mobile & desktop)
-- Real-time data updates (React Query)
+- Data fetching with TanStack Query (5-minute stale cache)
+- Real-time messaging via SignalR hub connection
 - Automatic database migrations
 - API documentation
 - Distributed tracing
@@ -347,7 +356,8 @@ Potential improvements planned for the messaging system:
 - `/faq` - Frequently Asked Questions
 - `/terms` - Terms of Service
 
-### Protected Routes (Auth Required)
+### Optional Protected Routes
+Routes are public by default. Wrap them in `<ProtectedRoute>` once authentication gating is required:
 - `/create-listing` - Create a new bottle listing
 - `/my-listings` - View and manage user's bottle listings (Active/Claimed/Completed tabs)
 - `/my-pickup-tasks` - View active and completed pickup tasks (with status tabs)
