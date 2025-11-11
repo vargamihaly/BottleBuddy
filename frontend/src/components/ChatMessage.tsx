@@ -6,6 +6,7 @@ import { formatDistanceToNow } from "date-fns";
 import { ImageModal } from "@/components/ImageModal";
 import { ReadReceipt } from "@/components/ReadReceipt";
 import { Loader2, AlertCircle } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface ChatMessageProps {
   message: Message;
@@ -17,6 +18,7 @@ export const ChatMessage = ({ message, isOwnMessage, apiBaseUrl = import.meta.en
   const [showImageModal, setShowImageModal] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
+  const { t } = useTranslation();
 
   const getInitials = (name?: string) => {
     if (!name) return "?";
@@ -72,7 +74,7 @@ export const ChatMessage = ({ message, isOwnMessage, apiBaseUrl = import.meta.en
           )}
         >
           <span className="text-xs font-medium text-gray-900">
-            {isOwnMessage ? "You" : message.senderName || "Unknown"}
+            {isOwnMessage ? t("messages.you") : message.senderName || t("messages.unknown")}
           </span>
           <span className="text-xs text-gray-500">{timeAgo}</span>
         </div>
@@ -100,7 +102,7 @@ export const ChatMessage = ({ message, isOwnMessage, apiBaseUrl = import.meta.en
               {imageError ? (
                 <div className="flex items-center justify-center gap-2 p-4 bg-gray-200 text-gray-500">
                   <AlertCircle className="w-5 h-5" />
-                  <span className="text-sm">Failed to load image</span>
+                  <span className="text-sm">{t("messages.imageLoadError")}</span>
                 </div>
               ) : (
                 <img

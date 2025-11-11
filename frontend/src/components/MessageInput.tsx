@@ -4,6 +4,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Send, Loader2, Image as ImageIcon, AlertCircle } from "lucide-react";
 import { ImagePreview } from "@/components/ImagePreview";
 import { CreateMessage } from "@/types";
+import { useTranslation } from "react-i18next";
 
 interface MessageInputProps {
   onSend: (data: CreateMessage) => void;
@@ -17,7 +18,7 @@ interface MessageInputProps {
 export const MessageInput = ({
   onSend,
   isSending,
-  placeholder = "Type your message...",
+  placeholder,
   disabled = false,
   onTypingStart,
   onTypingStop,
@@ -26,6 +27,7 @@ export const MessageInput = ({
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imageError, setImageError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { t } = useTranslation();
 
   const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
   const ALLOWED_TYPES = ["image/png", "image/jpeg", "image/jpg", "image/gif"];
@@ -39,13 +41,13 @@ export const MessageInput = ({
 
     // Validate file type
     if (!ALLOWED_TYPES.includes(file.type)) {
-      setImageError("Only PNG, JPEG, JPG, and GIF images are allowed");
+      setImageError(t("messageInput.imageTypeError"));
       return;
     }
 
     // Validate file size
     if (file.size > MAX_FILE_SIZE) {
-      setImageError(`Image size must be less than ${MAX_FILE_SIZE / 1024 / 1024}MB`);
+      setImageError(t("messageInput.imageSizeError"));
       return;
     }
 
@@ -127,7 +129,7 @@ export const MessageInput = ({
               }
             }}
             onKeyDown={handleKeyDown}
-            placeholder={placeholder}
+            placeholder={placeholder || t("messageInput.placeholder")}
             disabled={disabled || isSending}
             className="min-h-[60px] max-h-[120px] resize-none"
             maxLength={1050} // Allow typing a bit over to show error
@@ -141,7 +143,7 @@ export const MessageInput = ({
               {characterCount}/1000
             </span>
             <span className="text-xs text-gray-400">
-              Press Enter to send, Shift+Enter for new line
+              {t("messageInput.enterToSend")}
             </span>
           </div>
         </div>
@@ -162,7 +164,7 @@ export const MessageInput = ({
             disabled={disabled || isSending || !!selectedImage}
             variant="outline"
             className="h-[60px] px-3"
-            title="Attach image"
+            title={t("messageInput.attachImage")}
           >
             <ImageIcon className="w-5 h-5" />
           </Button>
@@ -179,7 +181,7 @@ export const MessageInput = ({
           ) : (
             <>
               <Send className="w-5 h-5" />
-              <span className="ml-2 hidden sm:inline">Send</span>
+              <span className="ml-2 hidden sm:inline">{t("messageInput.send")}</span>
             </>
           )}
         </Button>

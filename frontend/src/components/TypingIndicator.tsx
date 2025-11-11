@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 interface TypingIndicatorProps {
   typingUserNames: string[];
@@ -7,6 +8,7 @@ interface TypingIndicatorProps {
 
 export const TypingIndicator = ({ typingUserNames, className = "" }: TypingIndicatorProps) => {
   const [isVisible, setIsVisible] = useState(false);
+  const { t } = useTranslation();
 
   // Fade in/out animation
   useEffect(() => {
@@ -26,14 +28,15 @@ export const TypingIndicator = ({ typingUserNames, className = "" }: TypingIndic
   // Format the typing text based on number of users
   const getTypingText = () => {
     if (typingUserNames.length === 1) {
-      return `${typingUserNames[0]} is typing`;
+      return `${typingUserNames[0]} ${t("messages.typing")}`;
     } else if (typingUserNames.length === 2) {
-      return `${typingUserNames[0]} and ${typingUserNames[1]} are typing`;
+      return t("messages.typingMultiple", { users: `${typingUserNames[0]} and ${typingUserNames[1]}` });
     } else if (typingUserNames.length === 3) {
-      return `${typingUserNames[0]}, ${typingUserNames[1]}, and ${typingUserNames[2]} are typing`;
+      return t("messages.typingMultiple", { users: `${typingUserNames[0]}, ${typingUserNames[1]}, and ${typingUserNames[2]}` });
     } else {
       // 4+ users
-      return `${typingUserNames[0]}, ${typingUserNames[1]}, and ${typingUserNames.length - 2} others are typing`;
+      const firstUser = typingUserNames[0];
+      return `${firstUser} ${t("messages.typingOthers", { count: typingUserNames.length - 1 })}`;
     }
   };
 

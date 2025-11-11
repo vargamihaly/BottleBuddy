@@ -13,6 +13,7 @@ import { Star } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Transaction } from "@/types";
 import { useCreateRating } from "@/hooks/api";
+import { useTranslation } from "react-i18next";
 
 interface RatingDialogProps {
   open: boolean;
@@ -26,14 +27,15 @@ export const RatingDialog = ({ open, onOpenChange, transaction, otherPartyName }
   const [hoveredRating, setHoveredRating] = useState(0);
   const [comment, setComment] = useState("");
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const createRatingMutation = useCreateRating();
 
   const handleSubmit = () => {
     if (rating === 0) {
       toast({
-        title: "Rating required",
-        description: "Please select a star rating before submitting.",
+        title: t("rating.ratingRequired"),
+        description: t("rating.selectRating"),
         variant: "destructive",
       });
       return;
@@ -59,9 +61,9 @@ export const RatingDialog = ({ open, onOpenChange, transaction, otherPartyName }
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Rate Your Experience</DialogTitle>
+          <DialogTitle>{t("rating.title")}</DialogTitle>
           <DialogDescription>
-            How was your experience with {otherPartyName || "the other party"}?
+            {t("rating.description", { name: otherPartyName || "the other party" })}
           </DialogDescription>
         </DialogHeader>
 
@@ -90,31 +92,31 @@ export const RatingDialog = ({ open, onOpenChange, transaction, otherPartyName }
             </div>
             {rating > 0 && (
               <p className="text-sm text-gray-600">
-                {rating === 1 && "Poor"}
-                {rating === 2 && "Fair"}
-                {rating === 3 && "Good"}
-                {rating === 4 && "Very Good"}
-                {rating === 5 && "Excellent"}
+                {rating === 1 && t("rating.ratings.poor")}
+                {rating === 2 && t("rating.ratings.fair")}
+                {rating === 3 && t("rating.ratings.good")}
+                {rating === 4 && t("rating.ratings.veryGood")}
+                {rating === 5 && t("rating.ratings.excellent")}
               </p>
             )}
           </div>
 
           {/* Transaction Details */}
           <div className="bg-gray-50 rounded-lg p-3 space-y-1">
-            <p className="text-sm text-gray-600">Transaction Details:</p>
+            <p className="text-sm text-gray-600">{t("rating.transactionDetails")}</p>
             <p className="text-sm font-medium">{transaction.listingTitle || `${transaction.bottleCount} bottles`}</p>
             <p className="text-xs text-gray-500">
-              Total Refund: {transaction.totalRefund} HUF
+              {t("rating.totalRefund", { amount: transaction.totalRefund })}
             </p>
           </div>
 
           {/* Comment */}
           <div className="space-y-2">
             <label className="text-sm font-medium">
-              Comment (Optional)
+              {t("rating.commentLabel")}
             </label>
             <Textarea
-              placeholder="Share your experience..."
+              placeholder={t("rating.commentPlaceholder")}
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               rows={3}
@@ -133,7 +135,7 @@ export const RatingDialog = ({ open, onOpenChange, transaction, otherPartyName }
             onClick={() => onOpenChange(false)}
             disabled={createRatingMutation.isPending}
           >
-            Cancel
+            {t("rating.cancel")}
           </Button>
           <Button
             type="button"
@@ -141,7 +143,7 @@ export const RatingDialog = ({ open, onOpenChange, transaction, otherPartyName }
             disabled={createRatingMutation.isPending || rating === 0}
             className="bg-gradient-to-r from-green-600 to-emerald-600"
           >
-            {createRatingMutation.isPending ? "Submitting..." : "Submit Rating"}
+            {createRatingMutation.isPending ? t("rating.submitting") : t("rating.submit")}
           </Button>
         </DialogFooter>
       </DialogContent>

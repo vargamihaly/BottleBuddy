@@ -6,6 +6,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useTranslation } from "react-i18next";
 
 interface ReadReceiptProps {
   isRead: boolean;
@@ -14,6 +15,8 @@ interface ReadReceiptProps {
 }
 
 export const ReadReceipt = ({ isRead, readAtUtc, isSending = false }: ReadReceiptProps) => {
+  const { t } = useTranslation();
+
   // Status: Sending (not delivered yet)
   if (isSending) {
     return (
@@ -22,11 +25,11 @@ export const ReadReceipt = ({ isRead, readAtUtc, isSending = false }: ReadReceip
           <TooltipTrigger asChild>
             <div className="flex items-center gap-1 text-gray-400">
               <Clock className="w-3 h-3" />
-              <span className="text-xs">Sending...</span>
+              <span className="text-xs">{t("readReceipt.sending")}</span>
             </div>
           </TooltipTrigger>
           <TooltipContent>
-            <p>Message is being sent</p>
+            <p>{t("readReceipt.sendingMessage")}</p>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
@@ -58,11 +61,11 @@ export const ReadReceipt = ({ isRead, readAtUtc, isSending = false }: ReadReceip
           <TooltipTrigger asChild>
             <div className="flex items-center gap-1 text-green-600">
               <CheckCheck className="w-3 h-3" />
-              <span className="text-xs">Read {displayText}</span>
+              <span className="text-xs">{t("readReceipt.read")} {displayText}</span>
             </div>
           </TooltipTrigger>
           <TooltipContent>
-            <p>Read at {format(readDate, "PPpp")}</p>
+            <p>{t("readReceipt.readAt", { time: format(readDate, "PPpp") })}</p>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
@@ -77,11 +80,11 @@ export const ReadReceipt = ({ isRead, readAtUtc, isSending = false }: ReadReceip
           <TooltipTrigger asChild>
             <div className="flex items-center gap-1 text-green-600">
               <CheckCheck className="w-3 h-3" />
-              <span className="text-xs">Read</span>
+              <span className="text-xs">{t("readReceipt.read")}</span>
             </div>
           </TooltipTrigger>
           <TooltipContent>
-            <p>Read</p>
+            <p>{t("readReceipt.read")}</p>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
@@ -95,11 +98,11 @@ export const ReadReceipt = ({ isRead, readAtUtc, isSending = false }: ReadReceip
         <TooltipTrigger asChild>
           <div className="flex items-center gap-1 text-gray-400">
             <Check className="w-3 h-3" />
-            <span className="text-xs">Delivered</span>
+            <span className="text-xs">{t("readReceipt.delivered")}</span>
           </div>
         </TooltipTrigger>
         <TooltipContent>
-          <p>Delivered</p>
+          <p>{t("readReceipt.delivered")}</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

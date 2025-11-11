@@ -474,6 +474,41 @@ const resources = {
           button: "Try Again"
         }
       },
+      rating: {
+        title: "Rate Your Experience",
+        description: "How was your experience with {{name}}?",
+        selectRating: "Please select a star rating before submitting.",
+        ratingRequired: "Rating required",
+        transactionDetails: "Transaction Details:",
+        totalRefund: "Total Refund: {{amount}} HUF",
+        commentLabel: "Comment (Optional)",
+        commentPlaceholder: "Share your experience...",
+        cancel: "Cancel",
+        submit: "Submit Rating",
+        submitting: "Submitting...",
+        ratings: {
+          poor: "Poor",
+          fair: "Fair",
+          good: "Good",
+          veryGood: "Very Good",
+          excellent: "Excellent"
+        }
+      },
+      messageInput: {
+        placeholder: "Type your message...",
+        imageTypeError: "Only PNG, JPEG, JPG, and GIF images are allowed",
+        imageSizeError: "Image size must be less than 5MB",
+        enterToSend: "Press Enter to send, Shift+Enter for new line",
+        attachImage: "Attach image",
+        send: "Send"
+      },
+      readReceipt: {
+        sending: "Sending...",
+        sendingMessage: "Message is being sent",
+        read: "Read",
+        readAt: "Read at {{time}}",
+        delivered: "Delivered"
+      },
       faq: {
         title: "Frequently Asked Questions",
         subtitle: "Everything you need to know about BottleBuddy",
@@ -1130,6 +1165,41 @@ const resources = {
           title: "Az átvételi feladatok betöltése sikertelen.",
           button: "Próbáld újra"
         }
+      },
+      rating: {
+        title: "Értékeld az Élményedet",
+        description: "Milyen volt az élményed {{name}} felhasználóval?",
+        selectRating: "Kérjük, válassz csillagos értékelést a beküldés előtt.",
+        ratingRequired: "Értékelés kötelező",
+        transactionDetails: "Tranzakció részletei:",
+        totalRefund: "Teljes visszatérítés: {{amount}} Ft",
+        commentLabel: "Megjegyzés (opcionális)",
+        commentPlaceholder: "Oszd meg az élményedet...",
+        cancel: "Mégse",
+        submit: "Értékelés beküldése",
+        submitting: "Beküldés...",
+        ratings: {
+          poor: "Gyenge",
+          fair: "Megfelelő",
+          good: "Jó",
+          veryGood: "Nagyon jó",
+          excellent: "Kiváló"
+        }
+      },
+      messageInput: {
+        placeholder: "Írj üzenetet...",
+        imageTypeError: "Csak PNG, JPEG, JPG és GIF képek engedélyezettek",
+        imageSizeError: "A kép mérete nem lehet nagyobb 5 MB-nál",
+        enterToSend: "Enter a küldéshez, Shift+Enter az új sorhoz",
+        attachImage: "Kép csatolása",
+        send: "Küldés"
+      },
+      readReceipt: {
+        sending: "Küldés...",
+        sendingMessage: "Az üzenet küldése folyamatban",
+        read: "Elolvasva",
+        readAt: "Elolvasva: {{time}}",
+        delivered: "Kézbesítve"
       },
       faq: {
         title: "Gyakran Ismételt Kérdések",
