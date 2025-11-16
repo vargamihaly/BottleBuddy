@@ -1,5 +1,12 @@
 // Shared TypeScript types for the application
 
+// Enums
+export enum ListingStatus {
+    Open = 'open',
+    Claimed = 'claimed',
+    Completed = 'completed'
+}
+
 export interface User {
     id: string;
     email: string;
@@ -107,6 +114,15 @@ export interface PaginatedResponse<T> {
     page: number;
     pageSize: number;
     hasMore?: boolean;
+}
+
+export interface PaginationMetadata {
+    page: number;
+    pageSize: number;
+    totalCount: number;
+    totalPages: number;
+    hasNext: boolean;
+    hasPrevious: boolean;
 }
 
 export interface ApiError {

@@ -154,14 +154,6 @@ const About = () => {
             >
               {t("about.cta.getStarted")}
             </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              onClick={() => navigate("/")}
-              className="border-2 border-white text-white hover:bg-white hover:text-green-600"
-            >
-              {t("about.cta.exploreListings")}
-            </Button>
           </div>
         </div>
       </section>

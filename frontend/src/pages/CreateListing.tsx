@@ -197,19 +197,21 @@ const CreateListing = () => {
                   <Coins className="w-4 h-4 inline mr-1" />
                   {t('listing.totalBottleRefund')}
                 </Label>
-                <div className="flex items-center space-x-2">
-                  <Input
-                    value={`${estimatedRefund} HUF`}
-                    readOnly
-                    className="bg-gray-50 font-semibold text-lg"
-                  />
-                  <span className="text-sm text-gray-500 whitespace-nowrap">
-                    {t('listing.bottlesPerHuf', { count: bottleCount })}
-                  </span>
-                </div>
-                <p className="text-xs text-gray-500">
-                  {t('listing.autoCalculated')}
-                </p>
+                <Card className="bg-gray-50 border-gray-200">
+                  <CardContent className="pt-4 pb-4">
+                    <div className="flex items-baseline justify-between">
+                      <div>
+                        <p className="text-3xl font-bold text-gray-900">{estimatedRefund} HUF</p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {t('listing.autoCalculated')}
+                        </p>
+                      </div>
+                      <span className="text-sm text-gray-500">
+                        {t('listing.bottlesPerHuf', { count: bottleCount })}
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
 
               {/* Split Percentage Slider */}

@@ -48,7 +48,21 @@ function MapController({
   }, [selectedListing, map]);
 
   useEffect(() => {
-    map.setView(center, map.getZoom());
+    // Use flyTo for smoother transitions when center changes (e.g., from address search)
+    const currentCenter = map.getCenter();
+    const distance = Math.sqrt(
+      Math.pow(center[0] - currentCenter.lat, 2) + 
+      Math.pow(center[1] - currentCenter.lng, 2)
+    );
+    
+    // If the distance is significant, use flyTo, otherwise use setView
+    if (distance > 0.01) {
+      map.flyTo(center, map.getZoom() > 13 ? map.getZoom() : 15, {
+        duration: 1.5,
+      });
+    } else {
+      map.setView(center, map.getZoom());
+    }
   }, [center, map]);
 
   return null;
@@ -64,6 +78,8 @@ export const MapView = ({ listings, onBackToHome }: MapViewProps) => {
   const { t } = useTranslation();
   const [selectedListing, setSelectedListing] = useState<BottleListingWithDistance | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [addressSearchQuery, setAddressSearchQuery] = useState("");
+  const [isSearchingAddress, setIsSearchingAddress] = useState(false);
   const [mapCenter, setMapCenter] = useState<[number, number]>(DEFAULT_CENTER);
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [isOfferingPickup, setIsOfferingPickup] = useState(false);
@@ -170,12 +186,66 @@ export const MapView = ({ listings, onBackToHome }: MapViewProps) => {
     }
   };
 
+  // Forward geocode to get coordinates from address search
+  const handleAddressSearch = async (e?: React.FormEvent) => {
+    if (e) {
+      e.preventDefault();
+    }
+    
+    if (!addressSearchQuery.trim()) {
+      toast({
+        title: t("map.searchEmpty"),
+        description: t("map.pleaseEnterAddress"),
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSearchingAddress(true);
+    try {
+      // Using Nominatim for forward geocoding
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+          addressSearchQuery
+        )}&limit=1&countrycodes=hu`
+      );
+      const data = await response.json();
+
+      if (data && data.length > 0) {
+        const result = data[0];
+        const lat = parseFloat(result.lat);
+        const lng = parseFloat(result.lon);
+
+        setMapCenter([lat, lng]);
+        toast({
+          title: t("map.locationFound"),
+          description: result.display_name,
+        });
+      } else {
+        toast({
+          title: t("map.locationNotFound"),
+          description: t("map.tryDifferentAddress"),
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Forward geocoding failed:", error);
+      toast({
+        title: t("map.searchFailed"),
+        description: t("map.searchFailedDesc"),
+        variant: "destructive",
+      });
+    } finally {
+      setIsSearchingAddress(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100">
       {/* Header */}
       <header className="bg-white/90 backdrop-blur-sm shadow-sm border-b border-green-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-3">
               <Button variant="ghost" onClick={onBackToHome}>
                 <ArrowLeft className="w-4 h-4 mr-2" />
@@ -195,6 +265,26 @@ export const MapView = ({ listings, onBackToHome }: MapViewProps) => {
               </Button>
             </div>
           </div>
+          {/* Address Search Bar */}
+          <form onSubmit={handleAddressSearch} className="flex items-center space-x-2">
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Input
+                placeholder={t("map.searchAddressPlaceholder")}
+                value={addressSearchQuery}
+                onChange={(e) => setAddressSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <Button 
+              type="submit" 
+              size="sm" 
+              disabled={isSearchingAddress}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              {isSearchingAddress ? t("map.searching") : t("map.search")}
+            </Button>
+          </form>
         </div>
       </header>
 

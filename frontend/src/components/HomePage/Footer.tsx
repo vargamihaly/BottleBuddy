@@ -22,18 +22,26 @@ export const Footer = () => {
           <div>
             <h4 className="font-semibold mb-4">{t("footer.platform")}</h4>
             <ul className="space-y-2 text-gray-400">
-              <li className="hover:text-green-400 cursor-pointer transition-colors" onClick={() => navigate("/about")}>{t("footer.aboutUs")}</li>
-              <li className="hover:text-green-400 cursor-pointer transition-colors" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>{t("footer.howItWorks")}</li>
+              <li>
+                <span className="hover:text-green-400 cursor-pointer transition-colors" onClick={() => navigate("/about")}>{t("footer.aboutUs")}</span>
+              </li>
+              <li>
+                <span className="hover:text-green-400 cursor-pointer transition-colors" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>{t("footer.howItWorks")}</span>
+              </li>
             </ul>
           </div>
           <div>
             <h4 className="font-semibold mb-4">{t("footer.support")}</h4>
             <ul className="space-y-2 text-gray-400">
-              <li className="hover:text-green-400 cursor-pointer transition-colors" onClick={() => navigate("/faq")}>{t("common.faq")}</li>
-              <li className="hover:text-green-400 cursor-pointer transition-colors">
-                <a href="mailto:misi@protonmail.ch">{t("footer.contactUs")}</a>
+              <li>
+                <span className="hover:text-green-400 cursor-pointer transition-colors" onClick={() => navigate("/faq")}>{t("common.faq")}</span>
               </li>
-              <li className="hover:text-green-400 cursor-pointer transition-colors" onClick={() => navigate("/terms")}>{t("footer.termsOfService")}</li>
+              <li>
+                <a href="mailto:misi@protonmail.ch" className="hover:text-green-400 cursor-pointer transition-colors">{t("footer.contactUs")}</a>
+              </li>
+              <li>
+                <span className="hover:text-green-400 cursor-pointer transition-colors" onClick={() => navigate("/terms")}>{t("footer.termsOfService")}</span>
+              </li>
             </ul>
           </div>
         </div>

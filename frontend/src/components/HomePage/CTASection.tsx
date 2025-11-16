@@ -34,9 +34,9 @@ export const CTASection = ({ onDashboardClick }: CTASectionProps) => {
               <Button size="lg" variant="secondary" onClick={() => navigate("/auth")}>
                 {t("homeSections.cta.signUpFree")}
               </Button>
-              <Button size="lg" variant="outline" className="border-2 border-white text-white hover:bg-white hover:text-green-600">
-                {t("homeSections.cta.learnMore")}
-              </Button>
+                <Button size="lg" variant="secondary" onClick={() => navigate("/about")}>
+                    {t("homeSections.cta.learnMore")}
+                </Button>
             </>
           )}
         </div>

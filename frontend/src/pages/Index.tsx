@@ -4,7 +4,7 @@ import { MapView } from "@/components/MapView";
 import { FullPageLoader } from "@/components/LoadingSpinner";
 import { Button } from "@/components/ui/button";
 import { BottomNav } from "@/components/ui/bottom-nav";
-import { useBottleListingOverview } from "@/hooks/useBottleListingOverview";
+import { useIndex } from "@/hooks/useIndex";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   Header,
@@ -36,7 +36,7 @@ const Index = () => {
     myPickupRequests,
     isLoading,
     isError,
-  } = useBottleListingOverview();
+  } = useIndex();
 
   if (activeTab === "dashboard") {
     return (
