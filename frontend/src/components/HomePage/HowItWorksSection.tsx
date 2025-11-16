@@ -12,7 +12,7 @@ export const HowItWorksSection = () => {
           {t("howItWorks.subtitle")}
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="border-green-200 hover:border-green-400 transition-all hover:shadow-lg">
+          <Card className="border-green-200">
             <CardHeader className="text-center">
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl">📦</span>
@@ -24,7 +24,7 @@ export const HowItWorksSection = () => {
             </CardHeader>
           </Card>
 
-          <Card className="border-blue-200 hover:border-blue-400 transition-all hover:shadow-lg">
+          <Card className="border-blue-200">
             <CardHeader className="text-center">
               <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl">🤝</span>
@@ -36,7 +36,7 @@ export const HowItWorksSection = () => {
             </CardHeader>
           </Card>
 
-          <Card className="border-purple-200 hover:border-purple-400 transition-all hover:shadow-lg">
+          <Card className="border-purple-200">
             <CardHeader className="text-center">
               <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl">💵</span>
@@ -48,7 +48,7 @@ export const HowItWorksSection = () => {
             </CardHeader>
           </Card>
 
-          <Card className="border-emerald-200 hover:border-emerald-400 transition-all hover:shadow-lg">
+          <Card className="border-emerald-200">
             <CardHeader className="text-center">
               <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl">♻️</span>
