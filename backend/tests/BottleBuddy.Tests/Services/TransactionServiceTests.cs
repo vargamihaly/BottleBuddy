@@ -61,7 +61,7 @@ public class TransactionServiceTests : IDisposable
         result.TotalRefund.Should().Be(500m);
         result.OwnerAmount.Should().Be(250m); // 50% of 500
         result.VolunteerAmount.Should().Be(250m); // 50% of 500
-        result.Status.Should().Be("completed");
+        result.Status.Should().Be(TransactionStatus.Completed);
         result.CreatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(5));
 
         var transactionInDb = await _context.Transactions

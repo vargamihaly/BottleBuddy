@@ -207,7 +207,7 @@ public class TransactionService(ApplicationDbContext context, ILogger<Transactio
             VolunteerAmount = transaction.VolunteerAmount,
             OwnerAmount = transaction.OwnerAmount,
             TotalRefund = transaction.TotalRefund,
-            Status = transaction.Status.ToString().ToLower(),
+            Status = transaction.Status,
             CreatedAt = transaction.CreatedAtUtc,
             CompletedAt = transaction.CompletedAtUtc,
             VolunteerName = transaction.PickupRequest?.Volunteer?.UserName,

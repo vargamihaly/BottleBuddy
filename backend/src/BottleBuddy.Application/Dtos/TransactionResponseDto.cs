@@ -1,3 +1,5 @@
+using BottleBuddy.Application.Enums;
+
 namespace BottleBuddy.Application.Dtos;
 
 public class TransactionResponseDto
@@ -8,7 +10,7 @@ public class TransactionResponseDto
     public decimal VolunteerAmount { get; set; }
     public decimal OwnerAmount { get; set; }
     public decimal TotalRefund { get; set; }
-    public string? Status { get; set; }
+    public TransactionStatus Status { get; set; } = TransactionStatus.Pending;
     public DateTime CreatedAt { get; set; }
     public DateTime? CompletedAt { get; set; }
 

@@ -1,3 +1,5 @@
+using BottleBuddy.Application.Enums;
+
 namespace BottleBuddy.Application.Dtos;
 
 public class BottleListingResponseDto
@@ -11,7 +13,7 @@ public class BottleListingResponseDto
     public double? Longitude { get; set; }
     public decimal EstimatedRefund { get; set; }
     public decimal? SplitPercentage { get; set; }
-    public string Status { get; set; } = "open";
+    public ListingStatus Status { get; set; } = ListingStatus.Open;
     public DateTime? PickupDeadline { get; set; }
     public string UserId { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }

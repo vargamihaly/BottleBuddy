@@ -14,7 +14,7 @@ export interface CreateBottleListingRequest {
 }
 
 export interface UpdateBottleListingRequest extends Partial<CreateBottleListingRequest> {
-  status?: 'open' | 'claimed' | 'completed' | 'cancelled';
+  status?: 'open' | 'claimed' | 'completed';
 }
 
 // Backend wraps responses in { data: ... }

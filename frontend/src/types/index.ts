@@ -25,7 +25,7 @@ export interface BottleListing {
     estimatedRefund: number;
     pickupDeadline?: string;
     splitPercentage?: number;
-    status: 'open' | 'claimed' | 'completed' | 'cancelled';
+    status: 'open' | 'claimed' | 'completed';
     userId: string;
     createdByUserRating?: number;
     createdByUserName?: string;
@@ -65,7 +65,7 @@ export interface Transaction {
     volunteerAmount: number;
     ownerAmount: number;
     totalRefund: number;
-    status?: 'pending' | 'completed' | 'cancelled';
+    status: 'pending' | 'completed';
     createdAt?: string;
     completedAt?: string;
     volunteerName?: string;
