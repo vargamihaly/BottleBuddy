@@ -1,5 +1,5 @@
 import { apiClient } from "@/lib/apiClient";
-import { BottleListing } from "@/types";
+import { BottleListing, ListingStatus, PaginationMetadata } from "@/types";
 
 export interface CreateBottleListingRequest {
   title?: string;
@@ -17,18 +17,46 @@ export interface UpdateBottleListingRequest extends Partial<CreateBottleListingR
   status?: 'open' | 'claimed' | 'completed';
 }
 
-// Backend wraps responses in { data: ... }
+export interface GetBottleListingsParams {
+  page?: number;
+  pageSize?: number;
+  status?: ListingStatus;
+}
+
+// Backend wraps responses in { data: ..., pagination: ... }
 interface ApiResponse<T> {
   data: T;
 }
 
+interface PaginatedApiResponse<T> {
+  data: T[];
+  pagination: PaginationMetadata;
+}
+
 export const bottleListingService = {
   /**
-   * Get all bottle listings
+   * Get all bottle listings with optional pagination and filtering
    */
-  getAll: async () => {
-    const response = await apiClient.get<ApiResponse<BottleListing[]>>('/api/bottlelistings');
-    return response.data;
+  getAll: async (params?: GetBottleListingsParams) => {
+    const searchParams = new URLSearchParams();
+
+    if (params?.page !== undefined) {
+      searchParams.append('page', params.page.toString());
+    }
+    if (params?.pageSize !== undefined) {
+      searchParams.append('pageSize', params.pageSize.toString());
+    }
+    if (params?.status !== undefined) {
+      searchParams.append('status', params.status);
+    }
+
+    const url = `/api/bottlelistings${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
+    const response = await apiClient.get<PaginatedApiResponse<BottleListing>>(url);
+
+    return {
+      data: response.data,
+      pagination: response.pagination
+    };
   },
 
   /**

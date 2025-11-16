@@ -3,10 +3,12 @@ import { useToast } from "@/hooks/use-toast";
 import {
   bottleListingService,
   CreateBottleListingRequest,
-  UpdateBottleListingRequest
+  UpdateBottleListingRequest,
+  GetBottleListingsParams
 } from "@/api/services";
 import { useTranslation } from "react-i18next";
 import { ApiRequestError } from "@/lib/apiClient";
+import { ListingStatus, PaginationMetadata } from "@/types";
 
 /**
  * Query keys for bottle listings
@@ -14,18 +16,30 @@ import { ApiRequestError } from "@/lib/apiClient";
 export const bottleListingKeys = {
   all: ['bottleListings'] as const,
   lists: () => [...bottleListingKeys.all, 'list'] as const,
-  list: (filters?: unknown) => [...bottleListingKeys.lists(), { filters }] as const,
+  list: (params?: GetBottleListingsParams) => [...bottleListingKeys.lists(), { params }] as const,
   details: () => [...bottleListingKeys.all, 'detail'] as const,
   detail: (id: string) => [...bottleListingKeys.details(), id] as const,
 };
 
 /**
- * Hook to fetch all bottle listings
+ * Hook to fetch all bottle listings with optional pagination and filtering
  */
-export const useBottleListings = () => {
+export const useBottleListings = (params?: GetBottleListingsParams) => {
   return useQuery({
-    queryKey: bottleListingKeys.list(),
-    queryFn: bottleListingService.getAll,
+    queryKey: bottleListingKeys.list(params),
+    queryFn: () => bottleListingService.getAll(params),
+    staleTime: 30000, // 30 seconds
+    select: (data) => data.data, // Extract just the data array for backward compatibility
+  });
+};
+
+/**
+ * Hook to fetch all bottle listings with pagination metadata
+ */
+export const useBottleListingsPaginated = (params?: GetBottleListingsParams) => {
+  return useQuery({
+    queryKey: bottleListingKeys.list(params),
+    queryFn: () => bottleListingService.getAll(params),
     staleTime: 30000, // 30 seconds
   });
 };
@@ -49,9 +63,10 @@ export const useBottleListing = (id: string) => {
 export const useMyBottleListings = ({ enabled = true }: { enabled?: boolean } = {}) => {
   return useQuery({
     queryKey: bottleListingKeys.list(), // Use same cache as getAll
-    queryFn: bottleListingService.getAll,
+    queryFn: () => bottleListingService.getAll(),
     enabled,
     staleTime: 30000, // 30 seconds
+    select: (data) => data.data, // Extract just the data array for backward compatibility
   });
 };
 

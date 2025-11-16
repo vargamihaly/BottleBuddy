@@ -8,21 +8,18 @@ using Microsoft.Extensions.Logging;
 
 namespace BottleBuddy.Application.Services;
 
-public class BottleListingService(
-    ApplicationDbContext context,
-    UserManager<User> userManager,
-    ILogger<BottleListingService> logger) : IBottleListingService
+public class BottleListingService(ApplicationDbContext context, UserManager<User> userManager, ILogger<BottleListingService> logger) : IBottleListingService
 {
     public async Task<(IEnumerable<BottleListingResponseDto> Listings, PaginationMetadata Metadata)> GetListingsAsync(
         int page,
         int pageSize,
-        string? status)
+        ListingStatus? status)
     {
         logger.LogInformation(
             "Listing retrieval requested for page {Page} with size {PageSize} and status {Status}",
             page,
             pageSize,
-            status ?? "any");
+            status?.ToString() ?? "any");
 
         // Validate pagination parameters
         if (page < 1) page = 1;
@@ -31,13 +28,9 @@ public class BottleListingService(
         var query = context.BottleListings.Include(l => l.Owner).AsQueryable();
 
         // Filter by status if provided
-        if (!string.IsNullOrEmpty(status))
+        if (status.HasValue)
         {
-            // Parse status string to enum
-            if (Enum.TryParse<ListingStatus>(status, true, out var statusEnum))
-            {
-                query = query.Where(l => l.Status == statusEnum);
-            }
+            query = query.Where(l => l.Status == status.Value);
         }
 
         var totalCount = await query.CountAsync();

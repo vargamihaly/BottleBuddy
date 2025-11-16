@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using BottleBuddy.Application.Dtos;
 using BottleBuddy.Application.Services;
+using BottleBuddy.Application.Enums;
 
 namespace BottleBuddy.Api.Controllers;
 
@@ -22,9 +23,9 @@ public class BottleListingsController(IBottleListingService bottleListingService
     /// <param name="status">Filter by status (optional)</param>
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetListings([FromQuery] int page = 1, [FromQuery] int pageSize = 50, [FromQuery] string? status = null)
+    public async Task<IActionResult> GetListings([FromQuery] int page = 1, [FromQuery] int pageSize = 50, [FromQuery] ListingStatus? status = null)
     {
-        logger.LogInformation("Fetching bottle listings for page {Page} with size {PageSize} and status {Status}", page, pageSize, status ?? "any");
+        logger.LogInformation("Fetching bottle listings for page {Page} with size {PageSize} and status {Status}", page, pageSize, status?.ToString() ?? "any");
 
         var (listings, metadata) = await bottleListingService.GetListingsAsync(page, pageSize, status);
 

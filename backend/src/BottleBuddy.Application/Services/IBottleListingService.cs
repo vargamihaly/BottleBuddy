@@ -1,10 +1,11 @@
 using BottleBuddy.Application.Dtos;
+using BottleBuddy.Application.Enums;
 
 namespace BottleBuddy.Application.Services;
 
 public interface IBottleListingService
 {
-    Task<(IEnumerable<BottleListingResponseDto> Listings, PaginationMetadata Metadata)> GetListingsAsync(int page, int pageSize, string? status);
+    Task<(IEnumerable<BottleListingResponseDto> Listings, PaginationMetadata Metadata)> GetListingsAsync(int page, int pageSize, ListingStatus? status);
     Task<BottleListingResponseDto> CreateListingAsync(string userId, CreateBottleListingRequest request);
     Task DeleteListingAsync(string userId, Guid listingId);
 }
