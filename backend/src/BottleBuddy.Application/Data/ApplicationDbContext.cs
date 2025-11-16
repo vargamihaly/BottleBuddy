@@ -92,19 +92,19 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             entity.HasKey(r => r.Id);
 
             // Relationship with Rater (who gives the rating)
-            entity.HasOne<User>()
+            entity.HasOne(r => r.Rater)
                 .WithMany()
                 .HasForeignKey(r => r.RaterId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             // Relationship with Rated User (who receives the rating)
-            entity.HasOne<User>()
+            entity.HasOne(r => r.RatedUser)
                 .WithMany()
                 .HasForeignKey(r => r.RatedUserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             // Relationship with Transaction
-            entity.HasOne<Transaction>()
+            entity.HasOne(r => r.Transaction)
                 .WithMany()
                 .HasForeignKey(r => r.TransactionId)
                 .OnDelete(DeleteBehavior.Cascade);

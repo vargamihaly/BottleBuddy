@@ -242,6 +242,37 @@ namespace BottleBuddy.Application.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Messages",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    PickupRequestId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    SenderId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Content = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
+                    ImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ImageFileName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsRead = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
+                    ReadAtUtc = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    CreatedAtUtc = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Messages", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Messages_AspNetUsers_SenderId",
+                        column: x => x.SenderId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Messages_PickupRequests_PickupRequestId",
+                        column: x => x.PickupRequestId,
+                        principalTable: "PickupRequests",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Transactions",
                 columns: table => new
                 {
@@ -279,10 +310,7 @@ namespace BottleBuddy.Application.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     RaterId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     RatedUserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    RaterId1 = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    RatedUserId1 = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     TransactionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    TransactionId1 = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     Value = table.Column<int>(type: "int", nullable: false),
                     Comment = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedAtUtc = table.Column<DateTime>(type: "datetime2", nullable: false)
@@ -297,32 +325,17 @@ namespace BottleBuddy.Application.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Ratings_AspNetUsers_RatedUserId1",
-                        column: x => x.RatedUserId1,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id");
-                    table.ForeignKey(
                         name: "FK_Ratings_AspNetUsers_RaterId",
                         column: x => x.RaterId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Ratings_AspNetUsers_RaterId1",
-                        column: x => x.RaterId1,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id");
-                    table.ForeignKey(
                         name: "FK_Ratings_Transactions_TransactionId",
                         column: x => x.TransactionId,
                         principalTable: "Transactions",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Ratings_Transactions_TransactionId1",
-                        column: x => x.TransactionId1,
-                        principalTable: "Transactions",
-                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateIndex(
@@ -370,6 +383,21 @@ namespace BottleBuddy.Application.Migrations
                 column: "OwnerId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Messages_CreatedAtUtc",
+                table: "Messages",
+                column: "CreatedAtUtc");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Messages_PickupRequestId",
+                table: "Messages",
+                column: "PickupRequestId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Messages_SenderId",
+                table: "Messages",
+                column: "SenderId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_PickupRequests_ListingId",
                 table: "PickupRequests",
                 column: "ListingId");
@@ -392,29 +420,14 @@ namespace BottleBuddy.Application.Migrations
                 column: "RatedUserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Ratings_RatedUserId1",
-                table: "Ratings",
-                column: "RatedUserId1");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Ratings_RaterId",
                 table: "Ratings",
                 column: "RaterId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Ratings_RaterId1",
-                table: "Ratings",
-                column: "RaterId1");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Ratings_TransactionId",
                 table: "Ratings",
                 column: "TransactionId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Ratings_TransactionId1",
-                table: "Ratings",
-                column: "TransactionId1");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Transactions_ListingId",
@@ -446,6 +459,9 @@ namespace BottleBuddy.Application.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetUserTokens");
+
+            migrationBuilder.DropTable(
+                name: "Messages");
 
             migrationBuilder.DropTable(
                 name: "Profiles");

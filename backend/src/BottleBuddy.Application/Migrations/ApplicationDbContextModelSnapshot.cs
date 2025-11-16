@@ -220,20 +220,11 @@ namespace BottleBuddy.Application.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("RatedUserId1")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<string>("RaterId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("RaterId1")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<Guid>("TransactionId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("TransactionId1")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("Value")
@@ -243,15 +234,9 @@ namespace BottleBuddy.Application.Migrations
 
                     b.HasIndex("RatedUserId");
 
-                    b.HasIndex("RatedUserId1");
-
                     b.HasIndex("RaterId");
 
-                    b.HasIndex("RaterId1");
-
                     b.HasIndex("TransactionId");
-
-                    b.HasIndex("TransactionId1");
 
                     b.ToTable("Ratings");
                 });
@@ -557,35 +542,23 @@ namespace BottleBuddy.Application.Migrations
 
             modelBuilder.Entity("BottleBuddy.Application.Models.Rating", b =>
                 {
-                    b.HasOne("BottleBuddy.Application.Models.User", null)
+                    b.HasOne("BottleBuddy.Application.Models.User", "RatedUser")
                         .WithMany()
                         .HasForeignKey("RatedUserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("BottleBuddy.Application.Models.User", "RatedUser")
-                        .WithMany()
-                        .HasForeignKey("RatedUserId1");
-
-                    b.HasOne("BottleBuddy.Application.Models.User", null)
+                    b.HasOne("BottleBuddy.Application.Models.User", "Rater")
                         .WithMany()
                         .HasForeignKey("RaterId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("BottleBuddy.Application.Models.User", "Rater")
-                        .WithMany()
-                        .HasForeignKey("RaterId1");
-
-                    b.HasOne("BottleBuddy.Application.Models.Transaction", null)
+                    b.HasOne("BottleBuddy.Application.Models.Transaction", "Transaction")
                         .WithMany()
                         .HasForeignKey("TransactionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("BottleBuddy.Application.Models.Transaction", "Transaction")
-                        .WithMany()
-                        .HasForeignKey("TransactionId1");
 
                     b.Navigation("RatedUser");
 
