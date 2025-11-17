@@ -7,7 +7,10 @@ using Microsoft.Extensions.Logging;
 
 namespace BottleBuddy.Application.Services;
 
-public class TransactionService(ApplicationDbContext context, ILogger<TransactionService> logger)
+public class TransactionService(
+    ApplicationDbContext context,
+    IUserActivityService userActivityService,
+    ILogger<TransactionService> logger)
     : ITransactionService
 {
     public async Task<TransactionResponseDto> CreateTransactionAsync(Guid pickupRequestId, string userId)
@@ -103,6 +106,59 @@ public class TransactionService(ApplicationDbContext context, ILogger<Transactio
 
         context.Transactions.Add(transaction);
         await context.SaveChangesAsync();
+
+        // Create activities for transaction completion
+        await userActivityService.CreateActivityAsync(
+            listing.OwnerId,
+            UserActivityType.TransactionCompleted,
+            "Transaction Completed",
+            $"Transaction completed for your listing at {listing.LocationAddress}. You earned {ownerAmount:F0} HUF",
+            listingId: listing.Id,
+            pickupRequestId: pickupRequestId,
+            transactionId: transaction.Id,
+            metadata: new Dictionary<string, object>
+            {
+                { "ownerAmount", ownerAmount },
+                { "totalRefund", totalRefund }
+            });
+
+        await userActivityService.CreateActivityAsync(
+            listing.OwnerId,
+            UserActivityType.EarningsReceived,
+            "Earnings Received",
+            $"You received {ownerAmount:F0} HUF from the bottle return",
+            listingId: listing.Id,
+            transactionId: transaction.Id,
+            metadata: new Dictionary<string, object>
+            {
+                { "amount", ownerAmount }
+            });
+
+        await userActivityService.CreateActivityAsync(
+            pickupRequest.VolunteerId,
+            UserActivityType.TransactionCompleted,
+            "Transaction Completed",
+            $"Transaction completed! You earned {volunteerAmount:F0} HUF",
+            listingId: listing.Id,
+            pickupRequestId: pickupRequestId,
+            transactionId: transaction.Id,
+            metadata: new Dictionary<string, object>
+            {
+                { "volunteerAmount", volunteerAmount },
+                { "totalRefund", totalRefund }
+            });
+
+        await userActivityService.CreateActivityAsync(
+            pickupRequest.VolunteerId,
+            UserActivityType.EarningsReceived,
+            "Earnings Received",
+            $"You received {volunteerAmount:F0} HUF for your volunteer work",
+            listingId: listing.Id,
+            transactionId: transaction.Id,
+            metadata: new Dictionary<string, object>
+            {
+                { "amount", volunteerAmount }
+            });
 
         logger.LogInformation(
             "Transaction {TransactionId} created for pickup request {PickupRequestId}",

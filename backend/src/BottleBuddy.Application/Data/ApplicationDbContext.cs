@@ -12,6 +12,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Rating> Ratings => Set<Rating>();
     public DbSet<Transaction> Transactions => Set<Transaction>();
     public DbSet<Message> Messages => Set<Message>();
+    public DbSet<UserActivity> UserActivities => Set<UserActivity>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -145,6 +146,47 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             // Default value for IsRead
             entity.Property(m => m.IsRead)
                 .HasDefaultValue(false);
+        });
+
+        // Configure UserActivity
+        modelBuilder.Entity<UserActivity>(entity =>
+        {
+            entity.HasKey(ua => ua.Id);
+
+            entity.HasIndex(ua => new { ua.UserId, ua.CreatedAtUtc });
+            entity.HasIndex(ua => ua.IsRead);
+
+            entity.Property(ua => ua.CreatedAtUtc)
+                .HasDefaultValueSql("GETUTCDATE()");
+
+            entity.Property(ua => ua.IsRead)
+                .HasDefaultValue(false);
+
+            // Relationships
+            entity.HasOne(ua => ua.User)
+                .WithMany()
+                .HasForeignKey(ua => ua.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(ua => ua.Listing)
+                .WithMany()
+                .HasForeignKey(ua => ua.ListingId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            entity.HasOne(ua => ua.PickupRequest)
+                .WithMany()
+                .HasForeignKey(ua => ua.PickupRequestId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            entity.HasOne(ua => ua.Transaction)
+                .WithMany()
+                .HasForeignKey(ua => ua.TransactionId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            entity.HasOne(ua => ua.Rating)
+                .WithMany()
+                .HasForeignKey(ua => ua.RatingId)
+                .OnDelete(DeleteBehavior.NoAction);
         });
     }
 }

@@ -8,7 +8,11 @@ using Microsoft.Extensions.Logging;
 
 namespace BottleBuddy.Application.Services;
 
-public class BottleListingService(ApplicationDbContext context, UserManager<User> userManager, ILogger<BottleListingService> logger) : IBottleListingService
+public class BottleListingService(
+    ApplicationDbContext context,
+    UserManager<User> userManager,
+    IUserActivityService userActivityService,
+    ILogger<BottleListingService> logger) : IBottleListingService
 {
     public async Task<(IEnumerable<BottleListingResponseDto> Listings, PaginationMetadata Metadata)> GetListingsAsync(
         int page,
@@ -117,6 +121,19 @@ public class BottleListingService(ApplicationDbContext context, UserManager<User
 
         await context.SaveChangesAsync();
 
+        // Create activity for listing creation
+        await userActivityService.CreateActivityAsync(
+            userId,
+            UserActivityType.ListingCreated,
+            "Listing Created",
+            $"You created a new listing for {listing.BottleCount} bottles at {listing.LocationAddress}",
+            listingId: listing.Id,
+            metadata: new Dictionary<string, object>
+            {
+                { "bottleCount", listing.BottleCount },
+                { "estimatedRefund", listing.EstimatedRefund }
+            });
+
         logger.LogInformation(
             "Listing {ListingId} created for user {UserId}",
             listing.Id,
@@ -172,9 +189,24 @@ public class BottleListingService(ApplicationDbContext context, UserManager<User
             throw new UnauthorizedAccessException("You can only delete your own listings.");
         }
 
+        var bottleCount = listing.BottleCount;
+        var locationAddress = listing.LocationAddress;
+
         context.BottleListings.Remove(listing);
 
         await context.SaveChangesAsync();
+
+        // Create activity for listing deletion
+        await userActivityService.CreateActivityAsync(
+            userId,
+            UserActivityType.ListingDeleted,
+            "Listing Deleted",
+            $"You deleted your listing for {bottleCount} bottles at {locationAddress}",
+            metadata: new Dictionary<string, object>
+            {
+                { "bottleCount", bottleCount },
+                { "locationAddress", locationAddress }
+            });
 
         logger.LogInformation(
             "Listing {ListingId} deleted for user {UserId}",

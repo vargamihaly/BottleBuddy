@@ -1,7 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { MapPin, Users, Bell, LogOut, Info, Recycle, MessageCircle, HelpCircle, Menu } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { MapPin, Users, Bell, LogOut, Info, Recycle, MessageCircle, HelpCircle, Menu, X, Check } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
@@ -9,6 +11,8 @@ import { useTotalUnreadCount } from "@/hooks/useMessages";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useState } from "react";
+import { useUnreadActivityCount, useUserActivities, useMarkActivityAsRead, useMarkAllActivitiesAsRead, useDeleteActivity } from "@/hooks/api/useUserActivities";
+import { formatDistanceToNow } from "date-fns";
 
 interface HeaderProps {
   onMapClick: () => void;
@@ -22,6 +26,14 @@ export const Header = ({ onMapClick, onDashboardClick }: HeaderProps) => {
   const totalUnreadCount = useTotalUnreadCount();
   const { t } = useTranslation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [activitiesOpen, setActivitiesOpen] = useState(false);
+
+  // User activities
+  const { data: unreadCount = 0 } = useUnreadActivityCount();
+  const { data: activitiesData } = useUserActivities({ page: 1, pageSize: 10 });
+  const markAsRead = useMarkActivityAsRead();
+  const markAllAsRead = useMarkAllActivitiesAsRead();
+  const deleteActivity = useDeleteActivity();
 
   const handleSignOut = async () => {
     try {
@@ -37,6 +49,18 @@ export const Header = ({ onMapClick, onDashboardClick }: HeaderProps) => {
         variant: "destructive",
       });
     }
+  };
+
+  const handleMarkAsRead = (activityId: string) => {
+    markAsRead.mutate(activityId);
+  };
+
+  const handleMarkAllAsRead = () => {
+    markAllAsRead.mutate();
+  };
+
+  const handleDeleteActivity = (activityId: string) => {
+    deleteActivity.mutate(activityId);
   };
 
   return (
@@ -149,9 +173,76 @@ export const Header = ({ onMapClick, onDashboardClick }: HeaderProps) => {
                     </Badge>
                   )}
                 </Button>
-                <Button variant="outline" size="sm" className="hidden md:flex">
-                  <Bell className="w-4 h-4" />
-                </Button>
+                <Popover open={activitiesOpen} onOpenChange={setActivitiesOpen}>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" size="sm" className="relative hidden md:flex">
+                      <Bell className="w-4 h-4" />
+                      {unreadCount > 0 && (
+                        <Badge className="absolute -top-2 -right-2 h-5 min-w-5 bg-red-500 text-white text-xs px-1.5">
+                          {unreadCount}
+                        </Badge>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-96 p-0" align="end">
+                    <div className="flex items-center justify-between p-4 border-b">
+                      <h3 className="font-semibold text-lg">{t('activities.title', { defaultValue: 'Activities' })}</h3>
+                      {unreadCount > 0 && (
+                        <Button variant="ghost" size="sm" onClick={handleMarkAllAsRead}>
+                          <Check className="w-4 h-4 mr-1" />
+                          {t('activities.markAllRead', { defaultValue: 'Mark all read' })}
+                        </Button>
+                      )}
+                    </div>
+                    <ScrollArea className="h-96">
+                      {activitiesData && activitiesData.data.length > 0 ? (
+                        <div className="divide-y">
+                          {activitiesData.data.map((activity) => (
+                            <div
+                              key={activity.id}
+                              className={`p-4 hover:bg-gray-50 transition-colors ${!activity.isRead ? 'bg-blue-50' : ''}`}
+                            >
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1 min-w-0">
+                                  <p className="font-medium text-sm text-gray-900">{activity.title}</p>
+                                  <p className="text-sm text-gray-600 mt-1">{activity.description}</p>
+                                  <p className="text-xs text-gray-400 mt-2">
+                                    {formatDistanceToNow(new Date(activity.createdAtUtc), { addSuffix: true })}
+                                  </p>
+                                </div>
+                                <div className="flex items-center space-x-1 ml-2">
+                                  {!activity.isRead && (
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => handleMarkAsRead(activity.id)}
+                                      className="h-8 w-8 p-0"
+                                    >
+                                      <Check className="w-4 h-4 text-green-600" />
+                                    </Button>
+                                  )}
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleDeleteActivity(activity.id)}
+                                    className="h-8 w-8 p-0"
+                                  >
+                                    <X className="w-4 h-4 text-red-600" />
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="p-8 text-center text-gray-500">
+                          <Bell className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                          <p>{t('activities.noActivities', { defaultValue: 'No activities yet' })}</p>
+                        </div>
+                      )}
+                    </ScrollArea>
+                  </PopoverContent>
+                </Popover>
                 <Button variant="outline" size="sm" onClick={handleSignOut} className="hidden md:flex">
                   <LogOut className="w-4 h-4 sm:mr-2" />
                   <span className="hidden sm:inline">{t("common.signOut")}</span>

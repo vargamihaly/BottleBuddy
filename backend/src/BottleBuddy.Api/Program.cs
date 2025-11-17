@@ -62,6 +62,7 @@ try
     builder.Services.AddScoped<IStatisticsService, StatisticsService>();
     builder.Services.AddScoped<IMessageService, MessageService>();
     builder.Services.AddScoped<IImageStorageService, ImageStorageService>();
+    builder.Services.AddScoped<IUserActivityService, UserActivityService>();
     builder.Services.AddScoped<PickupRequestService>();
 
     // SignalR

@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BottleBuddy.Application.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251116150842_Initial")]
+    [Migration("20251117063843_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -350,6 +350,69 @@ namespace BottleBuddy.Application.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("BottleBuddy.Application.Models.UserActivity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsRead")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<Guid?>("ListingId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Metadata")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("PickupRequestId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("RatingId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("TransactionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IsRead");
+
+                    b.HasIndex("ListingId");
+
+                    b.HasIndex("PickupRequestId");
+
+                    b.HasIndex("RatingId");
+
+                    b.HasIndex("TransactionId");
+
+                    b.HasIndex("UserId", "CreatedAtUtc");
+
+                    b.ToTable("UserActivities");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
@@ -587,6 +650,45 @@ namespace BottleBuddy.Application.Migrations
                     b.Navigation("Listing");
 
                     b.Navigation("PickupRequest");
+                });
+
+            modelBuilder.Entity("BottleBuddy.Application.Models.UserActivity", b =>
+                {
+                    b.HasOne("BottleBuddy.Application.Models.BottleListing", "Listing")
+                        .WithMany()
+                        .HasForeignKey("ListingId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("BottleBuddy.Application.Models.PickupRequest", "PickupRequest")
+                        .WithMany()
+                        .HasForeignKey("PickupRequestId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("BottleBuddy.Application.Models.Rating", "Rating")
+                        .WithMany()
+                        .HasForeignKey("RatingId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("BottleBuddy.Application.Models.Transaction", "Transaction")
+                        .WithMany()
+                        .HasForeignKey("TransactionId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("BottleBuddy.Application.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Listing");
+
+                    b.Navigation("PickupRequest");
+
+                    b.Navigation("Rating");
+
+                    b.Navigation("Transaction");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

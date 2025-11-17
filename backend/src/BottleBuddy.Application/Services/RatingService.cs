@@ -6,7 +6,10 @@ using Microsoft.Extensions.Logging;
 
 namespace BottleBuddy.Application.Services;
 
-public class RatingService(ApplicationDbContext context, ILogger<RatingService> logger)
+public class RatingService(
+    ApplicationDbContext context,
+    IUserActivityService userActivityService,
+    ILogger<RatingService> logger)
     : IRatingService
 {
     public async Task<RatingResponseDto> CreateRatingAsync(CreateRatingDto dto, string raterId)
@@ -90,6 +93,23 @@ public class RatingService(ApplicationDbContext context, ILogger<RatingService> 
         await UpdateUserRatingAsync(ratedUserId);
 
         await context.SaveChangesAsync();
+
+        // Get rated user info for activity
+        var ratedUser = await context.Users.FindAsync(ratedUserId);
+
+        // Create activity for the user who received the rating
+        await userActivityService.CreateActivityAsync(
+            ratedUserId,
+            Enums.UserActivityType.RatingReceived,
+            "New Rating Received",
+            $"You received a {dto.Value}-star rating" + (string.IsNullOrEmpty(dto.Comment) ? "" : $": \"{dto.Comment}\""),
+            transactionId: dto.TransactionId,
+            ratingId: rating.Id,
+            metadata: new Dictionary<string, object>
+            {
+                { "ratingValue", dto.Value },
+                { "raterName", (await context.Users.FindAsync(raterId))?.UserName ?? "Unknown" }
+            });
 
         logger.LogInformation(
             "Rating {RatingId} created for transaction {TransactionId} by user {RaterId}",

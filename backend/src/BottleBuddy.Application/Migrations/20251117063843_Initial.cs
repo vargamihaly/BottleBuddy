@@ -338,6 +338,54 @@ namespace BottleBuddy.Application.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "UserActivities",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Type = table.Column<int>(type: "int", nullable: false),
+                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedAtUtc = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
+                    IsRead = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
+                    ListingId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    PickupRequestId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    TransactionId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    RatingId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    Metadata = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserActivities", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_UserActivities_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_UserActivities_BottleListings_ListingId",
+                        column: x => x.ListingId,
+                        principalTable: "BottleListings",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_UserActivities_PickupRequests_PickupRequestId",
+                        column: x => x.PickupRequestId,
+                        principalTable: "PickupRequests",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_UserActivities_Ratings_RatingId",
+                        column: x => x.RatingId,
+                        principalTable: "Ratings",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_UserActivities_Transactions_TransactionId",
+                        column: x => x.TransactionId,
+                        principalTable: "Transactions",
+                        principalColumn: "Id");
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
@@ -440,6 +488,36 @@ namespace BottleBuddy.Application.Migrations
                 table: "Transactions",
                 column: "PickupRequestId",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserActivities_IsRead",
+                table: "UserActivities",
+                column: "IsRead");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserActivities_ListingId",
+                table: "UserActivities",
+                column: "ListingId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserActivities_PickupRequestId",
+                table: "UserActivities",
+                column: "PickupRequestId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserActivities_RatingId",
+                table: "UserActivities",
+                column: "RatingId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserActivities_TransactionId",
+                table: "UserActivities",
+                column: "TransactionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserActivities_UserId_CreatedAtUtc",
+                table: "UserActivities",
+                columns: new[] { "UserId", "CreatedAtUtc" });
         }
 
         /// <inheritdoc />
@@ -467,10 +545,13 @@ namespace BottleBuddy.Application.Migrations
                 name: "Profiles");
 
             migrationBuilder.DropTable(
-                name: "Ratings");
+                name: "UserActivities");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
+
+            migrationBuilder.DropTable(
+                name: "Ratings");
 
             migrationBuilder.DropTable(
                 name: "Transactions");

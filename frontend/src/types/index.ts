@@ -173,3 +173,53 @@ export interface CreateMessage {
     content?: string;
     image?: File;
 }
+
+// UserActivity types
+export enum UserActivityType {
+    // Listing events
+    ListingCreated = 'listingCreated',
+    ListingDeleted = 'listingDeleted',
+    ListingReceivedOffer = 'listingReceivedOffer',
+
+    // Pickup request events (as owner receiving requests)
+    PickupRequestReceived = 'pickupRequestReceived',
+    PickupRequestAcceptedByOwner = 'pickupRequestAcceptedByOwner',
+    PickupRequestRejectedByOwner = 'pickupRequestRejectedByOwner',
+
+    // Pickup request events (as volunteer making requests)
+    PickupRequestCreated = 'pickupRequestCreated',
+    PickupRequestAccepted = 'pickupRequestAccepted',
+    PickupRequestRejected = 'pickupRequestRejected',
+
+    // Transaction events
+    TransactionCompleted = 'transactionCompleted',
+    EarningsReceived = 'earningsReceived',
+
+    // Rating events
+    RatingReceived = 'ratingReceived',
+    RatingPrompt = 'ratingPrompt',
+
+    // Map events
+    NearbyListingAvailable = 'nearbyListingAvailable',
+    PickupOpportunityNearby = 'pickupOpportunityNearby'
+}
+
+export interface UserActivity {
+    id: string;
+    userId: string;
+    type: UserActivityType;
+    title: string;
+    description: string;
+    createdAtUtc: string;
+    isRead: boolean;
+    listingId?: string;
+    pickupRequestId?: string;
+    transactionId?: string;
+    ratingId?: string;
+    metadata?: Record<string, any>;
+}
+
+export interface UserActivityResponse {
+    data: UserActivity[];
+    pagination: PaginationMetadata;
+}

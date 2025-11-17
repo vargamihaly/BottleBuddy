@@ -13,6 +13,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Profile> Profiles => Set<Profile>();
     public DbSet<Rating> Ratings => Set<Rating>();
     public DbSet<Transaction> Transactions => Set<Transaction>();
+    public DbSet<UserActivity> UserActivities => Set<UserActivity>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -111,6 +112,47 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
                 .WithMany()
                 .HasForeignKey(r => r.TransactionId)
                 .OnDelete(DeleteBehavior.Cascade); // Can cascade from transaction
+        });
+
+        // Configure UserActivity
+        modelBuilder.Entity<UserActivity>(entity =>
+        {
+            entity.HasKey(ua => ua.Id);
+
+            entity.HasIndex(ua => new { ua.UserId, ua.CreatedAtUtc });
+            entity.HasIndex(ua => ua.IsRead);
+
+            entity.Property(ua => ua.CreatedAtUtc)
+                .HasDefaultValueSql("GETUTCDATE()");
+
+            entity.Property(ua => ua.IsRead)
+                .HasDefaultValue(false);
+
+            // Relationships
+            entity.HasOne(ua => ua.User)
+                .WithMany()
+                .HasForeignKey(ua => ua.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(ua => ua.Listing)
+                .WithMany()
+                .HasForeignKey(ua => ua.ListingId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            entity.HasOne(ua => ua.PickupRequest)
+                .WithMany()
+                .HasForeignKey(ua => ua.PickupRequestId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            entity.HasOne(ua => ua.Transaction)
+                .WithMany()
+                .HasForeignKey(ua => ua.TransactionId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            entity.HasOne(ua => ua.Rating)
+                .WithMany()
+                .HasForeignKey(ua => ua.RatingId)
+                .OnDelete(DeleteBehavior.SetNull);
         });
     }
 }

@@ -1,0 +1,34 @@
+namespace BottleBuddy.Application.Enums;
+
+public enum UserActivityType
+{
+    // Listing lifecycle
+    ListingCreated,
+    ListingDeleted,
+    ListingReceivedOffer,
+
+    // Pickup request workflow - Owner perspective
+    PickupRequestReceived,
+    PickupRequestAcceptedByOwner,
+    PickupRequestRejectedByOwner,
+    PickupRequestCompletedByOwner,
+
+    // Pickup request workflow - Volunteer perspective
+    PickupRequestCreated,
+    PickupRequestAccepted,
+    PickupRequestRejected,
+    PickupRequestCompleted,
+    PickupRequestCancelled,
+
+    // Transactions & earnings
+    TransactionCompleted,
+    EarningsReceived,
+
+    // Ratings & reviews
+    RatingReceived,
+    RatingPrompt,
+
+    // Map interactions
+    NearbyListingAvailable,
+    PickupOpportunityNearby
+}

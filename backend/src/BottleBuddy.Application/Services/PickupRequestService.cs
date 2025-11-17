@@ -10,6 +10,7 @@ namespace BottleBuddy.Application.Services;
 public class PickupRequestService(
     ApplicationDbContext context,
     ITransactionService transactionService,
+    IUserActivityService userActivityService,
     ILogger<PickupRequestService> logger)
 {
     public async Task<PickupRequestResponseDto> CreatePickupRequestAsync(CreatePickupRequestDto dto, string volunteerId)
@@ -84,6 +85,34 @@ public class PickupRequestService(
 
         // Load volunteer info for response
         var volunteer = await context.Users.FindAsync(volunteerId);
+
+        // Create activity for volunteer
+        await userActivityService.CreateActivityAsync(
+            volunteerId,
+            UserActivityType.PickupRequestCreated,
+            "Pickup Request Sent",
+            $"You sent a pickup request for {listing.BottleCount} bottles at {listing.LocationAddress}",
+            listingId: listing.Id,
+            pickupRequestId: pickupRequest.Id,
+            metadata: new Dictionary<string, object>
+            {
+                { "bottleCount", listing.BottleCount },
+                { "estimatedRefund", listing.EstimatedRefund }
+            });
+
+        // Create activity for listing owner
+        await userActivityService.CreateActivityAsync(
+            listing.OwnerId,
+            UserActivityType.PickupRequestReceived,
+            "New Pickup Request",
+            $"{volunteer?.UserName ?? "A volunteer"} wants to pick up your {listing.BottleCount} bottles at {listing.LocationAddress}",
+            listingId: listing.Id,
+            pickupRequestId: pickupRequest.Id,
+            metadata: new Dictionary<string, object>
+            {
+                { "volunteerId", volunteerId },
+                { "volunteerName", volunteer?.UserName ?? "Unknown" }
+            });
 
         logger.LogInformation(
             "Pickup request {PickupRequestId} created for listing {ListingId} by volunteer {VolunteerId}",
@@ -270,6 +299,67 @@ public class PickupRequestService(
         }
 
         await context.SaveChangesAsync();
+
+        // Create activities based on status change
+        if (statusEnum == PickupRequestStatus.Accepted)
+        {
+            // Notify owner
+            await userActivityService.CreateActivityAsync(
+                pickupRequest.Listing!.OwnerId,
+                UserActivityType.PickupRequestAcceptedByOwner,
+                "Pickup Request Accepted",
+                $"You accepted {pickupRequest.Volunteer?.UserName ?? "a volunteer"}'s request to pick up your {pickupRequest.Listing.BottleCount} bottles",
+                listingId: pickupRequest.ListingId,
+                pickupRequestId: pickupRequest.Id);
+
+            // Notify volunteer
+            await userActivityService.CreateActivityAsync(
+                pickupRequest.VolunteerId,
+                UserActivityType.PickupRequestAccepted,
+                "Pickup Request Accepted!",
+                $"Your pickup request for {pickupRequest.Listing.BottleCount} bottles at {pickupRequest.Listing.LocationAddress} was accepted!",
+                listingId: pickupRequest.ListingId,
+                pickupRequestId: pickupRequest.Id);
+        }
+        else if (statusEnum == PickupRequestStatus.Rejected)
+        {
+            // Notify owner
+            await userActivityService.CreateActivityAsync(
+                pickupRequest.Listing!.OwnerId,
+                UserActivityType.PickupRequestRejectedByOwner,
+                "Pickup Request Rejected",
+                $"You rejected {pickupRequest.Volunteer?.UserName ?? "a volunteer"}'s pickup request",
+                listingId: pickupRequest.ListingId,
+                pickupRequestId: pickupRequest.Id);
+
+            // Notify volunteer
+            await userActivityService.CreateActivityAsync(
+                pickupRequest.VolunteerId,
+                UserActivityType.PickupRequestRejected,
+                "Pickup Request Rejected",
+                $"Your pickup request for {pickupRequest.Listing!.LocationAddress} was not accepted",
+                listingId: pickupRequest.ListingId,
+                pickupRequestId: pickupRequest.Id);
+        }
+        else if (statusEnum == PickupRequestStatus.Completed)
+        {
+            // Notify both parties
+            await userActivityService.CreateActivityAsync(
+                pickupRequest.Listing!.OwnerId,
+                UserActivityType.PickupRequestCompletedByOwner,
+                "Pickup Completed",
+                $"Pickup completed for your listing at {pickupRequest.Listing.LocationAddress}",
+                listingId: pickupRequest.ListingId,
+                pickupRequestId: pickupRequest.Id);
+
+            await userActivityService.CreateActivityAsync(
+                pickupRequest.VolunteerId,
+                UserActivityType.PickupRequestCompleted,
+                "Pickup Completed",
+                $"You completed the pickup for {pickupRequest.Listing.BottleCount} bottles at {pickupRequest.Listing.LocationAddress}",
+                listingId: pickupRequest.ListingId,
+                pickupRequestId: pickupRequest.Id);
+        }
 
         logger.LogInformation(
             "Pickup request {PickupRequestId} updated to status {Status} by user {UserId}",
