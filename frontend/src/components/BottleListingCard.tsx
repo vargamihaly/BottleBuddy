@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { MapPin, Star, Clock, Users, Trash2, CheckCircle, XCircle, MessageCircle } from "lucide-react";
+import { MapPin, Star, Clock, Users, Trash2, CheckCircle, XCircle, MessageCircle, Calendar } from "lucide-react";
 import { BottleListing, PickupRequest, Transaction } from "@/types";
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
@@ -268,6 +268,23 @@ export const BottleListingCard = ({ listing, isOwnListing = false, myPickupReque
       })
     : 'Recently';
 
+  // Format pickup deadline if available
+  const formattedDeadline = listing.pickupDeadline
+    ? new Date(listing.pickupDeadline).toLocaleString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    : null;
+
+  // Check if deadline is approaching or past
+  const deadlineDate = listing.pickupDeadline ? new Date(listing.pickupDeadline) : null;
+  const isDeadlinePast = deadlineDate ? deadlineDate < new Date() : false;
+  const isDeadlineSoon = deadlineDate
+    ? deadlineDate > new Date() && deadlineDate.getTime() - new Date().getTime() < 24 * 60 * 60 * 1000
+    : false;
+
   // Calculate share amounts based on splitPercentage
   // splitPercentage is the owner's (lister's) percentage
   // Default to 50/50 if not specified
@@ -367,6 +384,37 @@ export const BottleListingCard = ({ listing, isOwnListing = false, myPickupReque
             <span>{timePosted}</span>
           </div>
         </div>
+
+        {formattedDeadline && (
+          <div className={`flex items-center space-x-2 text-sm rounded-lg p-2 ${
+            isDeadlinePast
+              ? 'bg-red-50 text-red-700'
+              : isDeadlineSoon
+              ? 'bg-yellow-50 text-yellow-700'
+              : 'bg-blue-50 text-blue-700'
+          }`}>
+            <Calendar className={`w-4 h-4 ${
+              isDeadlinePast
+                ? 'text-red-600'
+                : isDeadlineSoon
+                ? 'text-yellow-600'
+                : 'text-blue-600'
+            }`} />
+            <span className="font-medium">
+              {t('listing.pickupDeadline')}: {formattedDeadline}
+            </span>
+            {isDeadlinePast && (
+              <Badge variant="destructive" className="ml-auto text-xs">
+                {t('listing.pastDeadline')}
+              </Badge>
+            )}
+            {isDeadlineSoon && !isDeadlinePast && (
+              <Badge className="ml-auto text-xs bg-yellow-500 text-white">
+                {t('listing.soon')}
+              </Badge>
+            )}
+          </div>
+        )}
 
         <div className="bg-green-50 rounded-lg p-3">
           <div className="flex items-center justify-between">

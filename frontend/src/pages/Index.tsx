@@ -20,6 +20,7 @@ import {
   WelcomeWidget,
   QuickActionsBar,
   MyActivePickupsWidget,
+  MyActiveListingsWidget,
   EarningsWidget
 } from "@/components/Dashboard";
 
@@ -86,6 +87,11 @@ const Index = () => {
 
   // Authenticated User - Dashboard View
   if (user) {
+    // Filter active listings (open or claimed status)
+    const activeListings = myListings.filter(
+      listing => listing.status === 'open' || listing.status === 'claimed'
+    );
+
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100">
         <Header
@@ -95,31 +101,31 @@ const Index = () => {
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-20 md:pb-8">
           <div className="space-y-6">
-            {/* Welcome Section */}
-            <WelcomeWidget />
+            {/* Primary CTA Section - Full Width */}
+            <div className="space-y-4">
+              <WelcomeWidget />
+              <QuickActionsBar onMapClick={() => setActiveTab("map")} />
+            </div>
 
-            {/* Quick Actions */}
-            <QuickActionsBar onMapClick={() => setActiveTab("map")} />
-
-            {/* Two Column Layout */}
+            {/* In-Progress Section - Two Column Layout */}
             <div className="grid md:grid-cols-2 gap-6">
-              {/* Active Pickups */}
+              {/* Left: Active Pickups */}
               <MyActivePickupsWidget
                 pickupRequests={myPickupRequests}
                 listings={bottleListings}
               />
 
-              {/* Earnings Widget */}
-              <EarningsWidget />
+              {/* Right: My Active Listings */}
+              <MyActiveListingsWidget
+                listings={activeListings}
+                isLoading={isLoading}
+              />
             </div>
 
-            {/* My Listings Section */}
-            <MyListingsSection
-              listings={myListings}
-              isLoading={isLoading}
-            />
+            {/* Motivation Section - Full Width */}
+            <EarningsWidget />
 
-            {/* Available Bottles Section */}
+            {/* Discovery Section - Full Width */}
             <AvailableBottlesSection
               listings={availableListings}
               pickupRequests={myPickupRequests}

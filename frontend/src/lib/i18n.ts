@@ -60,6 +60,11 @@ const resources = {
         },
         quickActions: {
           title: "Quick Actions",
+          primaryCTA: {
+            title: "Start Earning Today",
+            description: "List your bottles and get paid your share when volunteers pick them up",
+            button: "List Your Bottles"
+          },
           listBottles: {
             label: "List Bottles",
             description: "Create a new listing"
@@ -99,6 +104,14 @@ const resources = {
             accepted: "Accepted"
           },
           noMessage: "No message"
+        },
+        activeListings: {
+          title: "My Active Listings",
+          description: "Your listings waiting for volunteers",
+          emptyDescription: "You have no active listings",
+          emptyCtaDescription: "Create your first listing to start earning!",
+          createButton: "Create Listing",
+          viewAll: "View All"
         }
       },
       homeSections: {
@@ -313,7 +326,9 @@ const resources = {
         coordinatePickup: "Accepted! Coordinate pickup details",
         howPaymentWorks: "How payment works:",
         paymentExplanation: "The volunteer who picks up your bottles will return them to a collection point and receive the full refund. They will then pay you your agreed share in cash when picking up the bottles. You both benefit from recycling together!",
-        pickupDeadline: "Pickup Deadline (Optional)",
+        pickupDeadline: "Pickup Deadline",
+        pastDeadline: "Past Deadline",
+        soon: "Soon",
         sliderLabels: {
           zero: "0%",
           twentyFive: "25%",
@@ -809,6 +824,11 @@ const resources = {
         },
         quickActions: {
           title: "Gyors menü",
+          primaryCTA: {
+            title: "Kezdj el keresni ma",
+            description: "Hirdesd meg a palackjaidat és kapd meg a részedet, amikor az önkéntesek átveszik őket",
+            button: "Palackok meghirdetése"
+          },
           listBottles: {
             label: "Palackok meghirdetése",
             description: "Új hirdetés létrehozása"
@@ -848,6 +868,14 @@ const resources = {
             accepted: "Elfogadva"
           },
           noMessage: "Nincs üzenet"
+        },
+        activeListings: {
+          title: "Aktív hirdetéseim",
+          description: "Hirdetéseid, amelyek önkéntesekre várnak",
+          emptyDescription: "Nincsenek aktív hirdetéseid",
+          emptyCtaDescription: "Hozz létre első hirdetésed, hogy elkezdhess keresni!",
+          createButton: "Hirdetés létrehozása",
+          viewAll: "Összes megtekintése"
         }
       },
       homeSections: {
@@ -994,7 +1022,9 @@ const resources = {
         coordinatePickup: "Elfogadva! Egyeztess az átvétel részleteiről",
         howPaymentWorks: "Hogyan működik a fizetés:",
         paymentExplanation: "Az önkéntes, aki átveszi a palackjaidat, visszaviszi őket egy gyűjtőhelyre és megkapja a teljes visszatérítést. Ezután kifizeti neked a megállapodott részedet készpénzben a palackok átvételekor. Mindketten profitáltok az együttes újrahasznosításból!",
-        pickupDeadline: "Átvételi határidő (opcionális)",
+        pickupDeadline: "Átvételi határidő",
+        pastDeadline: "Lejárt határidő",
+        soon: "Hamarosan",
         sliderLabels: {
           zero: "0%",
           twentyFive: "25%",
