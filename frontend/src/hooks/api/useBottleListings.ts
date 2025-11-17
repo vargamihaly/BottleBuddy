@@ -28,7 +28,10 @@ export const useBottleListings = (params?: GetBottleListingsParams) => {
   return useQuery({
     queryKey: bottleListingKeys.list(params),
     queryFn: () => bottleListingService.getAll(params),
-    staleTime: 30000, // 30 seconds
+    staleTime: 30000, // 30 seconds - data is considered fresh for 30s
+    refetchInterval: 60000, // Refetch every 60 seconds
+    refetchOnWindowFocus: true, // Refetch when user returns to tab
+    refetchOnReconnect: true, // Refetch when network reconnects
     select: (data) => data.data, // Extract just the data array for backward compatibility
   });
 };
@@ -40,7 +43,10 @@ export const useBottleListingsPaginated = (params?: GetBottleListingsParams) => 
   return useQuery({
     queryKey: bottleListingKeys.list(params),
     queryFn: () => bottleListingService.getAll(params),
-    staleTime: 30000, // 30 seconds
+    staleTime: 30000, // 30 seconds - data is considered fresh for 30s
+    refetchInterval: 60000, // Refetch every 60 seconds
+    refetchOnWindowFocus: true, // Refetch when user returns to tab
+    refetchOnReconnect: true, // Refetch when network reconnects
   });
 };
 
@@ -65,7 +71,10 @@ export const useMyBottleListings = ({ enabled = true }: { enabled?: boolean } = 
     queryKey: bottleListingKeys.list(), // Use same cache as getAll
     queryFn: () => bottleListingService.getAll(),
     enabled,
-    staleTime: 30000, // 30 seconds
+    staleTime: 30000, // 30 seconds - data is considered fresh for 30s
+    refetchInterval: 60000, // Refetch every 60 seconds
+    refetchOnWindowFocus: true, // Refetch when user returns to tab
+    refetchOnReconnect: true, // Refetch when network reconnects
     select: (data) => data.data, // Extract just the data array for backward compatibility
   });
 };

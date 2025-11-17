@@ -24,6 +24,10 @@ export const usePickupRequestsByListing = (listingId: string, enabled = true) =>
     queryKey: pickupRequestKeys.byListing(listingId),
     queryFn: () => pickupRequestService.getByListingId(listingId),
     enabled: !!listingId && enabled,
+    staleTime: 30000, // 30 seconds - data is considered fresh for 30s
+    refetchInterval: 60000, // Refetch every 60 seconds
+    refetchOnWindowFocus: true, // Refetch when user returns to tab
+    refetchOnReconnect: true, // Refetch when network reconnects
   });
 };
 
@@ -35,6 +39,10 @@ export const useMyPickupRequests = ({ enabled = true }: { enabled?: boolean } = 
     queryKey: pickupRequestKeys.myRequests(),
     queryFn: pickupRequestService.getMyRequests,
     enabled,
+    staleTime: 30000, // 30 seconds - data is considered fresh for 30s
+    refetchInterval: 60000, // Refetch every 60 seconds
+    refetchOnWindowFocus: true, // Refetch when user returns to tab
+    refetchOnReconnect: true, // Refetch when network reconnects
   });
 };
 
