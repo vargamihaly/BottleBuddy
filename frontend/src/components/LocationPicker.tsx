@@ -177,8 +177,11 @@ export const LocationPicker = ({
       });
   };
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSearch = (e?: React.MouseEvent | React.KeyboardEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     forwardGeocode(searchQuery);
   };
 
@@ -205,7 +208,7 @@ export const LocationPicker = ({
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Search Bar */}
-        <form onSubmit={handleSearch} className="flex gap-2">
+        <div className="flex gap-2">
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <Input
@@ -213,22 +216,42 @@ export const LocationPicker = ({
               placeholder={t("locationPicker.searchPlaceholder")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleSearch(e);
+                }
+              }}
               className="pl-10"
             />
           </div>
-          <Button type="submit" variant="outline" disabled={isLoadingAddress}>
+          <Button 
+            type="button" 
+            variant="outline" 
+            disabled={isLoadingAddress}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleSearch(e);
+            }}
+          >
             {t("locationPicker.search")}
           </Button>
           <Button
             type="button"
             variant="outline"
-            onClick={handleUseMyLocation}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleUseMyLocation();
+            }}
             disabled={isLoadingAddress}
           >
             <Navigation className="w-4 h-4 mr-2" />
             {t("locationPicker.myLocation")}
           </Button>
-        </form>
+        </div>
 
         {/* Map Container */}
         <div className="h-[400px] w-full rounded-lg overflow-hidden border-2 border-green-200">
