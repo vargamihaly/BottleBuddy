@@ -3,10 +3,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useNavigate } from "react-router-dom";
 import { Recycle, Heart, Users, Leaf, ArrowLeft, Shield, Zap, Globe } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { useGlobalStatistics } from "@/hooks/api/useStatistics";
 
 const About = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { data: stats, isLoading: isStatsLoading } = useGlobalStatistics();
 
   const features = [
     {
@@ -41,11 +43,20 @@ const About = () => {
     }
   ];
 
-  const stats = [
-    { value: "1000+", labelKey: "about.stats.bottlesRecycled" },
-    { value: "500+", labelKey: "about.stats.activeUsers" },
-    { value: "50+", labelKey: "about.stats.cities" },
-    { value: "95%", labelKey: "about.stats.userSatisfaction" }
+  // Format statistics for display
+  const formattedStats = [
+    {
+      value: isStatsLoading ? "..." : `${stats?.totalBottlesReturned.toLocaleString('hu-HU') || 0}`,
+      labelKey: "stats.bottlesReturned"
+    },
+    {
+      value: isStatsLoading ? "..." : `${Math.round(stats?.totalHufShared || 0).toLocaleString('hu-HU')} HUF`,
+      labelKey: "stats.hufShared"
+    },
+    {
+      value: isStatsLoading ? "..." : `${stats?.activeUsers.toLocaleString('hu-HU') || 0}`,
+      labelKey: "stats.activeUsers"
+    }
   ];
 
   const steps = [
@@ -99,8 +110,8 @@ const About = () => {
       {/* Stats Section */}
       <section className="py-12 px-4 bg-white/60 backdrop-blur-sm">
         <div className="container mx-auto max-w-6xl">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {stats.map((stat, index) => (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {formattedStats.map((stat, index) => (
               <div key={index} className="text-center">
                 <div className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent mb-2">
                   {stat.value}
