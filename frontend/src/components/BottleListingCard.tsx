@@ -346,22 +346,22 @@ export const BottleListingCard = ({ listing, isOwnListing = false, myPickupReque
   return (
     <Card className="hover:shadow-lg transition-all duration-300 border-green-100 hover:border-green-300 hover:scale-105">
       <CardHeader className="pb-3">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center space-x-2">
-            <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full flex items-center justify-center text-white font-bold">
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex items-center space-x-2 min-w-0 flex-1">
+            <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">
               {listing.bottleCount}
             </div>
-            <div>
-              <h4 className="font-semibold text-gray-900">
+            <div className="min-w-0 flex-1">
+              <h4 className="font-semibold text-gray-900 truncate" title={listing.title || `${listing.bottleCount} Bottles Available`}>
                 {listing.title || `${listing.bottleCount} Bottles Available`}
               </h4>
-              <div className="flex items-center space-x-1 text-sm text-gray-600">
-                <MapPin className="w-3 h-3" />
-                <span>{listing.locationAddress}</span>
+              <div className="flex items-center space-x-1 text-sm text-gray-600 min-w-0">
+                <MapPin className="w-3 h-3 flex-shrink-0" />
+                <span className="truncate" title={listing.locationAddress}>{listing.locationAddress}</span>
               </div>
             </div>
           </div>
-          <Badge variant="secondary" className="bg-green-100 text-green-700">
+          <Badge variant="secondary" className="bg-green-100 text-green-700 flex-shrink-0">
             {t(`listing.${listing.status}`)}
           </Badge>
         </div>
