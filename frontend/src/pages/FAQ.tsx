@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useNavigate } from "react-router-dom";
 import { HelpCircle, ArrowLeft, Recycle } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -64,25 +65,31 @@ const FAQ = () => {
       {/* FAQ Content */}
       <section className="py-12 px-4">
         <div className="container mx-auto max-w-4xl">
-          <div className="grid gap-6">
+          <Accordion type="single" collapsible className="space-y-4">
             {faqKeys.map((key, index) => (
-              <Card key={index} className="border-2 hover:border-green-300 transition-colors bg-white/90 backdrop-blur-sm">
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-start gap-3">
-                    <span className="flex-shrink-0 w-6 h-6 bg-green-100 text-green-700 rounded-full flex items-center justify-center text-sm font-bold">
+              <AccordionItem 
+                key={index} 
+                value={`item-${index}`}
+                className="border-2 rounded-lg bg-white/90 backdrop-blur-sm hover:border-green-300 transition-colors px-6"
+              >
+                <AccordionTrigger className="text-left hover:no-underline py-6">
+                  <div className="flex items-start gap-3 w-full">
+                    <span className="flex-shrink-0 w-6 h-6 bg-green-100 text-green-700 rounded-full flex items-center justify-center text-sm font-bold mt-0.5">
                       Q
                     </span>
-                    {t(`faq.questions.${key}.question`)}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription className="text-base text-gray-700 leading-relaxed pl-9">
+                    <span className="text-lg font-semibold text-gray-900">
+                      {t(`faq.questions.${key}.question`)}
+                    </span>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="pb-6">
+                  <div className="text-base text-gray-700 leading-relaxed pl-9">
                     {t(`faq.questions.${key}.answer`)}
-                  </CardDescription>
-                </CardContent>
-              </Card>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
             ))}
-          </div>
+          </Accordion>
 
           {/* Additional Help */}
           <div className="mt-12 text-center">
