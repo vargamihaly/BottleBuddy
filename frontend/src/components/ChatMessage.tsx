@@ -21,6 +21,8 @@ export const ChatMessage = ({ message, isOwnMessage, apiBaseUrl = import.meta.en
   const { t } = useTranslation();
 
   const getInitials = (name?: string) => {
+
+
     if (!name) return "?";
     const parts = name.split(" ");
     if (parts.length >= 2) {
@@ -35,6 +37,10 @@ export const ChatMessage = ({ message, isOwnMessage, apiBaseUrl = import.meta.en
 
   // Construct full image URL
   const getImageUrl = (relativeUrl: string) => {
+      console.log("---------------")
+      console.log("import.meta.env.VITE_API_URL:")
+      console.log(import.meta.env.VITE_API_URL)
+
     if (relativeUrl.startsWith("http")) {
       return relativeUrl;
     }

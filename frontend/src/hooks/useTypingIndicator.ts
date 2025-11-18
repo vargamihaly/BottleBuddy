@@ -1,6 +1,6 @@
 import { useEffect, useRef, useCallback, useState } from "react";
 
-import { useSignalR } from "@/hooks/useSignalR";
+import { useSignalRContext } from "@/contexts/SignalRContext";
 
 interface TypingUser {
   userId: string;
@@ -19,7 +19,7 @@ export const useTypingIndicator = ({
   pickupRequestId,
   currentUserId,
 }: UseTypingIndicatorOptions) => {
-  const { connection, isConnected } = useSignalR();
+  const { connection, isConnected } = useSignalRContext();
   const [typingUsers, setTypingUsers] = useState<string[]>([]);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const sendTypingTimeoutRef = useRef<NodeJS.Timeout | null>(null);

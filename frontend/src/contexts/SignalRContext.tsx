@@ -10,7 +10,7 @@ interface SignalRContextValue {
   connectionError: string | null;
 }
 
-export const SignalRContext = createContext<SignalRContextValue | undefined>(undefined);
+const SignalRContext = createContext<SignalRContextValue | undefined>(undefined);
 
 const HUB_URL = `${config.api.baseUrl}/hubs/messages`;
 

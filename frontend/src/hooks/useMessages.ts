@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Message, CreateMessage } from "@/types";
 import { useToast } from "@/hooks/use-toast";
-import { useSignalR } from "@/hooks/useSignalR";
+import { useSignalRContext } from "@/contexts/SignalRContext";
 import { messageService } from "@/api/services";
 import { ApiRequestError } from "@/lib/apiClient";
 
@@ -28,7 +28,7 @@ export const useMessages = (
 ) => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const { connection, isConnected } = useSignalR();
+  const { connection, isConnected } = useSignalRContext();
 
   const {
     enabled = true,

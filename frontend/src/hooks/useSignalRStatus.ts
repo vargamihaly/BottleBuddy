@@ -1,11 +1,11 @@
-import { useSignalR } from "./useSignalR";
+import { useSignalRContext } from "@/contexts/SignalRContext";
 
 /**
  * Hook to get the current SignalR connection status
  * Provides convenient boolean flags for different connection states
  */
 export const useSignalRStatus = () => {
-  const { isConnected, connectionError } = useSignalR();
+  const { isConnected, connectionError } = useSignalRContext();
 
   return {
     isConnected,
