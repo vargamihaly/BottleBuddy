@@ -1,3 +1,4 @@
+import * as React from 'react';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/contexts/AuthContext';
@@ -16,7 +17,7 @@ export const LanguageSyncProvider = ({ children }: { children: React.ReactNode }
         if (user && settings?.preferredLanguage) {
             // Only change language if it's different from current
             if (i18n.language !== settings.preferredLanguage) {
-                i18n.changeLanguage(settings.preferredLanguage);
+                void i18n.changeLanguage(settings.preferredLanguage);
                 // Also update localStorage as backup
                 localStorage.setItem('preferredLanguage', settings.preferredLanguage);
             }

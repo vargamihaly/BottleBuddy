@@ -148,7 +148,7 @@ export const SignalRProvider = ({ children }: { children: ReactNode }) => {
       isStartingRef.current = false;
     };
 
-    startConnection();
+    void startConnection();
 
     return () => {
       isMounted = false;

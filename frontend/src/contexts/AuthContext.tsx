@@ -1,218 +1,218 @@
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import { toast } from '@/hooks/use-toast';
-import { apiClient, ApiRequestError } from '@/lib/apiClient';
-import { isValidToken, getUserIdFromToken } from '@/lib/tokenUtils';
-import type { User, AuthResponse } from '@/types';
+import React, {createContext, useCallback, useContext, useEffect, useState} from 'react';
+import {apiClient, ApiRequestError} from '@/lib/apiClient';
+import {getUserIdFromToken, isValidToken} from '@/lib/tokenUtils';
+import type {AuthResponse, User} from '@/types';
+
 type RegisterRequestBody = {
-  email: string;
-  password: string;
-  fullName?: string;
-  username?: string;
-  phone?: string;
+    email: string;
+    password: string;
+    fullName?: string;
+    username?: string;
+    phone?: string;
 };
 
 interface AuthContextType {
-  token: string | null;
-  user: User | null;
-  loading: boolean;
-  isAuthenticated: boolean;
-  signIn: (email: string, password: string) => Promise<void>;
-  signUp: (
-    email: string,
-    password: string,
-    fullName?: string,
-    username?: string,
-    phone?: string
-  ) => Promise<void>;
-  signInWithGoogle: (idToken: string) => Promise<void>;
-  signOut: () => Promise<void>;
-  refreshUser: () => Promise<void>;
+    token: string | null;
+    user: User | null;
+    loading: boolean;
+    isAuthenticated: boolean;
+    signIn: (email: string, password: string) => Promise<void>;
+    signUp: (
+        email: string,
+        password: string,
+        fullName?: string,
+        username?: string,
+        phone?: string
+    ) => Promise<void>;
+    signInWithGoogle: (idToken: string) => Promise<void>;
+    signOut: () => Promise<void>;
+    refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
+    const context = useContext(AuthContext);
+    if (!context) {
+        throw new Error('useAuth must be used within an AuthProvider');
+    }
+    return context;
 };
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [token, setToken] = useState<string | null>(null);
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({children}) => {
+    const [token, setToken] = useState<string | null>(null);
+    const [user, setUser] = useState<User | null>(null);
+    const [loading, setLoading] = useState(true);
 
-  // Fetch user profile data
-  const fetchUserProfile = useCallback(async (authToken: string): Promise<User | null> => {
-    try {
-      // Try to get user data from /api/auth/me endpoint
-      const userData = await apiClient.get<User>('/api/auth/me', { token: authToken });
-      return userData;
-    } catch (error) {
-      console.error('Failed to fetch user profile:', error);
+    // Fetch user profile data
+    const fetchUserProfile = useCallback(async (authToken: string): Promise<User | null> => {
+        try {
+            // Try to get user data from /api/auth/me endpoint
+            const userData = await apiClient.get<User>('/api/auth/me', {token: authToken});
+            return userData;
+        } catch (error) {
+            console.error('Failed to fetch user profile:', error);
 
-      // Fallback: create basic user object from token
-      const userId = getUserIdFromToken(authToken);
-      if (userId) {
-        return {
-          id: userId,
-          email: '', // Will be populated when backend supports it
+            // Fallback: create basic user object from token
+            const userId = getUserIdFromToken(authToken);
+            if (userId) {
+                return {
+                    id: userId,
+                    email: '', // Will be populated when backend supports it
+                };
+            }
+
+            return null;
+        }
+    }, []);
+
+    // Initialize auth state from localStorage
+    useEffect(() => {
+        const initAuth = async () => {
+            const stored = localStorage.getItem('token');
+
+            if (stored && isValidToken(stored)) {
+                setToken(stored);
+
+                // Fetch user data
+                const userData = await fetchUserProfile(stored);
+                setUser(userData);
+            } else {
+                // Token is invalid or expired, clean up
+                localStorage.removeItem('token');
+                setToken(null);
+                setUser(null);
+            }
+
+            setLoading(false);
         };
-      }
 
-      return null;
-    }
-  }, []);
+        void initAuth();
+    }, [fetchUserProfile]);
 
-  // Initialize auth state from localStorage
-  useEffect(() => {
-    const initAuth = async () => {
-      const stored = localStorage.getItem('token');
+    const signIn = async (email: string, password: string) => {
+        try {
+            const data = await apiClient.postNoRetry<AuthResponse>(
+                '/api/auth/login',
+                {
+                    email,
+                    password,
+                },
+                {skipAuth: true}
+            );
 
-      if (stored && isValidToken(stored)) {
-        setToken(stored);
+            localStorage.setItem('token', data.token);
+            setToken(data.token);
 
-        // Fetch user data
-        const userData = await fetchUserProfile(stored);
-        setUser(userData);
-      } else {
-        // Token is invalid or expired, clean up
-        localStorage.removeItem('token');
-        setToken(null);
-        setUser(null);
-      }
-
-      setLoading(false);
+            // Fetch user profile
+            const userData = await fetchUserProfile(data.token);
+            setUser(userData);
+        } catch (error) {
+            if (error instanceof ApiRequestError) {
+                throw new Error(error.getUserMessage());
+            }
+            throw new Error('Failed to sign in. Please try again.');
+        }
     };
 
-    initAuth();
-  }, [fetchUserProfile]);
+    const signUp = async (
+        email: string,
+        password: string,
+        fullName?: string,
+        username?: string,
+        phone?: string
+    ) => {
+        try {
+            const requestBody: RegisterRequestBody = {
+                email,
+                password,
+            };
 
-  const signIn = async (email: string, password: string) => {
-    try {
-      const data = await apiClient.postNoRetry<AuthResponse>(
-        '/api/auth/login',
-        {
-          email,
-          password,
-        },
-        { skipAuth: true }
-      );
+            // Add optional fields if provided
+            if (fullName) requestBody.fullName = fullName;
+            if (username) requestBody.username = username;
+            if (phone) requestBody.phone = phone;
 
-      localStorage.setItem('token', data.token);
-      setToken(data.token);
+            const data = await apiClient.postNoRetry<AuthResponse>('/api/auth/register', requestBody, {skipAuth: true});
 
-      // Fetch user profile
-      const userData = await fetchUserProfile(data.token);
-      setUser(userData);
-    } catch (error) {
-      if (error instanceof ApiRequestError) {
-        throw new Error(error.getUserMessage());
-      }
-      throw new Error('Failed to sign in. Please try again.');
-    }
-  };
+            localStorage.setItem('token', data.token);
+            setToken(data.token);
 
-  const signUp = async (
-    email: string,
-    password: string,
-    fullName?: string,
-    username?: string,
-    phone?: string
-  ) => {
-    try {
-      const requestBody: RegisterRequestBody = {
-        email,
-        password,
-      };
+            // Fetch user profile
+            const userData = await fetchUserProfile(data.token);
+            setUser(userData);
+        } catch (error) {
+            if (error instanceof ApiRequestError) {
+                throw new Error(error.getUserMessage());
+            }
+            throw new Error('Failed to create account. Please try again.');
+        }
+    };
 
-      // Add optional fields if provided
-      if (fullName) requestBody.fullName = fullName;
-      if (username) requestBody.username = username;
-      if (phone) requestBody.phone = phone;
+    const signInWithGoogle = async (idToken: string) => {
+        try {
+            console.log('[AuthContext] Sending Google ID token to backend');
 
-      const data = await apiClient.postNoRetry<AuthResponse>('/api/auth/register', requestBody, { skipAuth: true });
+            const data = await apiClient.postNoRetry<AuthResponse>('/api/auth/google-signin', {
+                idToken
+            }, {skipAuth: true});
 
-      localStorage.setItem('token', data.token);
-      setToken(data.token);
+            localStorage.setItem('token', data.token);
+            setToken(data.token);
 
-      // Fetch user profile
-      const userData = await fetchUserProfile(data.token);
-      setUser(userData);
-    } catch (error) {
-      if (error instanceof ApiRequestError) {
-        throw new Error(error.getUserMessage());
-      }
-      throw new Error('Failed to create account. Please try again.');
-    }
-  };
+            // Fetch user profile
+            const userData = await fetchUserProfile(data.token);
+            setUser(userData);
 
-  const signInWithGoogle = async (idToken: string) => {
-    try {
-      console.log('[AuthContext] Sending Google ID token to backend');
+            console.log('[AuthContext] Google sign-in successful');
+        } catch (error) {
+            console.error('[AuthContext] Google sign-in failed:', error);
+            if (error instanceof ApiRequestError) {
+                throw new Error(error.getUserMessage());
+            }
+            throw new Error('Failed to sign in with Google. Please try again.');
+        }
+    };
 
-      const data = await apiClient.postNoRetry<AuthResponse>('/api/auth/google-signin', {
-        idToken
-      }, { skipAuth: true });
+    const signOut = async () => {
+        try {
+            // Try to call logout endpoint
+            await apiClient.postNoRetry('/api/auth/logout', undefined, {token});
+        } catch (err) {
+            console.error('Logout API call failed:', err);
+            // Continue with local cleanup even if API call fails
+        } finally {
+            localStorage.removeItem('token');
+            setToken(null);
+            setUser(null);
+        }
+    };
 
-      localStorage.setItem('token', data.token);
-      setToken(data.token);
+    const refreshUser = async () => {
+        if (token) {
+            const userData = await fetchUserProfile(token);
+            setUser(userData);
+        }
+    };
 
-      // Fetch user profile
-      const userData = await fetchUserProfile(data.token);
-      setUser(userData);
+    const isAuthenticated = !!token && !!user;
 
-      console.log('[AuthContext] Google sign-in successful');
-    } catch (error) {
-      console.error('[AuthContext] Google sign-in failed:', error);
-      if (error instanceof ApiRequestError) {
-        throw new Error(error.getUserMessage());
-      }
-      throw new Error('Failed to sign in with Google. Please try again.');
-    }
-  };
-
-  const signOut = async () => {
-    try {
-      // Try to call logout endpoint
-      await apiClient.postNoRetry('/api/auth/logout', undefined, { token });
-    } catch (err) {
-      console.error('Logout API call failed:', err);
-      // Continue with local cleanup even if API call fails
-    } finally {
-      localStorage.removeItem('token');
-      setToken(null);
-      setUser(null);
-    }
-  };
-
-  const refreshUser = async () => {
-    if (token) {
-      const userData = await fetchUserProfile(token);
-      setUser(userData);
-    }
-  };
-
-  const isAuthenticated = !!token && !!user;
-
-  return (
-    <AuthContext.Provider
-      value={{
-        token,
-        user,
-        loading,
-        isAuthenticated,
-        signIn,
-        signUp,
-        signInWithGoogle,
-        signOut,
-        refreshUser,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
-  );
+    return (
+        <AuthContext.Provider
+            value={{
+                token,
+                user,
+                loading,
+                isAuthenticated,
+                signIn,
+                signUp,
+                signInWithGoogle,
+                signOut,
+                refreshUser,
+            }}
+        >
+            {children}
+        </AuthContext.Provider>
+    );
 };

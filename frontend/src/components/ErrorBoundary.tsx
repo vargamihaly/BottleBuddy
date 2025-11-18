@@ -31,10 +31,6 @@ export class ErrorBoundary extends Component<Props, State> {
     // Example: Sentry.captureException(error, { extra: errorInfo });
   }
 
-  private handleReset = () => {
-    this.setState({ hasError: false, error: undefined, errorInfo: undefined });
-  };
-
   private handleGoHome = () => {
     window.location.href = '/';
   };

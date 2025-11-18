@@ -79,7 +79,7 @@ export const useMessages = (
       })
       .catch((err) => console.error("Error joining conversation:", err));
 
-    const handleReceiveMessage = (message: Message) => {
+    const handleReceiveMessage = async (message: Message) => {
       if (fetchMessages) {
         queryClient.setQueryData<Message[] | undefined>(
           messageKeys.byPickupRequest(conversationId),
@@ -97,16 +97,16 @@ export const useMessages = (
           }
         );
       } else {
-        queryClient.invalidateQueries({ queryKey: messageKeys.byPickupRequest(conversationId) });
+        await queryClient.invalidateQueries({ queryKey: messageKeys.byPickupRequest(conversationId) });
       }
 
       if (fetchUnreadCount) {
-        queryClient.invalidateQueries({ queryKey: messageKeys.unreadCount(conversationId) });
+        await queryClient.invalidateQueries({ queryKey: messageKeys.unreadCount(conversationId) });
       }
-      queryClient.invalidateQueries({ queryKey: messageKeys.totalUnread() });
+      await queryClient.invalidateQueries({ queryKey: messageKeys.totalUnread() });
     };
 
-    const handleMessageRead = (data: { messageId: string; readAtUtc?: string }) => {
+    const handleMessageRead = async (data: { messageId: string; readAtUtc?: string }) => {
       if (fetchMessages) {
         queryClient.setQueryData<Message[] | undefined>(
           messageKeys.byPickupRequest(conversationId),
@@ -121,13 +121,13 @@ export const useMessages = (
           }
         );
       } else {
-        queryClient.invalidateQueries({ queryKey: messageKeys.byPickupRequest(conversationId) });
+        await queryClient.invalidateQueries({ queryKey: messageKeys.byPickupRequest(conversationId) });
       }
 
       if (fetchUnreadCount) {
-        queryClient.invalidateQueries({ queryKey: messageKeys.unreadCount(conversationId) });
+        await queryClient.invalidateQueries({ queryKey: messageKeys.unreadCount(conversationId) });
       }
-      queryClient.invalidateQueries({ queryKey: messageKeys.totalUnread() });
+      await queryClient.invalidateQueries({ queryKey: messageKeys.totalUnread() });
     };
 
     connection.on("ReceiveMessage", handleReceiveMessage);
@@ -156,11 +156,11 @@ export const useMessages = (
 
   const sendMessageMutation = useMutation({
     mutationFn: (data: CreateMessage) => messageService.sendMessage(pickupRequestId ?? '', data),
-    onSuccess: () => {
+    onSuccess: async () => {
       if (!pickupRequestId) return;
-      queryClient.invalidateQueries({ queryKey: messageKeys.byPickupRequest(pickupRequestId) });
-      queryClient.invalidateQueries({ queryKey: messageKeys.unreadCount(pickupRequestId) });
-      queryClient.invalidateQueries({ queryKey: messageKeys.totalUnread() });
+      await queryClient.invalidateQueries({ queryKey: messageKeys.byPickupRequest(pickupRequestId) });
+      await queryClient.invalidateQueries({ queryKey: messageKeys.unreadCount(pickupRequestId) });
+      await queryClient.invalidateQueries({ queryKey: messageKeys.totalUnread() });
     },
     onError: (error: unknown) => {
       const description = error instanceof ApiRequestError
@@ -179,11 +179,11 @@ export const useMessages = (
 
   const markAllAsReadMutation = useMutation({
     mutationFn: () => messageService.markAsRead(pickupRequestId ?? ''),
-    onSuccess: () => {
+    onSuccess: async () => {
       if (!pickupRequestId) return;
-      queryClient.invalidateQueries({ queryKey: messageKeys.byPickupRequest(pickupRequestId) });
-      queryClient.invalidateQueries({ queryKey: messageKeys.unreadCount(pickupRequestId) });
-      queryClient.invalidateQueries({ queryKey: messageKeys.totalUnread() });
+      await queryClient.invalidateQueries({ queryKey: messageKeys.byPickupRequest(pickupRequestId) });
+      await queryClient.invalidateQueries({ queryKey: messageKeys.unreadCount(pickupRequestId) });
+      await queryClient.invalidateQueries({ queryKey: messageKeys.totalUnread() });
     },
   });
 

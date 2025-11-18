@@ -146,7 +146,7 @@ export const Header = ({ onMapClick, onDashboardClick }: HeaderProps) => {
                         <Users className="w-4 h-4 mr-2" />
                         {t("common.profile")}
                       </Button>
-                      <Button variant="ghost" onClick={() => { handleSignOut(); setMobileMenuOpen(false); }} className="justify-start">
+                      <Button variant="ghost" onClick={async () => { await handleSignOut(); setMobileMenuOpen(false); }} className="justify-start">
                         <LogOut className="w-4 h-4 mr-2" />
                         {t("common.signOut")}
                       </Button>

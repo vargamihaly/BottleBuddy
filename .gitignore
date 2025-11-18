@@ -277,3 +277,4 @@ temp-uploads/
 # Windows artifacts
 nul
 .claude
+*/qodana.yaml

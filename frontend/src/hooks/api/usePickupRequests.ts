@@ -56,9 +56,9 @@ export const useCreatePickupRequest = () => {
 
   return useMutation({
     mutationFn: (data: CreatePickupRequest) => pickupRequestService.create(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: pickupRequestKeys.all });
-      queryClient.invalidateQueries({ queryKey: ['bottleListings'] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: pickupRequestKeys.all });
+      await queryClient.invalidateQueries({ queryKey: ['bottleListings'] });
       toast({
         title: t('map.pickupRequestSent'),
         description: t('map.ownerNotified'),
@@ -91,9 +91,9 @@ export const useUpdatePickupRequestStatus = () => {
   return useMutation({
     mutationFn: ({ requestId, status }: { requestId: string; status: string }) =>
       pickupRequestService.updateStatus(requestId, status),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: pickupRequestKeys.all });
-      queryClient.invalidateQueries({ queryKey: ['bottleListings'] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: pickupRequestKeys.all });
+      await queryClient.invalidateQueries({ queryKey: ['bottleListings'] });
       toast({
         title: t('listing.updateSuccess'),
         description: t('listing.updateSuccess'),
@@ -125,8 +125,8 @@ export const useDeletePickupRequest = () => {
 
   return useMutation({
     mutationFn: (requestId: string) => pickupRequestService.delete(requestId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: pickupRequestKeys.all });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: pickupRequestKeys.all });
       toast({
         title: t('common.success'),
         description: t('common.success'),

@@ -177,7 +177,6 @@ async function requestWithRetry<T>(
         // Exponential backoff: 1s, 2s, 4s
         const delay = Math.pow(2, attempt) * 1000;
         await new Promise(resolve => setTimeout(resolve, delay));
-        continue;
       }
     }
   }

@@ -56,8 +56,8 @@ export const useMarkActivityAsRead = () => {
 
   return useMutation({
     mutationFn: (activityId: string) => userActivityService.markAsRead(activityId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: userActivityKeys.all });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: userActivityKeys.all });
     },
     onError: (error: unknown) => {
       const description = error instanceof ApiRequestError
@@ -85,8 +85,8 @@ export const useMarkAllActivitiesAsRead = () => {
 
   return useMutation({
     mutationFn: () => userActivityService.markAllAsRead(),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: userActivityKeys.all });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: userActivityKeys.all });
       toast({
         title: t('activities.markAllAsReadSuccess', { defaultValue: 'All activities marked as read' }),
       });
@@ -117,8 +117,8 @@ export const useDeleteActivity = () => {
 
   return useMutation({
     mutationFn: (activityId: string) => userActivityService.delete(activityId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: userActivityKeys.all });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: userActivityKeys.all });
       toast({
         title: t('activities.deleteSuccess', { defaultValue: 'Activity deleted' }),
       });

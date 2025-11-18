@@ -35,8 +35,8 @@ export const useUpdateNotificationPreferences = () => {
   return useMutation({
     mutationFn: (preferences: UpdateNotificationPreferences) =>
       notificationPreferencesService.update(preferences),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: notificationPreferencesKeys.all });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: notificationPreferencesKeys.all });
       toast({
         title: t('settings.preferences.updateSuccess', {
           defaultValue: 'Preferences updated successfully'

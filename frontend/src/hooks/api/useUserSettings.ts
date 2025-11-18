@@ -24,8 +24,8 @@ export const useUpdateUserSettings = () => {
 
     return useMutation({
         mutationFn: (dto: UpdateUserSettingsDto) => userSettingsService.update(dto),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: userSettingsKeys.all });
+        onSuccess: async () => {
+            await queryClient.invalidateQueries({ queryKey: userSettingsKeys.all });
         },
     });
 };

@@ -59,9 +59,9 @@ export const useCreateRating = () => {
 
   return useMutation({
     mutationFn: (data: CreateRating) => ratingService.create(data),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ratingKeys.all });
-      queryClient.invalidateQueries({
+    onSuccess: async (_, variables) => {
+      await queryClient.invalidateQueries({ queryKey: ratingKeys.all });
+      await queryClient.invalidateQueries({
         queryKey: ratingKeys.byTransaction(variables.transactionId),
       });
       toast({
@@ -96,8 +96,8 @@ export const useUpdateRating = () => {
   return useMutation({
     mutationFn: ({ ratingId, data }: { ratingId: string; data: Partial<CreateRating> }) =>
       ratingService.update(ratingId, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ratingKeys.all });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ratingKeys.all });
       toast({
         title: t('common.success'),
         description: t('listing.updateSuccess'),
@@ -129,8 +129,8 @@ export const useDeleteRating = () => {
 
   return useMutation({
     mutationFn: (ratingId: string) => ratingService.delete(ratingId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ratingKeys.all });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ratingKeys.all });
       toast({
         title: t('common.success'),
         description: t('common.success'),

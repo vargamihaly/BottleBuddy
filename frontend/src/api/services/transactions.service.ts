@@ -1,11 +1,6 @@
 import { apiClient } from "@/lib/apiClient";
 import { Transaction } from "@/types";
 
-// Backend wraps responses in { data: ... }
-interface ApiResponse<T> {
-  data: T;
-}
-
 export const transactionService = {
   /**
    * Get all transactions for the current user

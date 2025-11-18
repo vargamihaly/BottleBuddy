@@ -1,12 +1,11 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useMyPickupRequests } from "@/hooks/api";
-import { BottleListing } from "@/types";
 
 /**
- * Custom hook that combines listings and pickup requests for MapView
+ * Custom hook that provides pickup request data and helper functions for MapView
  * Provides helper functions to check pickup request status
  */
-export const useMapViewData = (listings: BottleListing[]) => {
+export const useMapViewData = () => {
   const { user } = useAuth();
 
   // Fetch user's pickup requests
