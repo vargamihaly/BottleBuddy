@@ -1,3 +1,4 @@
+console.log("Application is loading...");
 import { createRoot } from 'react-dom/client'
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import App from './App.tsx'
