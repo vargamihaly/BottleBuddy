@@ -11,7 +11,7 @@ export const notificationPreferencesService = {
    */
   get: async (): Promise<NotificationPreferences> => {
     const response = await apiClient.get<NotificationPreferencesResponse>('/notification-preferences');
-    return response.data.data;
+    return response.data;
   },
 
   /**
@@ -19,6 +19,6 @@ export const notificationPreferencesService = {
    */
   update: async (preferences: UpdateNotificationPreferences): Promise<NotificationPreferences> => {
     const response = await apiClient.patch<NotificationPreferencesResponse>('/notification-preferences', preferences);
-    return response.data.data;
+    return response.data;
   }
 };

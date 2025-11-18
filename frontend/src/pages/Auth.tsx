@@ -13,7 +13,6 @@ import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Loader2, Recycle, Sparkles } from "lucide-react";
-import config from "@/config";
 import { useTranslation } from "react-i18next";
 
 const Auth = () => {
@@ -125,13 +124,13 @@ const Auth = () => {
 
   const onSignUpSubmit = async (data: SignUpFormData) => {
     try {
-      await signUp({
-        email: data.email,
-        password: data.password,
-        fullName: data.fullName || undefined,
-        username: data.username || undefined,
-        phone: data.phone || undefined,
-      });
+      await signUp(
+        data.email,
+        data.password,
+        data.fullName || undefined,
+        data.username || undefined,
+        data.phone || undefined
+      );
       toast({
         title: t("auth.signUpSuccess"),
         description: t("auth.signUpSuccessDesc"),

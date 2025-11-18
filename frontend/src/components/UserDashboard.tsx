@@ -23,8 +23,7 @@ export const UserDashboard = ({ onBackToHome }: UserDashboardProps) => {
 
   // Fetch recent user activities (limit to 5 most recent)
   const { data: activitiesData, isLoading: activitiesLoading } = useUserActivities(
-    { page: 1, pageSize: 5 },
-    { refetchInterval: false }
+    { page: 1, pageSize: 5 }
   );
 
   // Debug: Log user data
