@@ -175,6 +175,21 @@ public class AuthController(
 
                 dbContext.Profiles.Add(profile);
 
+                // Create associated UserSettings
+                var userSettings = new UserSettings
+                {
+                    Id = user.Id,
+                    UserId = user.Id,
+                    PreferredLanguage = "en-US",
+                    NotificationSettings = new UserNotificationSettings(),
+                    CreatedAtUtc = DateTime.UtcNow,
+                    UpdatedAtUtc = DateTime.UtcNow
+                };
+
+                logger.LogInformation("Creating UserSettings for UserId: {UserId}", user.Id);
+
+                dbContext.UserSettings.Add(userSettings);
+
                 try
                 {
                     await dbContext.SaveChangesAsync();
@@ -192,11 +207,11 @@ public class AuthController(
             }
 
             logger.LogInformation("Generating JWT token for UserId: {UserId}", user.Id);
-            var jwt = authService.GenerateJwtToken(user);
+            string jwt = authService.GenerateJwtToken(user);
             logger.LogInformation("JWT token generated successfully (length: {TokenLength})", jwt?.Length ?? 0);
 
             logger.LogInformation("=== Google Sign-In Completed Successfully ===");
-            return Ok(new AuthResponseDto { Token = jwt });
+            return Ok(new AuthResponseDto { Token = jwt! });
         }
         catch (InvalidJwtException ex)
         {

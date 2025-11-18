@@ -150,6 +150,7 @@ export const useMessages = (
     fetchUnreadCount,
     isConnected,
     pickupRequestId,
+    queryClient,
     shouldSubscribeToHub,
   ]);
 

@@ -13,6 +13,7 @@ import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useState } from "react";
 import { useUnreadActivityCount, useUserActivities, useMarkActivityAsRead, useMarkAllActivitiesAsRead, useDeleteActivity } from "@/hooks/api/useUserActivities";
 import { formatDistanceToNow } from "date-fns";
+import { getActivityMessage } from "@/utils/activityTemplates";
 
 interface HeaderProps {
   onMapClick: () => void;
@@ -28,12 +29,19 @@ export const Header = ({ onMapClick, onDashboardClick }: HeaderProps) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activitiesOpen, setActivitiesOpen] = useState(false);
 
-  // User activities
+  // User activities with 30-second polling
   const { data: unreadCount = 0 } = useUnreadActivityCount();
-  const { data: activitiesData } = useUserActivities({ page: 1, pageSize: 10 });
+  const { data: activitiesData } = useUserActivities(
+    { page: 1, pageSize: 10 },
+    { enabled: !!user, refetchInterval: 30000 } // Poll every 30 seconds
+  );
   const markAsRead = useMarkActivityAsRead();
   const markAllAsRead = useMarkAllActivitiesAsRead();
   const deleteActivity = useDeleteActivity();
+
+  // Group activities into "New" (unread) and "Earlier" (read)
+  const newActivities = activitiesData?.data.filter((a) => !a.isRead) || [];
+  const earlierActivities = activitiesData?.data.filter((a) => a.isRead) || [];
 
   const handleSignOut = async () => {
     try {
@@ -186,7 +194,7 @@ export const Header = ({ onMapClick, onDashboardClick }: HeaderProps) => {
                   </PopoverTrigger>
                   <PopoverContent className="w-96 p-0" align="end">
                     <div className="flex items-center justify-between p-4 border-b">
-                      <h3 className="font-semibold text-lg">{t('activities.title', { defaultValue: 'Activities' })}</h3>
+                      <h3 className="font-semibold text-lg">{t('activities.title', { defaultValue: 'Notifications' })}</h3>
                       {unreadCount > 0 && (
                         <Button variant="ghost" size="sm" onClick={handleMarkAllAsRead}>
                           <Check className="w-4 h-4 mr-1" />
@@ -194,53 +202,115 @@ export const Header = ({ onMapClick, onDashboardClick }: HeaderProps) => {
                         </Button>
                       )}
                     </div>
-                    <ScrollArea className="h-96">
+                    <ScrollArea className="max-h-96">
                       {activitiesData && activitiesData.data.length > 0 ? (
-                        <div className="divide-y">
-                          {activitiesData.data.map((activity) => (
-                            <div
-                              key={activity.id}
-                              className={`p-4 hover:bg-gray-50 transition-colors ${!activity.isRead ? 'bg-blue-50' : ''}`}
-                            >
-                              <div className="flex items-start justify-between">
-                                <div className="flex-1 min-w-0">
-                                  <p className="font-medium text-sm text-gray-900">{activity.title}</p>
-                                  <p className="text-sm text-gray-600 mt-1">{activity.description}</p>
-                                  <p className="text-xs text-gray-400 mt-2">
-                                    {formatDistanceToNow(new Date(activity.createdAtUtc), { addSuffix: true })}
-                                  </p>
-                                </div>
-                                <div className="flex items-center space-x-1 ml-2">
-                                  {!activity.isRead && (
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() => handleMarkAsRead(activity.id)}
-                                      className="h-8 w-8 p-0"
-                                    >
-                                      <Check className="w-4 h-4 text-green-600" />
-                                    </Button>
-                                  )}
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => handleDeleteActivity(activity.id)}
-                                    className="h-8 w-8 p-0"
+                        <div>
+                          {/* New (Unread) Section */}
+                          {newActivities.length > 0 && (
+                            <div>
+                              <div className="px-4 py-2 bg-gray-50 border-b">
+                                <p className="text-xs font-semibold text-gray-600 uppercase">
+                                  {t('activities.new', { defaultValue: 'New' })}
+                                </p>
+                              </div>
+                              <div className="divide-y">
+                                {newActivities.map((activity) => (
+                                  <div
+                                    key={activity.id}
+                                    className="p-4 hover:bg-gray-50 transition-colors bg-green-50"
                                   >
-                                    <X className="w-4 h-4 text-red-600" />
-                                  </Button>
-                                </div>
+                                    <div className="flex items-start justify-between">
+                                      <div className="flex-1 min-w-0">
+                                        <p className="font-medium text-sm text-gray-900">{getActivityMessage(activity.type, activity.templateData, t).title}</p>
+                                        <p className="text-sm text-gray-600 mt-1">{getActivityMessage(activity.type, activity.templateData, t).description}</p>
+                                        <p className="text-xs text-gray-400 mt-2">
+                                          {formatDistanceToNow(new Date(activity.createdAtUtc), { addSuffix: true })}
+                                        </p>
+                                      </div>
+                                      <div className="flex items-center space-x-1 ml-2">
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          onClick={() => handleMarkAsRead(activity.id)}
+                                          className="h-8 w-8 p-0"
+                                        >
+                                          <Check className="w-4 h-4 text-green-600" />
+                                        </Button>
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          onClick={() => handleDeleteActivity(activity.id)}
+                                          className="h-8 w-8 p-0"
+                                        >
+                                          <X className="w-4 h-4 text-red-600" />
+                                        </Button>
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
                               </div>
                             </div>
-                          ))}
+                          )}
+
+                          {/* Earlier (Read) Section */}
+                          {earlierActivities.length > 0 && (
+                            <div>
+                              <div className="px-4 py-2 bg-gray-50 border-b">
+                                <p className="text-xs font-semibold text-gray-600 uppercase">
+                                  {t('activities.earlier', { defaultValue: 'Earlier' })}
+                                </p>
+                              </div>
+                              <div className="divide-y">
+                                {earlierActivities.map((activity) => (
+                                  <div
+                                    key={activity.id}
+                                    className="p-4 hover:bg-gray-50 transition-colors"
+                                  >
+                                    <div className="flex items-start justify-between">
+                                      <div className="flex-1 min-w-0">
+                                        <p className="font-medium text-sm text-gray-900">{getActivityMessage(activity.type, activity.templateData, t).title}</p>
+                                        <p className="text-sm text-gray-600 mt-1">{getActivityMessage(activity.type, activity.templateData, t).description}</p>
+                                        <p className="text-xs text-gray-400 mt-2">
+                                          {formatDistanceToNow(new Date(activity.createdAtUtc), { addSuffix: true })}
+                                        </p>
+                                      </div>
+                                      <div className="flex items-center space-x-1 ml-2">
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          onClick={() => handleDeleteActivity(activity.id)}
+                                          className="h-8 w-8 p-0"
+                                        >
+                                          <X className="w-4 h-4 text-red-600" />
+                                        </Button>
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
                         </div>
                       ) : (
                         <div className="p-8 text-center text-gray-500">
                           <Bell className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                          <p>{t('activities.noActivities', { defaultValue: 'No activities yet' })}</p>
+                          <p>{t('activities.noActivities', { defaultValue: 'No notifications yet' })}</p>
                         </div>
                       )}
                     </ScrollArea>
+                    {/* View All Button */}
+                    <div className="p-3 border-t">
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        onClick={() => {
+                          setActivitiesOpen(false);
+                          navigate("/notifications");
+                        }}
+                      >
+                        {t('activities.viewAll', { defaultValue: 'View All Notifications' })}
+                      </Button>
+                    </div>
                   </PopoverContent>
                 </Popover>
                 <Button variant="outline" size="sm" onClick={handleSignOut} className="hidden md:flex">

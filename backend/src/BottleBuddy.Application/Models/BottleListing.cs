@@ -18,6 +18,9 @@ public class BottleListing
     public string OwnerId { get; set; } = string.Empty;
     public User? Owner { get; set; }
 
+    // Navigation property for pickup requests
+    public ICollection<PickupRequest> PickupRequests { get; set; } = new List<PickupRequest>();
+
     // Audit fields
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAtUtc { get; set; }

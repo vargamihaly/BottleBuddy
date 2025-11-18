@@ -22,11 +22,9 @@ public enum UserActivityType
 
     // Transactions & earnings
     TransactionCompleted,
-    EarningsReceived,
 
     // Ratings & reviews
     RatingReceived,
-    RatingPrompt,
 
     // Map interactions
     NearbyListingAvailable,

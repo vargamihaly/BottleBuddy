@@ -8,3 +8,4 @@ export * from './usePickupRequests';
 export * from './useTransactions';
 export * from './useRatings';
 export * from './useStatistics';
+export * from './useNotificationPreferences';

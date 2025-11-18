@@ -21,6 +21,7 @@
 
         <!-- Identity + EF Core integration -->
         <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.0" />
+        <PackageReference Include="SendGrid" Version="9.29.3" />
         <PackageReference Include="SixLabors.ImageSharp" Version="3.1.12" />
     </ItemGroup>
 

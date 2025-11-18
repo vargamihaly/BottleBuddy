@@ -10,7 +10,7 @@ interface SignalRContextValue {
   connectionError: string | null;
 }
 
-const SignalRContext = createContext<SignalRContextValue | undefined>(undefined);
+export const SignalRContext = createContext<SignalRContextValue | undefined>(undefined);
 
 const HUB_URL = `${config.api.baseUrl}/hubs/messages`;
 
@@ -168,6 +168,7 @@ export const SignalRProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useSignalRContext = () => {
   const context = useContext(SignalRContext);
   if (!context) {
@@ -175,5 +176,3 @@ export const useSignalRContext = () => {
   }
   return context;
 };
-
-export { SignalRContext };

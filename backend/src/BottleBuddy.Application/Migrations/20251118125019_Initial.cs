@@ -212,6 +212,31 @@ namespace BottleBuddy.Application.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "UserSettings",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PreferredLanguage = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false, defaultValue: "en-US"),
+                    NotificationSettings_EmailNotificationsEnabled = table.Column<bool>(type: "bit", nullable: false, defaultValue: true),
+                    NotificationSettings_PickupRequestReceivedEmail = table.Column<bool>(type: "bit", nullable: false, defaultValue: true),
+                    NotificationSettings_PickupRequestAcceptedEmail = table.Column<bool>(type: "bit", nullable: false, defaultValue: true),
+                    NotificationSettings_TransactionCompletedEmail = table.Column<bool>(type: "bit", nullable: false, defaultValue: true),
+                    CreatedAtUtc = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
+                    UpdatedAtUtc = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserSettings", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_UserSettings_AspNetUsers_Id",
+                        column: x => x.Id,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "PickupRequests",
                 columns: table => new
                 {
@@ -222,7 +247,8 @@ namespace BottleBuddy.Application.Migrations
                     PickupTime = table.Column<DateTime>(type: "datetime2", nullable: true),
                     Status = table.Column<int>(type: "int", nullable: false),
                     CreatedAtUtc = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedAtUtc = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    UpdatedAtUtc = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    BottleListingId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -233,6 +259,11 @@ namespace BottleBuddy.Application.Migrations
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_PickupRequests_BottleListings_BottleListingId",
+                        column: x => x.BottleListingId,
+                        principalTable: "BottleListings",
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_PickupRequests_BottleListings_ListingId",
                         column: x => x.ListingId,
@@ -345,15 +376,13 @@ namespace BottleBuddy.Application.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Type = table.Column<int>(type: "int", nullable: false),
-                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedAtUtc = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
                     IsRead = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
                     ListingId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     PickupRequestId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     TransactionId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     RatingId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    Metadata = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    TemplateData = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -368,7 +397,8 @@ namespace BottleBuddy.Application.Migrations
                         name: "FK_UserActivities_BottleListings_ListingId",
                         column: x => x.ListingId,
                         principalTable: "BottleListings",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_UserActivities_PickupRequests_PickupRequestId",
                         column: x => x.PickupRequestId,
@@ -444,6 +474,11 @@ namespace BottleBuddy.Application.Migrations
                 name: "IX_Messages_SenderId",
                 table: "Messages",
                 column: "SenderId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PickupRequests_BottleListingId",
+                table: "PickupRequests",
+                column: "BottleListingId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PickupRequests_ListingId",
@@ -546,6 +581,9 @@ namespace BottleBuddy.Application.Migrations
 
             migrationBuilder.DropTable(
                 name: "UserActivities");
+
+            migrationBuilder.DropTable(
+                name: "UserSettings");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");

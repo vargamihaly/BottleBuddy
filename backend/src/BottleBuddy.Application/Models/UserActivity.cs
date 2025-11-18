@@ -7,8 +7,6 @@ public class UserActivity
     public Guid Id { get; set; }
     public string UserId { get; set; } = string.Empty;
     public UserActivityType Type { get; set; }
-    public string Title { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
     public DateTime CreatedAtUtc { get; set; }
     public bool IsRead { get; set; }
 
@@ -18,8 +16,8 @@ public class UserActivity
     public Guid? TransactionId { get; set; }
     public Guid? RatingId { get; set; }
 
-    // Optional metadata stored as JSON
-    public string? Metadata { get; set; }
+    // Template data for frontend localization (stored as JSON)
+    public string TemplateData { get; set; } = string.Empty;
 
     // Navigation properties
     public User? User { get; set; }

@@ -122,17 +122,17 @@ public class BottleListingService(
         await context.SaveChangesAsync();
 
         // Create activity for listing creation
-        await userActivityService.CreateActivityAsync(
-            userId,
-            UserActivityType.ListingCreated,
-            "Listing Created",
-            $"You created a new listing for {listing.BottleCount} bottles at {listing.LocationAddress}",
-            listingId: listing.Id,
-            metadata: new Dictionary<string, object>
+        await userActivityService.CreateActivityAsync(new ActivityCreationData
+        {
+            Type = UserActivityType.ListingCreated,
+            UserId = userId,
+            ListingId = listing.Id,
+            TemplateData = new Dictionary<string, object>
             {
                 { "bottleCount", listing.BottleCount },
-                { "estimatedRefund", listing.EstimatedRefund }
-            });
+                { "locationAddress", listing.LocationAddress }
+            }
+        });
 
         logger.LogInformation(
             "Listing {ListingId} created for user {UserId}",
@@ -197,20 +197,21 @@ public class BottleListingService(
         await context.SaveChangesAsync();
 
         // Create activity for listing deletion
-        await userActivityService.CreateActivityAsync(
-            userId,
-            UserActivityType.ListingDeleted,
-            "Listing Deleted",
-            $"You deleted your listing for {bottleCount} bottles at {locationAddress}",
-            metadata: new Dictionary<string, object>
+        await userActivityService.CreateActivityAsync(new ActivityCreationData
+        {
+            Type = UserActivityType.ListingDeleted,
+            UserId = userId,
+            TemplateData = new Dictionary<string, object>
             {
                 { "bottleCount", bottleCount },
                 { "locationAddress", locationAddress }
-            });
+            }
+        });
 
         logger.LogInformation(
             "Listing {ListingId} deleted for user {UserId}",
             listingId,
             userId);
     }
+
 }

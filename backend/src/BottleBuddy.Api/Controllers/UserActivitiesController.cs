@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using BottleBuddy.Application.Services;
+using BottleBuddy.Application.Enums;
 
 namespace BottleBuddy.Api.Controllers;
 
@@ -16,7 +17,12 @@ public class UserActivitiesController(IUserActivityService userActivityService, 
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> GetActivities([FromQuery] int page = 1, [FromQuery] int pageSize = 20, [FromQuery] bool? isRead = null)
+    public async Task<IActionResult> GetActivities(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20,
+        [FromQuery] bool? isRead = null,
+        [FromQuery] UserActivityType? type = null,
+        [FromQuery] UserActivityCategory? category = null)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId))
@@ -25,13 +31,15 @@ public class UserActivitiesController(IUserActivityService userActivityService, 
             return Unauthorized();
         }
 
-        logger.LogInformation("Fetching activities for user {UserId}", userId);
+        logger.LogInformation("Fetching activities for user {UserId}, category {Category}", userId, category);
 
         var (activities, metadata) = await userActivityService.GetUserActivitiesAsync(
             userId,
             page,
             pageSize,
-            isRead);
+            isRead,
+            type,
+            category);
 
         return Ok(new
         {
@@ -70,6 +78,7 @@ public class UserActivitiesController(IUserActivityService userActivityService, 
     public async Task<IActionResult> MarkAsRead(Guid id)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        
         if (string.IsNullOrEmpty(userId))
         {
             logger.LogWarning("Mark as read attempted without authenticated user");

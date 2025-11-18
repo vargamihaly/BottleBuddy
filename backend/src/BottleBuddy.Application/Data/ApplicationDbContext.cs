@@ -13,6 +13,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Transaction> Transactions => Set<Transaction>();
     public DbSet<Message> Messages => Set<Message>();
     public DbSet<UserActivity> UserActivities => Set<UserActivity>();
+    public DbSet<UserSettings> UserSettings => Set<UserSettings>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -168,10 +169,11 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
                 .HasForeignKey(ua => ua.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            // MÓDOSÍTOTT: Cascade delete a listing törlésekor
             entity.HasOne(ua => ua.Listing)
                 .WithMany()
                 .HasForeignKey(ua => ua.ListingId)
-                .OnDelete(DeleteBehavior.NoAction);
+                .OnDelete(DeleteBehavior.Cascade); // NoAction → Cascade
 
             entity.HasOne(ua => ua.PickupRequest)
                 .WithMany()
@@ -187,6 +189,46 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
                 .WithMany()
                 .HasForeignKey(ua => ua.RatingId)
                 .OnDelete(DeleteBehavior.NoAction);
+        });
+
+        // Configure UserSettings
+        modelBuilder.Entity<UserSettings>(entity =>
+        {
+            entity.HasKey(us => us.Id);
+
+            // Preferred language with default value
+            entity.Property(us => us.PreferredLanguage)
+                .HasDefaultValue("en-US")
+                .HasMaxLength(10);
+
+            // Configure owned entity for notification settings
+            entity.OwnsOne(us => us.NotificationSettings, ns =>
+            {
+                ns.Property(n => n.EmailNotificationsEnabled)
+                    .HasDefaultValue(true);
+
+                ns.Property(n => n.PickupRequestReceivedEmail)
+                    .HasDefaultValue(true);
+
+                ns.Property(n => n.PickupRequestAcceptedEmail)
+                    .HasDefaultValue(true);
+
+                ns.Property(n => n.TransactionCompletedEmail)
+                    .HasDefaultValue(true);
+            });
+
+            // Default values for timestamps
+            entity.Property(us => us.CreatedAtUtc)
+                .HasDefaultValueSql("GETUTCDATE()");
+
+            entity.Property(us => us.UpdatedAtUtc)
+                .HasDefaultValueSql("GETUTCDATE()");
+
+            // One-to-one relationship with User
+            entity.HasOne(us => us.User)
+                .WithOne(u => u.Settings)
+                .HasForeignKey<UserSettings>(us => us.Id)
+                .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }

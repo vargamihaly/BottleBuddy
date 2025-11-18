@@ -7,14 +7,32 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useUpdateUserSettings } from "@/hooks/api/useUserSettings";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 export const LanguageSwitcher = () => {
   const { i18n } = useTranslation();
+  const { user } = useAuth();
+  const updateSettings = useUpdateUserSettings();
 
-  const changeLanguage = (lng: string) => {
+  const changeLanguage = async (lng: string) => {
+    // Update i18n immediately for instant UI feedback
     i18n.changeLanguage(lng);
-    // Optionally save to localStorage
+    // Save to localStorage as fallback
     localStorage.setItem('preferredLanguage', lng);
+
+    // If user is authenticated, save to backend
+    if (user) {
+      try {
+        await updateSettings.mutateAsync({
+          preferredLanguage: lng
+        });
+      } catch (error) {
+        console.error('Failed to save language preference to backend:', error);
+        // Don't show error toast - localStorage fallback is sufficient
+      }
+    }
   };
 
   const languages = [

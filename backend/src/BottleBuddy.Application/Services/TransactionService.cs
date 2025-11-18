@@ -10,6 +10,8 @@ namespace BottleBuddy.Application.Services;
 public class TransactionService(
     ApplicationDbContext context,
     IUserActivityService userActivityService,
+    IEmailService emailService,
+    IUserSettingsService settingsService,
     ILogger<TransactionService> logger)
     : ITransactionService
 {
@@ -108,57 +110,89 @@ public class TransactionService(
         await context.SaveChangesAsync();
 
         // Create activities for transaction completion
-        await userActivityService.CreateActivityAsync(
-            listing.OwnerId,
-            UserActivityType.TransactionCompleted,
-            "Transaction Completed",
-            $"Transaction completed for your listing at {listing.LocationAddress}. You earned {ownerAmount:F0} HUF",
-            listingId: listing.Id,
-            pickupRequestId: pickupRequestId,
-            transactionId: transaction.Id,
-            metadata: new Dictionary<string, object>
+        await userActivityService.CreateActivityAsync(new ActivityCreationData
+        {
+            Type = UserActivityType.TransactionCompleted,
+            UserId = listing.OwnerId,
+            ListingId = listing.Id,
+            PickupRequestId = pickupRequestId,
+            TransactionId = transaction.Id,
+            TemplateData = new Dictionary<string, object>
             {
-                { "ownerAmount", ownerAmount },
-                { "totalRefund", totalRefund }
-            });
+                { "role", "owner" },
+                { "locationAddress", listing.LocationAddress },
+                { "ownerAmount", ownerAmount }
+            }
+        });
 
-        await userActivityService.CreateActivityAsync(
-            listing.OwnerId,
-            UserActivityType.EarningsReceived,
-            "Earnings Received",
-            $"You received {ownerAmount:F0} HUF from the bottle return",
-            listingId: listing.Id,
-            transactionId: transaction.Id,
-            metadata: new Dictionary<string, object>
+        await userActivityService.CreateActivityAsync(new ActivityCreationData
+        {
+            Type = UserActivityType.TransactionCompleted,
+            UserId = pickupRequest.VolunteerId,
+            ListingId = listing.Id,
+            PickupRequestId = pickupRequestId,
+            TransactionId = transaction.Id,
+            TemplateData = new Dictionary<string, object>
             {
-                { "amount", ownerAmount }
-            });
+                { "role", "volunteer" },
+                { "volunteerAmount", volunteerAmount }
+            }
+        });
 
-        await userActivityService.CreateActivityAsync(
-            pickupRequest.VolunteerId,
-            UserActivityType.TransactionCompleted,
-            "Transaction Completed",
-            $"Transaction completed! You earned {volunteerAmount:F0} HUF",
-            listingId: listing.Id,
-            pickupRequestId: pickupRequestId,
-            transactionId: transaction.Id,
-            metadata: new Dictionary<string, object>
+       
+        // Send email notification to owner
+        try
+        {
+            var ownerSettings = await settingsService.GetOrCreateSettingsAsync(listing.OwnerId);
+            if (ownerSettings.NotificationSettings.EmailNotificationsEnabled && ownerSettings.NotificationSettings.TransactionCompletedEmail)
             {
-                { "volunteerAmount", volunteerAmount },
-                { "totalRefund", totalRefund }
-            });
+                await emailService.SendTransactionCompletedEmailAsync(
+                    listing.OwnerId,
+                    ownerAmount,
+                    listing.BottleCount,
+                    listing.LocationAddress,
+                    transaction.Id,
+                    isOwner: true);
+                logger.LogInformation(
+                    "Email sent for TransactionCompleted to user {UserId}",
+                    listing.OwnerId);
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(
+                ex,
+                "Failed to send TransactionCompleted email to user {UserId}",
+                listing.OwnerId);
+            // Don't rethrow - email failure shouldn't break the flow
+        }
 
-        await userActivityService.CreateActivityAsync(
-            pickupRequest.VolunteerId,
-            UserActivityType.EarningsReceived,
-            "Earnings Received",
-            $"You received {volunteerAmount:F0} HUF for your volunteer work",
-            listingId: listing.Id,
-            transactionId: transaction.Id,
-            metadata: new Dictionary<string, object>
+        // Send email notification to volunteer
+        try
+        {
+            var volunteerSettings = await settingsService.GetOrCreateSettingsAsync(pickupRequest.VolunteerId);
+            if (volunteerSettings.NotificationSettings.EmailNotificationsEnabled && volunteerSettings.NotificationSettings.TransactionCompletedEmail)
             {
-                { "amount", volunteerAmount }
-            });
+                await emailService.SendTransactionCompletedEmailAsync(
+                    pickupRequest.VolunteerId,
+                    volunteerAmount,
+                    listing.BottleCount,
+                    listing.LocationAddress,
+                    transaction.Id,
+                    isOwner: false);
+                logger.LogInformation(
+                    "Email sent for TransactionCompleted to user {UserId}",
+                    pickupRequest.VolunteerId);
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(
+                ex,
+                "Failed to send TransactionCompleted email to user {UserId}",
+                pickupRequest.VolunteerId);
+            // Don't rethrow - email failure shouldn't break the flow
+        }
 
         logger.LogInformation(
             "Transaction {TransactionId} created for pickup request {PickupRequestId}",

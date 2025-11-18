@@ -98,18 +98,26 @@ public class RatingService(
         var ratedUser = await context.Users.FindAsync(ratedUserId);
 
         // Create activity for the user who received the rating
-        await userActivityService.CreateActivityAsync(
-            ratedUserId,
-            Enums.UserActivityType.RatingReceived,
-            "New Rating Received",
-            $"You received a {dto.Value}-star rating" + (string.IsNullOrEmpty(dto.Comment) ? "" : $": \"{dto.Comment}\""),
-            transactionId: dto.TransactionId,
-            ratingId: rating.Id,
-            metadata: new Dictionary<string, object>
-            {
-                { "ratingValue", dto.Value },
-                { "raterName", (await context.Users.FindAsync(raterId))?.UserName ?? "Unknown" }
-            });
+        var rater = await context.Users.FindAsync(raterId);
+        var templateData = new Dictionary<string, object>
+        {
+            { "ratingValue", dto.Value },
+            { "raterName", rater?.UserName ?? "Unknown" }
+        };
+
+        if (!string.IsNullOrEmpty(dto.Comment))
+        {
+            templateData.Add("comment", dto.Comment);
+        }
+
+        await userActivityService.CreateActivityAsync(new ActivityCreationData
+        {
+            Type = Enums.UserActivityType.RatingReceived,
+            UserId = ratedUserId,
+            TransactionId = dto.TransactionId,
+            RatingId = rating.Id,
+            TemplateData = templateData
+        });
 
         logger.LogInformation(
             "Rating {RatingId} created for transaction {TransactionId} by user {RaterId}",

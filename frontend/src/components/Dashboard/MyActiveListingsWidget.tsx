@@ -1,19 +1,15 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { BottleListing } from "@/types";
 import { ArrowRight, Package, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useMyActiveListingsWidget } from "@/hooks/useMyActiveListingsWidget";
 
-interface MyActiveListingsWidgetProps {
-  listings: BottleListing[];
-  isLoading: boolean;
-}
-
-export const MyActiveListingsWidget = ({ listings, isLoading }: MyActiveListingsWidgetProps) => {
+export const MyActiveListingsWidget = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { listings, isLoading } = useMyActiveListingsWidget();
 
   if (isLoading) {
     return (
@@ -98,9 +94,16 @@ export const MyActiveListingsWidget = ({ listings, isLoading }: MyActiveListings
                     {listing.bottleCount}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h4 className="font-semibold text-sm text-gray-900 truncate">
-                      {listing.title || `${listing.bottleCount} ${t("common.bottles")}`}
-                    </h4>
+                    <div className="flex items-center justify-between gap-2">
+                      <h4 className="font-semibold text-sm text-gray-900 truncate flex-1">
+                        {listing.title || `${listing.bottleCount} ${t("common.bottles")}`}
+                      </h4>
+                      {listing.pendingPickupRequestsCount && listing.pendingPickupRequestsCount > 0 && (
+                        <Badge variant="default" className="bg-orange-100 text-orange-700 text-xs flex-shrink-0">
+                          🔔 {listing.pendingPickupRequestsCount}
+                        </Badge>
+                      )}
+                    </div>
                     <p className="text-xs text-gray-600 truncate mt-1">
                       {listing.locationAddress}
                     </p>

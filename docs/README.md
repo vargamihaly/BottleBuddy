@@ -115,6 +115,7 @@ BottleBuddy/
 - **SignalR** for real-time WebSocket communication
 - **ASP.NET Core Identity** for user management
 - **JWT** + **Google OAuth** authentication
+- **SendGrid** for transactional email notifications
 - **SixLabors.ImageSharp** for image processing and optimization
 - **Serilog** for structured logging with Application Insights integration
 - **OpenTelemetry** + **Jaeger** for distributed tracing
@@ -195,11 +196,38 @@ BottleBuddy/
   - Cascade delete: messages automatically deleted when pickup request is deleted
   - Empty states for no conversations and no messages
   - Conversation filtering: shows only active conversations (pending/accepted status)
+- **Notification System**
+  - **User Activities & Notifications** - Comprehensive in-app notification system
+    - `/notifications` - Dedicated notification center page with full history
+    - Bell icon dropdown in header with real-time updates (30-second polling)
+    - Grouped notifications: "New" (unread) and "Earlier" (read)
+    - Filter by type: All, Listings, Pickups, Transactions, Ratings
+    - Traditional pagination for browsing notification history
+    - Mark as read/delete individual notifications
+    - Mark all as read functionality
+    - Unread badge count in header
+    - Activity types: listing events, pickup requests, transactions, ratings
+  - **Email Notifications via SendGrid** - Critical updates sent to user's email
+    - Pickup request received (when someone wants to pick up your bottles)
+    - Pickup request accepted (when your request is accepted)
+    - Transaction completed (when you receive earnings)
+    - Professional HTML email templates with responsive design
+    - Plain text fallback for all emails
+  - **User Settings & Preferences** - `/settings/notifications` page
+    - User settings stored per user (language preference + notification preferences)
+    - Preferred language setting (default: "en-US") - ready for i18n integration
+    - Master email notification toggle (enable/disable all email notifications)
+    - Granular email controls for each critical notification type
+    - Real-time preference updates with optimistic UI
+    - Auto-created on user registration with sensible defaults
+    - PATCH API for partial updates
 
 ### 🚧 In Progress
-- Push notifications
+- Frontend integration for notification settings page
+- Frontend integration for notification center page
 
 ### 📝 Planned
+- Push notifications (mobile/browser)
 - Advanced search and filters
 - User verification system
 - Admin dashboard
@@ -244,6 +272,18 @@ BottleBuddy/
 - `GET /api/pickuprequests/{pickupRequestId}/messages/unread-count` - Get unread count for pickup request (auth required)
 - `GET /api/messages/unread-count` - Get total unread message count across all conversations (auth required)
 - `PATCH /api/messages/{messageId}/read` - Mark specific message as read (auth required)
+
+### User Activities (Notifications)
+- `GET /api/useractivities` - Get user activities with pagination and filtering (auth required)
+  - Query params: `page`, `pageSize`, `isRead` (bool), `type` (UserActivityType enum)
+- `GET /api/useractivities/unread-count` - Get count of unread activities (auth required)
+- `PATCH /api/useractivities/{id}/mark-read` - Mark activity as read (auth required)
+- `PATCH /api/useractivities/mark-all-read` - Mark all activities as read (auth required)
+- `DELETE /api/useractivities/{id}` - Delete activity (auth required)
+
+### User Settings
+- `GET /api/user-settings` - Get user settings (language + notification preferences, auto-creates if not exists, auth required)
+- `PATCH /api/user-settings` - Update user settings (partial update, auth required)
 
 For complete API documentation, visit **http://localhost:3668/swagger** after starting the application.
 
@@ -362,6 +402,8 @@ Routes are public by default. Wrap them in `<ProtectedRoute>` once authenticatio
 - `/my-listings` - View and manage user's bottle listings (Active/Claimed/Completed tabs)
 - `/my-pickup-tasks` - View active and completed pickup tasks (with status tabs)
 - `/messages` - Dedicated messaging page with conversation list and chat interface
+- `/notifications` - Notification center with full history, filters, and pagination
+- `/settings/notifications` - User settings for language preference and email notification preferences
 
 ### In-App Views (Accessible from Home)
 - **User Dashboard** - View user stats, earnings, recent activity, and profile
@@ -525,6 +567,9 @@ docker-compose up -d
 - **Transactions** - Completed exchanges with refund amounts (auto-created when pickup completes)
 - **Ratings** - User reviews (1-5 stars with optional comments, linked to transactions)
 - **Messages** - In-app messages scoped to pickup requests (with read status tracking, cascade deleted with pickup request)
+- **UserActivities** - Notification/activity feed for users (listing events, pickup requests, transactions, ratings)
+- **UserSettings** - User preferences (preferred language, email notification settings as owned entity)
+  - Owned entity: **NotificationSettings** (email preferences embedded in same table)
 
 ## 🌍 Environment Variables
 
@@ -540,6 +585,10 @@ See `docker/.env.example` for all required variables.
 - `ASPNETCORE_ENVIRONMENT` - Development/Production (default: Development)
 - `DB_USER` - SQL Server username (default: sa)
 - `DB_NAME` - Database name (default: BottleBuddy)
+- `SENDGRID_API_KEY` - SendGrid API key for email notifications (optional, emails disabled if not set)
+- `SENDGRID_FROM_EMAIL` - Sender email address (default: noreply@bottlebuddy.com)
+- `SENDGRID_FROM_NAME` - Sender display name (default: BottleBuddy)
+- `FRONTEND_BASE_URL` - Frontend URL for email links (default: http://localhost:5173)
 
 
 

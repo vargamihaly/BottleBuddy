@@ -7,4 +7,5 @@ public class User : IdentityUser
 {
     // One-to-one relationship with Profile
     public Profile? Profile { get; set; }
+    public UserSettings? Settings { get; set; }
 }

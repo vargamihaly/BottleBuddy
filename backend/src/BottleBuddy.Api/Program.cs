@@ -63,11 +63,16 @@ try
     builder.Services.AddScoped<IMessageService, MessageService>();
     builder.Services.AddScoped<IImageStorageService, ImageStorageService>();
     builder.Services.AddScoped<IUserActivityService, UserActivityService>();
+    builder.Services.AddScoped<IUserSettingsService, UserSettingsService>();
+    builder.Services.AddScoped<IEmailService, SendGridEmailService>();
     builder.Services.AddScoped<PickupRequestService>();
 
     // SignalR
     builder.Services.AddSignalR();
     builder.Services.AddSingleton<IMessageHubService, MessageHubService>();
+
+    // Health Checks
+    builder.Services.AddHealthChecks().AddDbContextCheck<ApplicationDbContext>("database");
 
     // Application Insights (Azure monitoring)
     if (!string.IsNullOrEmpty(builder.Configuration["ApplicationInsights:ConnectionString"]))
@@ -129,6 +134,9 @@ try
 
     // Map SignalR hub
     app.MapHub<MessageHub>("/hubs/messages");
+
+    // Map health check endpoint
+    app.MapHealthChecks("/health");
 
     // Run database migrations and seed sample data
     using (var scope = app.Services.CreateScope())

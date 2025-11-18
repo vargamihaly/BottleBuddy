@@ -20,14 +20,15 @@ export const userActivityKeys = {
 /**
  * Hook to fetch user activities with optional pagination and filtering
  */
-export const useUserActivities = (params?: GetUserActivitiesParams) => {
+export const useUserActivities = (params?: GetUserActivitiesParams, options?: { enabled?: boolean; refetchInterval?: number }) => {
   return useQuery({
     queryKey: userActivityKeys.list(params),
     queryFn: () => userActivityService.getAll(params),
     staleTime: 30000, // 30 seconds - data is considered fresh for 30s
-    refetchInterval: 60000, // Refetch every 60 seconds
+    refetchInterval: options?.refetchInterval ?? 30000, // Default 30 seconds
     refetchOnWindowFocus: true, // Refetch when user returns to tab
     refetchOnReconnect: true, // Refetch when network reconnects
+    enabled: options?.enabled ?? true,
   });
 };
 

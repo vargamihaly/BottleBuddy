@@ -116,10 +116,7 @@ const Index = () => {
               />
 
               {/* Right: My Active Listings */}
-              <MyActiveListingsWidget
-                listings={activeListings}
-                isLoading={isLoading}
-              />
+              <MyActiveListingsWidget />
             </div>
 
             {/* Motivation Section - Full Width */}

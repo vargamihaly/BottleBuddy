@@ -1,8 +1,11 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
+import activitiesEn from "@/locales/en/activities.json";
+import activitiesHu from "@/locales/hu/activities.json";
 
 const resources = {
   en: {
+    activities: activitiesEn,
     translation: {
       common: {
         brandName: "BottleBuddy",
@@ -767,6 +770,7 @@ const resources = {
     }
   },
   hu: {
+    activities: activitiesHu,
     translation: {
       common: {
         brandName: "BottleBuddy",
@@ -825,7 +829,7 @@ const resources = {
         quickActions: {
           title: "Gyors menü",
           primaryCTA: {
-            title: "Kezdj el keresni ma",
+            title: "Hozz létre egy hirdetést",
             description: "Hirdesd meg a palackjaidat és kapd meg a részedet, amikor az önkéntesek átveszik őket",
             button: "Palackok meghirdetése"
           },

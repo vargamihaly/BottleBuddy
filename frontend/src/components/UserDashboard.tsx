@@ -3,19 +3,29 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { ArrowUp, Star, MapPin, Users, Plus, ArrowLeft, TrendingUp, Recycle } from "lucide-react";
+import { ArrowUp, Star, MapPin, Users, Plus, ArrowLeft, TrendingUp, Recycle, Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useUserActivities } from "@/hooks/api/useUserActivities";
+import { formatDistanceToNow } from "date-fns";
+import { hu, enUS } from "date-fns/locale";
+import { getActivityMessage } from "@/utils/activityTemplates";
 
 interface UserDashboardProps {
   onBackToHome: () => void;
 }
 
 export const UserDashboard = ({ onBackToHome }: UserDashboardProps) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+
+  // Fetch recent user activities (limit to 5 most recent)
+  const { data: activitiesData, isLoading: activitiesLoading } = useUserActivities(
+    { page: 1, pageSize: 5 },
+    { refetchInterval: false }
+  );
 
   // Debug: Log user data
   console.log('[UserDashboard] User data:', user);
@@ -61,38 +71,44 @@ export const UserDashboard = ({ onBackToHome }: UserDashboardProps) => {
   // Display name priority: fullName > username > email
   const displayName = user.fullName || user.username || user.email || "User";
 
-  const recentActivity = [
-    {
-      id: 1,
-      type: "pickup",
-      bottles: 15,
-      earnings: 375,
-      partner: "Anna K.",
-      location: "District V",
-      date: "2 hours ago",
-      status: "completed"
-    },
-    {
-      id: 2,
-      type: "listing",
-      bottles: 8,
-      earnings: 200,
-      partner: "Péter M.",
-      location: "District XIII",
-      date: "1 day ago",
-      status: "in progress"
-    },
-    {
-      id: 3,
-      type: "pickup",
-      bottles: 22,
-      earnings: 550,
-      partner: "Eszter L.",
-      location: "District II",
-      date: "3 days ago",
-      status: "completed"
+  // Get date-fns locale based on current language
+  const dateLocale = i18n.language === 'hu' ? hu : enUS;
+
+  // Helper to format activity date
+  const formatActivityDate = (dateString: string) => {
+    try {
+      return formatDistanceToNow(new Date(dateString), {
+        addSuffix: true,
+        locale: dateLocale
+      });
+    } catch {
+      return dateString;
     }
-  ];
+  };
+
+  // Helper to get activity icon
+  const getActivityIcon = (type: string) => {
+    const iconMap: Record<string, string> = {
+      listingCreated: "📦",
+      listingDeleted: "🗑️",
+      listingReceivedOffer: "📬",
+      pickupRequestReceived: "📥",
+      pickupRequestAcceptedByOwner: "✅",
+      pickupRequestRejectedByOwner: "❌",
+      pickupRequestCreated: "🚗",
+      pickupRequestAccepted: "✅",
+      pickupRequestRejected: "❌",
+      transactionCompleted: "🎉",
+      earningsReceived: "💰",
+      ratingReceived: "⭐",
+      ratingPrompt: "💭",
+      nearbyListingAvailable: "📍",
+      pickupOpportunityNearby: "🗺️"
+    };
+    return iconMap[type] || "📋";
+  };
+
+  const recentActivity = activitiesData?.data || [];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100">
@@ -224,29 +240,44 @@ export const UserDashboard = ({ onBackToHome }: UserDashboardProps) => {
             <CardDescription>{t('userDashboard.recentActivity.subtitle')}</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {recentActivity.map((activity) => (
-                <div key={activity.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                      {activity.type === "pickup" ? "🚗" : "📦"}
+            {activitiesLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="w-6 h-6 animate-spin text-green-600" />
+              </div>
+            ) : recentActivity.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                <p>No recent activity yet. Start by creating a listing or picking up bottles!</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {recentActivity.map((activity) => (
+                  <div key={activity.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div className="flex items-center space-x-4 flex-1">
+                      <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center text-2xl flex-shrink-0">
+                        {getActivityIcon(activity.type)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-semibold">{getActivityMessage(activity.type, activity.templateData, t).title}</h4>
+                        <p className="text-sm text-gray-600">{getActivityMessage(activity.type, activity.templateData, t).description}</p>
+
+                        {/* Show rating details if present */}
+                        {activity.rating && (
+                          <div className="mt-2 flex items-center gap-2">
+                            <span className="text-yellow-500">{"⭐".repeat(activity.rating.value)}</span>
+                            <span className="text-xs text-gray-600">
+                              {activity.rating.value}/5 from {activity.rating.raterName}
+                            </span>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    <div>
-                      <h4 className="font-semibold">
-                        {activity.type === "pickup" ? t('userDashboard.recentActivity.pickedUp') : t('userDashboard.recentActivity.listed')}
-                      </h4>
-                      <p className="text-sm text-gray-600">
-                        {activity.bottles} {t('common.bottles')} • {activity.location} • {t('userDashboard.recentActivity.with', { name: activity.partner })}
-                      </p>
+                    <div className="text-right text-sm text-gray-500 flex-shrink-0 ml-4">
+                      {formatActivityDate(activity.createdAtUtc)}
                     </div>
                   </div>
-                  <div className="text-right">
-                    <div className="font-semibold text-green-600">{t('userDashboard.recentActivity.earnings', { amount: activity.earnings })}</div>
-                    <div className="text-sm text-gray-500">{activity.date}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

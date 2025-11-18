@@ -9,20 +9,13 @@ public interface IUserActivityService
         string userId,
         int page = 1,
         int pageSize = 20,
-        bool? isRead = null);
+        bool? isRead = null,
+        UserActivityType? type = null,
+        UserActivityCategory? category = null);
 
     Task<int> GetUnreadCountAsync(string userId);
 
-    Task CreateActivityAsync(
-        string userId,
-        UserActivityType type,
-        string title,
-        string description,
-        Guid? listingId = null,
-        Guid? pickupRequestId = null,
-        Guid? transactionId = null,
-        Guid? ratingId = null,
-        Dictionary<string, object>? metadata = null);
+    Task CreateActivityAsync(ActivityCreationData data);
 
     Task MarkAsReadAsync(Guid activityId, string userId);
 

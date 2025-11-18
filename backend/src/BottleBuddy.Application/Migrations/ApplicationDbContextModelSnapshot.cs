@@ -17,7 +17,7 @@ namespace BottleBuddy.Application.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.10")
+                .HasAnnotation("ProductVersion", "9.0.11")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -131,6 +131,9 @@ namespace BottleBuddy.Application.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("BottleListingId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime>("CreatedAtUtc")
                         .HasColumnType("datetime2");
 
@@ -154,6 +157,8 @@ namespace BottleBuddy.Application.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("BottleListingId");
 
                     b.HasIndex("ListingId");
 
@@ -358,10 +363,6 @@ namespace BottleBuddy.Application.Migrations
                         .HasColumnType("datetime2")
                         .HasDefaultValueSql("GETUTCDATE()");
 
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<bool>("IsRead")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
@@ -370,16 +371,13 @@ namespace BottleBuddy.Application.Migrations
                     b.Property<Guid?>("ListingId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Metadata")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<Guid?>("PickupRequestId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid?>("RatingId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Title")
+                    b.Property<string>("TemplateData")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -408,6 +406,37 @@ namespace BottleBuddy.Application.Migrations
                     b.HasIndex("UserId", "CreatedAtUtc");
 
                     b.ToTable("UserActivities");
+                });
+
+            modelBuilder.Entity("BottleBuddy.Application.Models.UserSettings", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("PreferredLanguage")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)")
+                        .HasDefaultValue("en-US");
+
+                    b.Property<DateTime>("UpdatedAtUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UserSettings");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -575,6 +604,10 @@ namespace BottleBuddy.Application.Migrations
 
             modelBuilder.Entity("BottleBuddy.Application.Models.PickupRequest", b =>
                 {
+                    b.HasOne("BottleBuddy.Application.Models.BottleListing", null)
+                        .WithMany("PickupRequests")
+                        .HasForeignKey("BottleListingId");
+
                     b.HasOne("BottleBuddy.Application.Models.BottleListing", "Listing")
                         .WithMany()
                         .HasForeignKey("ListingId")
@@ -654,7 +687,7 @@ namespace BottleBuddy.Application.Migrations
                     b.HasOne("BottleBuddy.Application.Models.BottleListing", "Listing")
                         .WithMany()
                         .HasForeignKey("ListingId")
-                        .OnDelete(DeleteBehavior.NoAction);
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("BottleBuddy.Application.Models.PickupRequest", "PickupRequest")
                         .WithMany()
@@ -684,6 +717,53 @@ namespace BottleBuddy.Application.Migrations
                     b.Navigation("Rating");
 
                     b.Navigation("Transaction");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("BottleBuddy.Application.Models.UserSettings", b =>
+                {
+                    b.HasOne("BottleBuddy.Application.Models.User", "User")
+                        .WithOne("Settings")
+                        .HasForeignKey("BottleBuddy.Application.Models.UserSettings", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.OwnsOne("BottleBuddy.Application.Models.UserNotificationSettings", "NotificationSettings", b1 =>
+                        {
+                            b1.Property<string>("UserSettingsId")
+                                .HasColumnType("nvarchar(450)");
+
+                            b1.Property<bool>("EmailNotificationsEnabled")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("bit")
+                                .HasDefaultValue(true);
+
+                            b1.Property<bool>("PickupRequestAcceptedEmail")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("bit")
+                                .HasDefaultValue(true);
+
+                            b1.Property<bool>("PickupRequestReceivedEmail")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("bit")
+                                .HasDefaultValue(true);
+
+                            b1.Property<bool>("TransactionCompletedEmail")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("bit")
+                                .HasDefaultValue(true);
+
+                            b1.HasKey("UserSettingsId");
+
+                            b1.ToTable("UserSettings");
+
+                            b1.WithOwner()
+                                .HasForeignKey("UserSettingsId");
+                        });
+
+                    b.Navigation("NotificationSettings")
+                        .IsRequired();
 
                     b.Navigation("User");
                 });
@@ -739,6 +819,11 @@ namespace BottleBuddy.Application.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("BottleBuddy.Application.Models.BottleListing", b =>
+                {
+                    b.Navigation("PickupRequests");
+                });
+
             modelBuilder.Entity("BottleBuddy.Application.Models.PickupRequest", b =>
                 {
                     b.Navigation("Messages");
@@ -747,6 +832,8 @@ namespace BottleBuddy.Application.Migrations
             modelBuilder.Entity("BottleBuddy.Application.Models.User", b =>
                 {
                     b.Navigation("Profile");
+
+                    b.Navigation("Settings");
                 });
 #pragma warning restore 612, 618
         }

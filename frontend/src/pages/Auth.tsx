@@ -70,7 +70,7 @@ const Auth = () => {
   const { toast } = useToast();
 
   // Redirect if coming from a specific page
-  const from = (location.state as any)?.from?.pathname || "/";
+  const from = (location.state as { from?: { pathname?: string } })?.from?.pathname || "/";
 
   // Sign in form
   const signInForm = useForm<SignInFormData>({
@@ -98,7 +98,7 @@ const Auth = () => {
   useEffect(() => {
     signInForm.reset();
     signUpForm.reset();
-  }, [isSignUp]);
+  }, [isSignUp, signInForm, signUpForm]);
 
   const onSignInSubmit = async (data: SignInFormData) => {
     try {
@@ -108,11 +108,16 @@ const Auth = () => {
         description: t("auth.signInSuccessDesc"),
       });
       navigate(from, { replace: true });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Sign in error:", error);
+      const errorMessage = error instanceof Error
+        ? error.message
+        : typeof error === 'object' && error !== null && 'response' in error
+          ? ((error as { response?: { data?: { error?: string } } }).response?.data?.error || t("common.error"))
+          : t("common.error");
       toast({
         title: t("auth.signInError"),
-        description: error?.response?.data?.error || error?.message || t("common.error"),
+        description: errorMessage,
         variant: "destructive",
       });
     }
@@ -132,11 +137,16 @@ const Auth = () => {
         description: t("auth.signUpSuccessDesc"),
       });
       navigate(from, { replace: true });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Sign up error:", error);
+      const errorMessage = error instanceof Error
+        ? error.message
+        : typeof error === 'object' && error !== null && 'response' in error
+          ? ((error as { response?: { data?: { error?: string } } }).response?.data?.error || t("common.error"))
+          : t("common.error");
       toast({
         title: t("auth.signUpError"),
-        description: error?.response?.data?.error || error?.message || t("common.error"),
+        description: errorMessage,
         variant: "destructive",
       });
     }
@@ -157,11 +167,16 @@ const Auth = () => {
       });
 
       navigate(from, { replace: true });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Google sign-in error:", error);
+      const errorMessage = error instanceof Error
+        ? error.message
+        : typeof error === 'object' && error !== null && 'response' in error
+          ? ((error as { response?: { data?: { error?: string } } }).response?.data?.error || t("auth.googleSignInErrorDesc"))
+          : t("auth.googleSignInErrorDesc");
       toast({
         title: t("auth.googleSignInError"),
-        description: error?.response?.data?.error || error?.message || t("auth.googleSignInErrorDesc"),
+        description: errorMessage,
         variant: "destructive",
       });
     }

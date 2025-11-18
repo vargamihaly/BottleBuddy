@@ -1,5 +1,6 @@
 using BottleBuddy.Application.Dtos;
 using BottleBuddy.Application.Enums;
+using BottleBuddy.Application.Helpers;
 using BottleBuddy.Application.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -14,9 +15,12 @@ public class UserActivityService(ApplicationDbContext context, ILogger<UserActiv
         string userId,
         int page = 1,
         int pageSize = 20,
-        bool? isRead = null)
+        bool? isRead = null,
+        UserActivityType? type = null,
+        UserActivityCategory? category = null)
     {
-        logger.LogInformation("Fetching activities for user {UserId}, page {Page}, pageSize {PageSize}", userId, page, pageSize);
+        logger.LogInformation("Fetching activities for user {UserId}, page {Page}, pageSize {PageSize}, type {Type}, category {Category}",
+            userId, page, pageSize, type, category);
 
         // Validate pagination parameters
         if (page < 1) page = 1;
@@ -31,6 +35,18 @@ public class UserActivityService(ApplicationDbContext context, ILogger<UserActiv
             query = query.Where(ua => ua.IsRead == isRead.Value);
         }
 
+        // Filter by category (takes precedence over type)
+        if (category.HasValue && category.Value != UserActivityCategory.All)
+        {
+            var typesInCategory = UserActivityHelper.GetTypesForCategory(category.Value);
+            query = query.Where(ua => typesInCategory.Contains(ua.Type));
+        }
+        // Filter by specific type if specified and no category filter
+        else if (type.HasValue)
+        {
+            query = query.Where(ua => ua.Type == type.Value);
+        }
+
         // Get total count
         var totalCount = await query.CountAsync();
 
@@ -39,8 +55,10 @@ public class UserActivityService(ApplicationDbContext context, ILogger<UserActiv
         var hasNext = page < totalPages;
         var hasPrevious = page > 1;
 
-        // Get paginated results
+        // Get paginated results - include Rating navigation property
         var activitiesData = await query
+            .Include(ua => ua.Rating)
+                .ThenInclude(r => r!.Rater) // Include rater details
             .OrderByDescending(ua => ua.CreatedAtUtc)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
@@ -51,17 +69,24 @@ public class UserActivityService(ApplicationDbContext context, ILogger<UserActiv
             Id = ua.Id,
             UserId = ua.UserId,
             Type = ua.Type,
-            Title = ua.Title,
-            Description = ua.Description,
             CreatedAtUtc = ua.CreatedAtUtc,
             IsRead = ua.IsRead,
             ListingId = ua.ListingId,
             PickupRequestId = ua.PickupRequestId,
             TransactionId = ua.TransactionId,
             RatingId = ua.RatingId,
-            Metadata = ua.Metadata != null
-                ? JsonSerializer.Deserialize<Dictionary<string, object>>(ua.Metadata)
-                : null
+            Rating = ua.Rating != null ? new RatingDto
+            {
+                Id = ua.Rating.Id,
+                RaterId = ua.Rating.RaterId,
+                RaterName = ua.Rating.Rater?.UserName ?? ua.Rating.Rater?.Email ?? "Unknown",
+                Value = ua.Rating.Value,
+                Comment = ua.Rating.Comment,
+                CreatedAtUtc = ua.Rating.CreatedAtUtc
+            } : null,
+            TemplateData = !string.IsNullOrEmpty(ua.TemplateData)
+                ? JsonSerializer.Deserialize<Dictionary<string, object>>(ua.TemplateData) ?? new Dictionary<string, object>()
+                : new Dictionary<string, object>()
         }).ToList();
 
         var metadata = new PaginationMetadata
@@ -86,39 +111,28 @@ public class UserActivityService(ApplicationDbContext context, ILogger<UserActiv
             .CountAsync();
     }
 
-    public async Task CreateActivityAsync(
-        string userId,
-        UserActivityType type,
-        string title,
-        string description,
-        Guid? listingId = null,
-        Guid? pickupRequestId = null,
-        Guid? transactionId = null,
-        Guid? ratingId = null,
-        Dictionary<string, object>? metadata = null)
+    public async Task CreateActivityAsync(ActivityCreationData data)
     {
-        logger.LogInformation("Creating activity of type {Type} for user {UserId}", type, userId);
+        logger.LogInformation("Creating activity of type {Type} for user {UserId}", data.Type, data.UserId);
 
         var activity = new UserActivity
         {
             Id = Guid.NewGuid(),
-            UserId = userId,
-            Type = type,
-            Title = title,
-            Description = description,
+            UserId = data.UserId,
+            Type = data.Type,
             CreatedAtUtc = DateTime.UtcNow,
             IsRead = false,
-            ListingId = listingId,
-            PickupRequestId = pickupRequestId,
-            TransactionId = transactionId,
-            RatingId = ratingId,
-            Metadata = metadata != null ? JsonSerializer.Serialize(metadata) : null
+            ListingId = data.ListingId,
+            PickupRequestId = data.PickupRequestId,
+            TransactionId = data.TransactionId,
+            RatingId = data.RatingId,
+            TemplateData = JsonSerializer.Serialize(data.TemplateData)
         };
 
         context.UserActivities.Add(activity);
         await context.SaveChangesAsync();
 
-        logger.LogInformation("Activity {ActivityId} created for user {UserId}", activity.Id, userId);
+        logger.LogInformation("Activity {ActivityId} created for user {UserId}", activity.Id, data.UserId);
     }
 
     public async Task MarkAsReadAsync(Guid activityId, string userId)

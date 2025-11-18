@@ -43,6 +43,8 @@ export interface BottleListing {
     // Computed fields for display
     distance?: string;
     distanceKm?: number;
+    // Pickup request information
+    pendingPickupRequestsCount?: number;
 }
 
 export interface PickupRequest {
@@ -185,15 +187,17 @@ export enum UserActivityType {
     PickupRequestReceived = 'pickupRequestReceived',
     PickupRequestAcceptedByOwner = 'pickupRequestAcceptedByOwner',
     PickupRequestRejectedByOwner = 'pickupRequestRejectedByOwner',
+    PickupRequestCompletedByOwner = 'pickupRequestCompletedByOwner',
 
     // Pickup request events (as volunteer making requests)
     PickupRequestCreated = 'pickupRequestCreated',
     PickupRequestAccepted = 'pickupRequestAccepted',
     PickupRequestRejected = 'pickupRequestRejected',
+    PickupRequestCompleted = 'pickupRequestCompleted',
+    PickupRequestCancelled = 'pickupRequestCancelled',
 
     // Transaction events
     TransactionCompleted = 'transactionCompleted',
-    EarningsReceived = 'earningsReceived',
 
     // Rating events
     RatingReceived = 'ratingReceived',
@@ -204,22 +208,86 @@ export enum UserActivityType {
     PickupOpportunityNearby = 'pickupOpportunityNearby'
 }
 
+export enum UserActivityCategory {
+    All = 'all',
+    Listings = 'listings',
+    Pickups = 'pickups',
+    Transactions = 'transactions',
+    Ratings = 'ratings'
+}
+
+export interface RatingDto {
+    id: string;
+    raterId: string;
+    raterName: string;
+    value: number;
+    comment?: string;
+    createdAtUtc: string;
+}
+
 export interface UserActivity {
     id: string;
     userId: string;
     type: UserActivityType;
-    title: string;
-    description: string;
     createdAtUtc: string;
     isRead: boolean;
     listingId?: string;
     pickupRequestId?: string;
     transactionId?: string;
     ratingId?: string;
-    metadata?: Record<string, any>;
+    rating?: RatingDto;
+    templateData: Record<string, unknown>;
 }
 
 export interface UserActivityResponse {
     data: UserActivity[];
     pagination: PaginationMetadata;
+}
+
+// Notification Preferences types
+export interface NotificationPreferences {
+    id: string;
+    userId: string;
+    emailNotificationsEnabled: boolean;
+    pickupRequestReceivedEmail: boolean;
+    pickupRequestAcceptedEmail: boolean;
+    transactionCompletedEmail: boolean;
+    createdAtUtc: string;
+    updatedAtUtc: string;
+}
+
+export interface UpdateNotificationPreferences {
+    emailNotificationsEnabled?: boolean;
+    pickupRequestReceivedEmail?: boolean;
+    pickupRequestAcceptedEmail?: boolean;
+    transactionCompletedEmail?: boolean;
+}
+
+// User Settings types
+export interface UserNotificationSettings {
+    emailNotificationsEnabled: boolean;
+    pickupRequestReceivedEmail: boolean;
+    pickupRequestAcceptedEmail: boolean;
+    transactionCompletedEmail: boolean;
+}
+
+export interface UserSettings {
+    id: string;
+    userId: string;
+    preferredLanguage: string;
+    notificationSettings: UserNotificationSettings;
+    createdAtUtc: string;
+    updatedAtUtc: string;
+}
+
+export interface UpdateUserNotificationSettingsDto {
+    emailNotificationsEnabled?: boolean;
+    pickupRequestReceivedEmail?: boolean;
+    pickupRequestAcceptedEmail?: boolean;
+    transactionCompletedEmail?: boolean;
+}
+
+export interface UpdateUserSettingsDto {
+    preferredLanguage?: string;
+    notificationSettings?: UpdateUserNotificationSettingsDto;
 }
