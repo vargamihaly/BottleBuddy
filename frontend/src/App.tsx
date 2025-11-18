@@ -1,7 +1,7 @@
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import { Toaster } from "@/components/toaster";
+import { Toaster as Sonner } from "@/components/sonner";
+import { TooltipProvider } from "@/components/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
@@ -10,18 +10,18 @@ import { SignalRProvider } from "@/contexts/SignalRContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { LanguageSyncProvider } from "@/components/LanguageSyncProvider";
-import Index from "./pages/Index";
-import Auth from "./pages/Auth";
-import About from "./pages/About";
-import FAQ from "./pages/FAQ";
-import TermsOfService from "./pages/TermsOfService";
-import CreateListing from "./pages/CreateListing";
-import MyListings from "./pages/MyListings";
-import MyPickupTasks from "./pages/MyPickupTasks";
-import Messages from "./pages/Messages";
-import NotificationSettings from "./pages/NotificationSettings";
-import Notifications from "./pages/Notifications";
-import NotFound from "./pages/NotFound";
+import Index from "./features/home/pages/Index";
+import Auth from "./features/auth/pages/Auth";
+import About from "./features/static-pages/pages/About";
+import FAQ from "./features/static-pages/pages/FAQ";
+import TermsOfService from "./features/static-pages/pages/TermsOfService";
+import CreateListing from "./features/bottle-listings/pages/CreateListing";
+import MyListings from "./features/bottle-listings/pages/MyListings";
+import MyPickupTasks from "./features/pickup-requests/pages/MyPickupTasks";
+import Messages from "./features/messaging/pages/Messages";
+import NotificationSettings from "./features/notifications/pages/NotificationSettings";
+import Notifications from "./features/notifications/pages/Notifications";
+import NotFound from "./features/static-pages/pages/NotFound";
 
 // Configure React Query with better defaults
 const queryClient = new QueryClient({

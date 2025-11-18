@@ -1938,7 +1938,7 @@ const { data, isLoading } = useMyFeatures();
 - [Backend API Documentation](./backend.md)
 - [Deployment Guide](./AZURE_DEPLOYMENT.md)
 - [API Hooks README](../frontend/src/hooks/api/README.md)
-- [Terms of Service](../frontend/src/pages/TermsOfService.tsx)
+- [Terms of Service](../frontend/src/features/static-pages/pages/TermsOfService.tsx)
 
 ---
 
