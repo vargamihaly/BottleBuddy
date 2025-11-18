@@ -109,7 +109,7 @@ public class AuthController(
         try
         {
             // Log the request
-            logger.LogInformation("Received Google ID token (length: {TokenLength})", request.IdToken?.Length ?? 0);
+            logger.LogInformation("Received Google ID token (length: {TokenLength})", request.IdToken.Length );
 
             // Validate the Google ID token
             var clientId = configuration["Authentication:Google:ClientId"];
@@ -208,7 +208,7 @@ public class AuthController(
 
             logger.LogInformation("Generating JWT token for UserId: {UserId}", user.Id);
             string jwt = authService.GenerateJwtToken(user);
-            logger.LogInformation("JWT token generated successfully (length: {TokenLength})", jwt?.Length ?? 0);
+            logger.LogInformation("JWT token generated successfully (length: {TokenLength})", jwt.Length);
 
             logger.LogInformation("=== Google Sign-In Completed Successfully ===");
             return Ok(new AuthResponseDto { Token = jwt! });

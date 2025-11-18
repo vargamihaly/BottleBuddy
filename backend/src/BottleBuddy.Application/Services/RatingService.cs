@@ -94,9 +94,6 @@ public class RatingService(
 
         await context.SaveChangesAsync();
 
-        // Get rated user info for activity
-        var ratedUser = await context.Users.FindAsync(ratedUserId);
-
         // Create activity for the user who received the rating
         var rater = await context.Users.FindAsync(raterId);
         var templateData = new Dictionary<string, object>

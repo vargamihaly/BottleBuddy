@@ -112,7 +112,7 @@ try
             diagnosticContext.Set("RequestPath", httpContext.Request.Path);
             diagnosticContext.Set("CorrelationId", httpContext.TraceIdentifier);
 
-            var userId = httpContext.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (!string.IsNullOrEmpty(userId))
             {
                 diagnosticContext.Set("UserId", userId);

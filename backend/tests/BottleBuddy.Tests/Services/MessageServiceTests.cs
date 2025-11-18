@@ -1,6 +1,5 @@
 using BottleBuddy.Application.Data;
 using BottleBuddy.Application.Dtos;
-using BottleBuddy.Application.Models;
 using BottleBuddy.Application.Services;
 using BottleBuddy.Tests.Helpers;
 using FluentAssertions;
@@ -8,7 +7,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Xunit;
 
 namespace BottleBuddy.Tests.Services;
 
