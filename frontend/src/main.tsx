@@ -2,7 +2,7 @@ import { createRoot } from 'react-dom/client'
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import App from './App.tsx'
 import './index.css'
-import './lib/i18n'
+import './shared/lib/i18n'
 
 // Get Google Client ID from environment variable
 // Note: VITE_ prefix is required for Vite to expose the variable to the client
