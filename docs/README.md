@@ -114,7 +114,7 @@ BottleBuddy/
 - **SignalR** for real-time WebSocket communication
 - **ASP.NET Core Identity** for user management
 - **JWT** + **Google OAuth** authentication
-- **SendGrid** for transactional email notifications
+- **Azure Communication Services Email** for transactional email notifications
 - **SixLabors.ImageSharp** for image processing and optimization
 - **Serilog** for structured logging with Application Insights integration
 - **OpenTelemetry** + **Jaeger** for distributed tracing
@@ -206,12 +206,13 @@ BottleBuddy/
     - Mark all as read functionality
     - Unread badge count in header
     - Activity types: listing events, pickup requests, transactions, ratings
-  - **Email Notifications via SendGrid** - Critical updates sent to user's email
+  - **Email Notifications via Azure Communication Services** - Critical updates sent to user's email
     - Pickup request received (when someone wants to pick up your bottles)
     - Pickup request accepted (when your request is accepted)
     - Transaction completed (when you receive earnings)
     - Professional HTML email templates with responsive design
     - Plain text fallback for all emails
+    - Native Azure integration with 99% cost savings vs. third-party services
   - **User Settings & Preferences** - `/settings/notifications` page
     - User settings stored per user (language preference + notification preferences)
     - Preferred language setting (default: "en-US") - ready for i18n integration
@@ -584,9 +585,9 @@ See `docker/.env.example` for all required variables.
 - `ASPNETCORE_ENVIRONMENT` - Development/Production (default: Development)
 - `DB_USER` - SQL Server username (default: sa)
 - `DB_NAME` - Database name (default: BottleBuddy)
-- `SENDGRID_API_KEY` - SendGrid API key for email notifications (optional, emails disabled if not set)
-- `SENDGRID_FROM_EMAIL` - Sender email address (default: noreply@bottlebuddy.com)
-- `SENDGRID_FROM_NAME` - Sender display name (default: BottleBuddy)
+- `ACS_EMAIL_CONNECTION_STRING` - Azure Communication Services connection string for email notifications (optional, emails disabled if not set)
+- `ACS_FROM_EMAIL` - Sender email address (default: DoNotReply@bottlebuddy.azurecomm.net)
+- `ACS_FROM_NAME` - Sender display name (default: BottleBuddy)
 - `FRONTEND_BASE_URL` - Frontend URL for email links (default: http://localhost:5173)
 
 

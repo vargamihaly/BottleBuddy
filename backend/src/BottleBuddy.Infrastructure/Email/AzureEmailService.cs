@@ -1,22 +1,30 @@
+using Azure;
+using Azure.Communication.Email;
 using BottleBuddy.Application.Models;
+using BottleBuddy.Application.Services;
 using BottleBuddy.Application.Templates;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using SendGrid;
-using SendGrid.Helpers.Mail;
 
-namespace BottleBuddy.Application.Services;
+namespace BottleBuddy.Infrastructure.Email;
 
-public class SendGridEmailService(
+public class AzureEmailService(
     IConfiguration configuration,
-    ILogger<SendGridEmailService> logger,
-    UserManager<User> userManager) : IEmailService
+    ILogger<AzureEmailService> logger,
+    UserManager<User> userManager)
+    : IEmailService
 {
-    private readonly string? _apiKey = configuration["SendGrid:ApiKey"];
-    private readonly string _fromEmail = configuration["SendGrid:FromEmail"] ?? "noreply@bottlebuddy.com";
-    private readonly string _fromName = configuration["SendGrid:FromName"] ?? "BottleBuddy";
-    private readonly string _frontendBaseUrl = configuration["Frontend:BaseUrl"] ?? "http://localhost:5173";
+    private readonly string? _connectionString = configuration["AzureCommunicationServices:Email:ConnectionString"];
+
+    private readonly string _fromEmail = configuration["AzureCommunicationServices:Email:FromEmail"]
+                                         ?? "DoNotReply@bottlebuddy.azurecomm.net";
+
+    private readonly string _fromName = configuration["AzureCommunicationServices:Email:FromName"]
+                                        ?? "BottleBuddy";
+
+    private readonly string _frontendBaseUrl = configuration["Frontend:BaseUrl"]
+                                               ?? "http://localhost:5173";
 
     public async Task SendPickupRequestReceivedEmailAsync(
         string ownerUserId,
@@ -52,9 +60,9 @@ public class SendGridEmailService(
                 return;
             }
 
-            if (string.IsNullOrEmpty(_apiKey))
+            if (string.IsNullOrEmpty(_connectionString))
             {
-                logger.LogWarning("SendGrid API key not configured, skipping email");
+                logger.LogWarning("Azure Communication Services connection string not configured, skipping email");
                 return;
             }
 
@@ -124,9 +132,9 @@ public class SendGridEmailService(
                 return;
             }
 
-            if (string.IsNullOrEmpty(_apiKey))
+            if (string.IsNullOrEmpty(_connectionString))
             {
-                logger.LogWarning("SendGrid API key not configured, skipping email");
+                logger.LogWarning("Azure Communication Services connection string not configured, skipping email");
                 return;
             }
 
@@ -195,9 +203,9 @@ public class SendGridEmailService(
                 return;
             }
 
-            if (string.IsNullOrEmpty(_apiKey))
+            if (string.IsNullOrEmpty(_connectionString))
             {
-                logger.LogWarning("SendGrid API key not configured, skipping email");
+                logger.LogWarning("Azure Communication Services connection string not configured, skipping email");
                 return;
             }
 
@@ -240,34 +248,71 @@ public class SendGridEmailService(
 
     private async Task SendEmailAsync(string toEmail, string subject, string htmlContent, string textContent)
     {
-        if (string.IsNullOrEmpty(_apiKey))
+        if (string.IsNullOrEmpty(_connectionString))
         {
-            logger.LogWarning("SendGrid API key not configured, cannot send email");
+            logger.LogWarning("Azure Communication Services connection string not configured, cannot send email");
             return;
         }
 
-        var client = new SendGridClient(_apiKey);
-        var from = new EmailAddress(_fromEmail, _fromName);
-        var to = new EmailAddress(toEmail);
-        var msg = MailHelper.CreateSingleEmail(from, to, subject, textContent, htmlContent);
-
-        var response = await client.SendEmailAsync(msg);
-
-        if (response.StatusCode != System.Net.HttpStatusCode.OK &&
-            response.StatusCode != System.Net.HttpStatusCode.Accepted)
+        try
         {
-            var responseBody = await response.Body.ReadAsStringAsync();
-            logger.LogError(
-                "SendGrid returned status code {StatusCode} with body: {ResponseBody}",
-                response.StatusCode,
-                responseBody);
-            throw new InvalidOperationException(
-                $"Failed to send email via SendGrid. Status: {response.StatusCode}");
-        }
+            var emailClient = new EmailClient(_connectionString);
 
-        logger.LogInformation(
-            "Email sent successfully to {Email} with subject '{Subject}'",
-            toEmail,
-            subject);
+            var emailMessage = new EmailMessage(
+                senderAddress: _fromEmail,
+                recipientAddress: toEmail,
+                content: new EmailContent(subject)
+                {
+                    PlainText = textContent,
+                    Html = htmlContent
+                });
+
+            logger.LogInformation(
+                "Sending email to {Email} with subject '{Subject}' from {FromEmail}",
+                toEmail,
+                subject,
+                _fromEmail);
+
+            EmailSendOperation emailSendOperation = await emailClient.SendAsync(
+                WaitUntil.Completed,
+                emailMessage);
+
+            // Check the status
+            if (emailSendOperation.HasCompleted)
+            {
+                var operationId = emailSendOperation.Id;
+                logger.LogInformation(
+                    "Email sent successfully to {Email} with operation ID {OperationId}",
+                    toEmail,
+                    operationId);
+            }
+            else
+            {
+                logger.LogWarning(
+                    "Email sending to {Email} did not complete immediately, operation ID: {OperationId}",
+                    toEmail,
+                    emailSendOperation.Id);
+            }
+        }
+        catch (RequestFailedException ex)
+        {
+            logger.LogError(
+                ex,
+                "Azure Communication Services request failed when sending to {Email}. Status: {Status}, ErrorCode: {ErrorCode}",
+                toEmail,
+                ex.Status,
+                ex.ErrorCode);
+            throw new InvalidOperationException(
+                $"Failed to send email via Azure Communication Services. Status: {ex.Status}, Error: {ex.ErrorCode}",
+                ex);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(
+                ex,
+                "Unexpected error sending email to {Email}",
+                toEmail);
+            throw;
+        }
     }
 }

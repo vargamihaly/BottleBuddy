@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>BottleBuddy.Infrastructure</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Azure Communication Services Email -->
+    <PackageReference Include="Azure.Communication.Email" Version="1.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Reference to Application layer for interfaces -->
+    <ProjectReference Include="..\BottleBuddy.Application\BottleBuddy.Application.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+</Project>

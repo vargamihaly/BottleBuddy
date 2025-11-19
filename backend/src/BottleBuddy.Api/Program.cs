@@ -6,6 +6,7 @@ using BottleBuddy.Api.Middleware;
 using BottleBuddy.Api.Services;
 using BottleBuddy.Application.Data;
 using BottleBuddy.Application.Services;
+using BottleBuddy.Infrastructure.Email;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Formatting.Compact;
@@ -64,8 +65,10 @@ try
     builder.Services.AddScoped<IImageStorageService, ImageStorageService>();
     builder.Services.AddScoped<IUserActivityService, UserActivityService>();
     builder.Services.AddScoped<IUserSettingsService, UserSettingsService>();
-    builder.Services.AddScoped<IEmailService, SendGridEmailService>();
     builder.Services.AddScoped<PickupRequestService>();
+    
+    // Register infrastructure services
+    builder.Services.AddScoped<IEmailService, AzureEmailService>();
 
     // SignalR
     builder.Services.AddSignalR();
