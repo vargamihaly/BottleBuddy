@@ -1,56 +1,64 @@
 {
+  "title": "Notifications",
+  "markAllRead": "Mark all as read",
+  "new": "New",
+  "earlier": "Earlier",
+  "noActivities": "No notifications yet",
+  "viewAll": "View All Notifications",
+  "markAllAsReadSuccess": "All notifications marked as read",
+  "deleteSuccess": "Notification deleted",
   "listingCreated": {
-    "title": "Listing Created",
-    "description": "You created a new listing for {{bottleCount}} bottles at {{locationAddress}}"
+    "title": "Bottle Listing Created",
+    "description": "You have successfully created a new bottle listing for {{bottleCount}} bottles at {{locationAddress}}."
   },
   "listingDeleted": {
-    "title": "Listing Deleted",
-    "description": "You deleted your listing for {{bottleCount}} bottles at {{locationAddress}}"
+    "title": "Bottle Listing Deleted",
+    "description": "Your bottle listing for {{bottleCount}} bottles at {{locationAddress}} has been successfully deleted."
   },
   "pickupRequestReceived": {
     "title": "New Pickup Request",
-    "description": "{{volunteerName}} wants to pick up your {{bottleCount}} bottles at {{locationAddress}}"
+    "description": "{{volunteerName}} has requested to pick up your {{bottleCount}} bottles at {{locationAddress}}."
   },
   "pickupRequestAcceptedByOwner": {
     "title": "Pickup Request Accepted",
-    "description": "You accepted {{volunteerName}}'s request to pick up your {{bottleCount}} bottles"
+    "description": "You have accepted {{volunteerName}}'s request to pick up your {{bottleCount}} bottles."
   },
   "pickupRequestRejectedByOwner": {
     "title": "Pickup Request Rejected",
-    "description": "You rejected {{volunteerName}}'s pickup request"
+    "description": "You have rejected {{volunteerName}}'s pickup request."
   },
   "pickupRequestCompletedByOwner": {
     "title": "Pickup Completed",
-    "description": "Pickup completed for your listing at {{locationAddress}}"
+    "description": "The pickup for your listing at {{locationAddress}} has been completed."
   },
   "pickupRequestCreated": {
     "title": "Pickup Request Sent",
-    "description": "You sent a pickup request for {{bottleCount}} bottles at {{locationAddress}}"
+    "description": "You have sent a pickup request for {{bottleCount}} bottles at {{locationAddress}}."
   },
   "pickupRequestAccepted": {
-    "title": "Pickup Request Accepted!",
-    "description": "Your pickup request for {{bottleCount}} bottles at {{locationAddress}} was accepted!"
+    "title": "Pickup Request Accepted",
+    "description": "Your pickup request for {{bottleCount}} bottles at {{locationAddress}} has been accepted."
   },
   "pickupRequestRejected": {
     "title": "Pickup Request Rejected",
-    "description": "Your pickup request for {{locationAddress}} was not accepted"
+    "description": "Your pickup request for {{locationAddress}} has been rejected."
   },
   "pickupRequestCompleted": {
     "title": "Pickup Completed",
-    "description": "You completed the pickup for {{bottleCount}} bottles at {{locationAddress}}"
+    "description": "You have successfully completed the pickup of {{bottleCount}} bottles at {{locationAddress}}."
   },
   "transactionCompleted": {
     "title": "Transaction Completed",
-    "descriptionOwner": "Transaction completed for your listing at {{locationAddress}}. You earned {{ownerAmount}} HUF",
-    "descriptionVolunteer": "Transaction completed! You earned {{volunteerAmount}} HUF"
+    "descriptionOwner": "The transaction for your listing at {{locationAddress}} is complete. You have earned {{ownerAmount}} HUF.",
+    "descriptionVolunteer": "The transaction is complete. You have earned {{volunteerAmount}} HUF."
   },
   "ratingReceived": {
     "title": "New Rating Received",
-    "description": "You received a {{ratingValue}}-star rating from {{raterName}}",
-    "descriptionWithComment": "You received a {{ratingValue}}-star rating from {{raterName}}: \"{{comment}}\""
+    "description": "You have received a {{ratingValue}}-star rating from {{raterName}}.",
+    "descriptionWithComment": "You have received a {{ratingValue}}-star rating from {{raterName}} with the comment: \"{{comment}}\""
   },
   "default": {
-    "title": "Notification",
-    "description": "Activity type: {{type}}"
+    "title": "New Notification",
+    "description": "You have a new notification of type: {{type}}."
   }
 }

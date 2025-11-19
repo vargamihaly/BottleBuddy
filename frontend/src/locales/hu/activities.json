@@ -1,56 +1,64 @@
 {
+  "title": "Értesítések",
+  "markAllRead": "Összes olvasottnak jelölése",
+  "new": "Új",
+  "earlier": "Korábbi",
+  "noActivities": "Még nincsenek értesítések",
+  "viewAll": "Összes értesítés megtekintése",
+  "markAllAsReadSuccess": "Minden értesítés olvasottnak jelölve",
+  "deleteSuccess": "Értesítés törölve",
   "listingCreated": {
-    "title": "Hirdetés létrehozva",
-    "description": "Létrehoztál egy új hirdetést {{bottleCount}} palackra itt: {{locationAddress}}"
+    "title": "Palack hirdetés létrehozva",
+    "description": "Sikeresen létrehoztál egy új hirdetést {{bottleCount}} palackról itt: {{locationAddress}}."
   },
   "listingDeleted": {
-    "title": "Hirdetés törölve",
-    "description": "Törölted a hirdetésed {{bottleCount}} palackra itt: {{locationAddress}}"
+    "title": "Palack hirdetés törölve",
+    "description": "A hirdetésed {{bottleCount}} palackról itt: {{locationAddress}} sikeresen törölve lett."
   },
   "pickupRequestReceived": {
-    "title": "Új átvételi kérés",
-    "description": "{{volunteerName}} át szeretné venni {{bottleCount}} palackodat itt: {{locationAddress}}"
+    "title": "Új átvételi kérelem",
+    "description": "{{volunteerName}} kérte, hogy átvehesse a {{bottleCount}} palackodat itt: {{locationAddress}}."
   },
   "pickupRequestAcceptedByOwner": {
-    "title": "Átvételi kérés elfogadva",
-    "description": "Elfogadtad {{volunteerName}} kérését {{bottleCount}} palackod átvételére"
+    "title": "Átvételi kérelem elfogadva",
+    "description": "Elfogadtad {{volunteerName}} kérését, hogy átvegye a {{bottleCount}} palackodat."
   },
   "pickupRequestRejectedByOwner": {
-    "title": "Átvételi kérés elutasítva",
-    "description": "Elutasítottad {{volunteerName}} átvételi kérését"
+    "title": "Átvételi kérelem elutasítva",
+    "description": "Elutasítottad {{volunteerName}} átvételi kérését."
   },
   "pickupRequestCompletedByOwner": {
     "title": "Átvétel befejezve",
-    "description": "Átvétel befejezve a hirdetésnél itt: {{locationAddress}}"
+    "description": "Az átvétel a hirdetésednél itt: {{locationAddress}} befejeződött."
   },
   "pickupRequestCreated": {
-    "title": "Átvételi kérés elküldve",
-    "description": "Elküldtél egy átvételi kérést {{bottleCount}} palackra itt: {{locationAddress}}"
+    "title": "Átvételi kérelem elküldve",
+    "description": "Elküldtél egy átvételi kérelmet {{bottleCount}} palackra itt: {{locationAddress}}."
   },
   "pickupRequestAccepted": {
-    "title": "Átvételi kérés elfogadva!",
-    "description": "Az átvételi kérésedet {{bottleCount}} palackra itt: {{locationAddress}} elfogadták!"
+    "title": "Átvételi kérelem elfogadva",
+    "description": "Az átvételi kérelmedet {{bottleCount}} palackra itt: {{locationAddress}} elfogadták."
   },
   "pickupRequestRejected": {
-    "title": "Átvételi kérés elutasítva",
-    "description": "Az átvételi kérésedet erre a címre: {{locationAddress}} nem fogadták el"
+    "title": "Átvételi kérelem elutasítva",
+    "description": "Az átvételi kérelmedet itt: {{locationAddress}} elutasították."
   },
   "pickupRequestCompleted": {
     "title": "Átvétel befejezve",
-    "description": "Befejezte az átvételt {{bottleCount}} palackra itt: {{locationAddress}}"
+    "description": "Sikeresen befejezted {{bottleCount}} palack átvételét itt: {{locationAddress}}."
   },
   "transactionCompleted": {
     "title": "Tranzakció befejezve",
-    "descriptionOwner": "Tranzakció befejezve a hirdetésednél itt: {{locationAddress}}. Kerestél {{ownerAmount}} HUF-ot",
-    "descriptionVolunteer": "Tranzakció befejezve! Kerestél {{volunteerAmount}} HUF-ot"
+    "descriptionOwner": "A tranzakció a hirdetésednél itt: {{locationAddress}} befejeződött. Kerestél {{ownerAmount}} Ft-ot.",
+    "descriptionVolunteer": "A tranzakció befejeződött. Kerestél {{volunteerAmount}} Ft-ot."
   },
   "ratingReceived": {
     "title": "Új értékelés érkezett",
-    "description": "Kaptál egy {{ratingValue}} csillagos értékelést tőle: {{raterName}}",
-    "descriptionWithComment": "Kaptál egy {{ratingValue}} csillagos értékelést tőle: {{raterName}}: \"{{comment}}\""
+    "description": "Kaptál egy {{ratingValue}}-csillagos értékelést {{raterName}} nevű felhasználótól.",
+    "descriptionWithComment": "Kaptál egy {{ratingValue}}-csillagos értékelést {{raterName}} nevű felhasználótól a következő megjegyzéssel: \"{{comment}}\""
   },
   "default": {
-    "title": "Értesítés",
-    "description": "Tevékenység típusa: {{type}}"
+    "title": "Új értesítés",
+    "description": "Új értesítésed érkezett: {{type}}."
   }
 }
