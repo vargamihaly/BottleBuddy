@@ -1,15 +1,15 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import { BottomNav } from "@/components/ui/bottom-nav";
+import { Button } from "@/shared/components/ui/button";
+import { Card, CardContent } from "@/shared/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
+import { Badge } from "@/shared/components/ui/badge";
+import { BottomNav } from "@/shared/components/ui/bottom-nav";
 import { ArrowLeft } from "lucide-react";
-import { BottleListingCard } from "@/components/BottleListingCard";
-import { BottleListingsGridSkeleton } from "@/components/BottleListingSkeleton";
-import { useAuth } from "@/contexts/AuthContext";
-import { useBottleListingOverview } from "@/hooks/useBottleListingOverview";
+import { BottleListingCard } from "@/features/bottle-listings";
+import { BottleListingsGridSkeleton } from "@/features/bottle-listings";
+import { useAuth } from "@/shared/contexts/AuthContext";
+import { useMyPickupTasks } from "@/features/pickup-requests";
 import { useTranslation } from "react-i18next";
 
 const MyPickupTasks = () => {
@@ -24,7 +24,7 @@ const MyPickupTasks = () => {
     myPickupRequests,
     isLoading,
     isError,
-  } = useBottleListingOverview();
+  } = useMyPickupTasks();
 
   if (!user) {
     return (

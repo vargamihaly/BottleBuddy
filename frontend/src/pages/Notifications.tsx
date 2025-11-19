@@ -1,24 +1,24 @@
-import {useState} from "react";
+﻿import {useState} from "react";
 import {useNavigate} from "react-router-dom";
 import {useTranslation} from "react-i18next";
-import {Button} from "@/components/ui/button";
-import {Card, CardContent} from "@/components/ui/card";
-import {Tabs, TabsList, TabsTrigger} from "@/components/ui/tabs";
-import {Badge} from "@/components/ui/badge";
-import {BottomNav} from "@/components/ui/bottom-nav";
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "@/components/ui/select";
+import {Button} from "@/shared/components/ui/button";
+import {Card, CardContent} from "@/shared/components/ui/card";
+import {Tabs, TabsList, TabsTrigger} from "@/shared/components/ui/tabs";
+import {Badge} from "@/shared/components/ui/badge";
+import {BottomNav} from "@/shared/components/ui/bottom-nav";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "@/shared/components/ui/select";
 import {ArrowLeft, Bell, Settings, Trash2} from "lucide-react";
-import {useAuth} from "@/contexts/AuthContext";
+import {useAuth} from "@/shared/contexts/AuthContext";
 import {
     useDeleteActivity,
     useMarkActivityAsRead,
     useMarkAllActivitiesAsRead,
     useUserActivities,
-} from "@/hooks/api/useUserActivities";
+} from "@/features/notifications";
 import {UserActivityCategory} from "@/types";
 import {formatDistanceToNow} from "date-fns";
-import {Skeleton} from "@/components/ui/skeleton";
-import {getActivityMessage} from "@/utils/activityTemplates";
+import {Skeleton} from "@/shared/components/ui/skeleton";
+import {getActivityMessage} from "@/features/notifications";
 
 const Notifications = () => {
     const navigate = useNavigate();

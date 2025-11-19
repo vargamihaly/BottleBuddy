@@ -1,11 +1,11 @@
-import {useState} from "react";
-import {UserDashboard} from "@/components/UserDashboard";
-import {MapView} from "@/components/MapView";
-import {FullPageLoader} from "@/components/LoadingSpinner";
-import {Button} from "@/components/ui/button";
-import {BottomNav} from "@/components/ui/bottom-nav";
-import {useIndex} from "@/hooks/useIndex";
-import {useAuth} from "@/contexts/AuthContext";
+﻿import {useState} from "react";
+import {UserDashboard} from "@/features/dashboard";
+import {MapView} from "@/features/map";
+import {FullPageLoader} from "@/shared/components/layout/LoadingSpinner";
+import {Button} from "@/shared/components/ui/button";
+import {BottomNav} from "@/shared/components/ui/bottom-nav";
+import {useIndex} from "@/features/home";
+import {useAuth} from "@/shared/contexts/AuthContext";
 import {
     AvailableBottlesSection,
     CTASection,
@@ -14,14 +14,14 @@ import {
     HeroSection,
     HowItWorksSection,
     StatsSection
-} from "@/components/HomePage";
+} from "@/features/home";
 import {
     EarningsWidget,
     MyActiveListingsWidget,
     MyActivePickupsWidget,
     QuickActionsBar,
     WelcomeWidget
-} from "@/components/Dashboard";
+} from "@/features/dashboard";
 
 const Index = () => {
     const [activeTab, setActiveTab] = useState("home");

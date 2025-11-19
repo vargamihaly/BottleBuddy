@@ -1,15 +1,15 @@
-import { useNavigate } from "react-router-dom";
+﻿import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { BottomNav } from "@/components/ui/bottom-nav";
+import { Button } from "@/shared/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/components/ui/card";
+import { Switch } from "@/shared/components/ui/switch";
+import { Label } from "@/shared/components/ui/label";
+import { BottomNav } from "@/shared/components/ui/bottom-nav";
 import { ArrowLeft, Mail, Bell } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
-import { useNotificationPreferences, useUpdateNotificationPreferences } from "@/hooks/api/useNotificationPreferences";
+import { useAuth } from "@/shared/contexts/AuthContext";
+import { useNotificationPreferences, useUpdateNotificationPreferences } from "@/features/notifications";
 import { UpdateNotificationPreferences } from "@/types";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "@/shared/components/ui/skeleton";
 
 const NotificationSettings = () => {
   const navigate = useNavigate();

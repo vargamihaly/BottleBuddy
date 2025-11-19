@@ -1,16 +1,16 @@
-import {useEffect, useMemo, useState} from "react";
+﻿import {useEffect, useMemo, useState} from "react";
 import {useNavigate, useSearchParams} from "react-router-dom";
-import {Button} from "@/components/ui/button";
-import {Card} from "@/components/ui/card";
-import {BottomNav} from "@/components/ui/bottom-nav";
+import {Button} from "@/shared/components/ui/button";
+import {Card} from "@/shared/components/ui/card";
+import {BottomNav} from "@/shared/components/ui/bottom-nav";
 import {ArrowLeft, MessageSquare} from "lucide-react";
-import {useAuth} from "@/contexts/AuthContext";
+import {useAuth} from "@/shared/contexts/AuthContext";
 import {useQuery} from "@tanstack/react-query";
 import {PickupRequest} from "@/types";
-import {ConversationList} from "@/components/ConversationList";
-import {ChatBox} from "@/components/ChatBox";
-import {useBottleListings, useMyPickupRequests} from "@/hooks/api";
-import {pickupRequestService} from "@/api/services";
+import {ConversationList, ChatBox} from "@/features/messaging";
+import {useBottleListings} from "@/features/bottle-listings";
+import {useMyPickupRequests} from "@/features/pickup-requests";
+import {pickupRequestService} from "@/features/pickup-requests/api/pickupRequests.service";
 import {useTranslation} from "react-i18next";
 
 const Messages = () => {
