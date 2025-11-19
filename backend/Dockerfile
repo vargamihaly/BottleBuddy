@@ -2,28 +2,23 @@
 
 # Stage 1: Build
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+WORKDIR /src
 
-WORKDIR /app
-
-# Copy project file only (skip solution to avoid docker-compose.dcproj reference issue)
+# Copy project files
 COPY src/BottleBuddy.Api/BottleBuddy.Api.csproj ./src/BottleBuddy.Api/
+COPY src/BottleBuddy.Application/BottleBuddy.Application.csproj ./src/BottleBuddy.Application/
 
-# Restore dependencies for the specific project
-RUN dotnet restore ./src/BottleBuddy.Api/BottleBuddy.Api.csproj
+# Restore dependencies for the API project, which will also restore project references
+RUN dotnet restore src/BottleBuddy.Api/BottleBuddy.Api.csproj
 
-# Copy all source files
+# Copy the rest of the source code
 COPY . .
 
-# Build the application
-WORKDIR /app/src/BottleBuddy.Api
-RUN dotnet build -c Release -o /app/build
-
 # Publish the application
-RUN dotnet publish -c Release -o /app/publish
+RUN dotnet publish src/BottleBuddy.Api/BottleBuddy.Api.csproj -c Release -o /app/publish
 
 # Stage 2: Runtime
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
-
 WORKDIR /app
 
 # Install curl for health checks
