@@ -1,7 +1,8 @@
 import {useMemo} from "react";
 import {useAuth} from "@/contexts/AuthContext";
 import {useMyBottleListings} from "@/features/listings/hooks";
-import {usePickupRequestsByListing} from "@/features/pickup-requests/hooks";
+import {useQuery} from "@tanstack/react-query";
+import {pickupRequestService} from "@/features/pickup-requests/api";
 import {BottleListing} from "@/shared/types";
 
 /**
@@ -37,19 +38,41 @@ export const useMyActiveListingsWidget = () => {
     [myListings]
   );
 
-  // Fetch pickup requests for each active listing
-  const pickupRequestQueries = activeListings.map((listing) =>
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    usePickupRequestsByListing(listing.id, !!user)
+  // Extract active listing IDs
+  const activeListingIds = useMemo(
+    () => activeListings.map((listing) => listing.id),
+    [activeListings]
   );
 
-  // Check if any pickup request queries are still loading
-  const isLoadingPickupRequests = pickupRequestQueries.some((query) => query.isLoading);
+  // Fetch all pickup requests for active listings in a single query
+  const { data: allPickupRequests = [], isLoading: isLoadingPickupRequests } = useQuery({
+    queryKey: ['pickupRequests', 'listings', activeListingIds],
+    queryFn: async () => {
+      if (activeListingIds.length === 0) return [];
+
+      // Fetch pickup requests for all active listings in parallel
+      const requests = await Promise.all(
+        activeListingIds.map((id) => pickupRequestService.getByListingId(id))
+      );
+
+      // Flatten the results and tag each request with its listing ID
+      return requests.flatMap((reqs, index) =>
+        reqs.map((req) => ({ ...req, listingId: activeListingIds[index] }))
+      );
+    },
+    enabled: !!user && activeListingIds.length > 0,
+    staleTime: 30000, // 30 seconds
+    refetchInterval: 60000, // Refetch every 60 seconds
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
+  });
 
   // Enrich listings with pending pickup request counts
   const listingsWithRequests: BottleListingWithRequests[] = useMemo(() => {
-    return activeListings.map((listing, index) => {
-      const pickupRequests = pickupRequestQueries[index]?.data || [];
+    return activeListings.map((listing) => {
+      const pickupRequests = allPickupRequests.filter(
+        (req) => req.listingId === listing.id
+      );
       const pendingCount = pickupRequests.filter((req) => req.status === "pending").length;
 
       return {
@@ -57,7 +80,7 @@ export const useMyActiveListingsWidget = () => {
         pendingPickupRequestsCount: pendingCount,
       };
     });
-  }, [activeListings, pickupRequestQueries]);
+  }, [activeListings, allPickupRequests]);
 
   return {
     listings: listingsWithRequests,
