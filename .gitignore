@@ -102,6 +102,8 @@ node_modules/
 
 # Testing
 /coverage
+playwright-report/
+test-results/
 
 # Production build
 dist/
