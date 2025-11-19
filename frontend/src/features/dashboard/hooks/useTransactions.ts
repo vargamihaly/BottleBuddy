@@ -1,7 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
-import { transactionService } from "@/features/dashboard/api";
-import { ApiRequestError } from "@/shared/lib/apiClient";
-import { Transaction } from "@/shared/types";
+import {useQuery} from "@tanstack/react-query";
+import {transactionService} from "@/features/dashboard/api";
+import {ApiRequestError} from "@/shared/lib/apiClient";
+import {Transaction} from "@/shared/types";
 
 /**
  * Query keys for transactions

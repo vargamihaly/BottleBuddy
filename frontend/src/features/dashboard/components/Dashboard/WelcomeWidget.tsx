@@ -1,7 +1,7 @@
-import { useAuth } from "@/contexts/AuthContext";
-import { Card, CardContent } from "@/shared/ui/card";
-import { Sparkles } from "lucide-react";
-import { useTranslation } from "react-i18next";
+import {useAuth} from "@/contexts/AuthContext";
+import {Card, CardContent} from "@/shared/ui/card";
+import {Sparkles} from "lucide-react";
+import {useTranslation} from "react-i18next";
 
 export const WelcomeWidget = () => {
   const { user } = useAuth();

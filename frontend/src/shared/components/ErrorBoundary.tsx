@@ -1,7 +1,7 @@
-import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { Button } from '@/shared/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
-import { AlertCircle, RefreshCw, Home } from 'lucide-react';
+import React, {Component, ErrorInfo, ReactNode} from 'react';
+import {Button} from '@/shared/ui/button';
+import {Card, CardContent, CardHeader, CardTitle} from '@/shared/ui/card';
+import {AlertCircle, Home, RefreshCw} from 'lucide-react';
 
 interface Props {
   children: ReactNode;

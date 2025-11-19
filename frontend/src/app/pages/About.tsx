@@ -1,9 +1,9 @@
-import { Button } from "@/shared/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
-import { useNavigate } from "react-router-dom";
-import { Recycle, Heart, Users, Leaf, ArrowLeft, Shield, Zap, Globe } from "lucide-react";
-import { useTranslation } from "react-i18next";
-import { useGlobalStatistics } from "@/features/dashboard/hooks";
+import {Button} from "@/shared/ui/button";
+import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/shared/ui/card";
+import {useNavigate} from "react-router-dom";
+import {ArrowLeft, Globe, Heart, Leaf, Recycle, Shield, Users, Zap} from "lucide-react";
+import {useTranslation} from "react-i18next";
+import {useGlobalStatistics} from "@/features/dashboard/hooks";
 
 const About = () => {
   const navigate = useNavigate();

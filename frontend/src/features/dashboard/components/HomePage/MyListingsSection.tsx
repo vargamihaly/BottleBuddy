@@ -1,12 +1,11 @@
-import { Button } from "@/shared/ui/button";
-import { Badge } from "@/shared/ui/badge";
-import { ArrowRight } from "lucide-react";
-import { BottleListingCard } from "@/features/listings/components";
-import { BottleListingsGridSkeleton } from "@/features/listings/components";
-import { BottleListing } from "@/shared/types";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
-import { useTranslation } from "react-i18next";
+import {Button} from "@/shared/ui/button";
+import {Badge} from "@/shared/ui/badge";
+import {ArrowRight} from "lucide-react";
+import {BottleListingCard, BottleListingsGridSkeleton} from "@/features/listings/components";
+import {BottleListing} from "@/shared/types";
+import {useNavigate} from "react-router-dom";
+import {useAuth} from "@/contexts/AuthContext";
+import {useTranslation} from "react-i18next";
 
 interface MyListingsSectionProps {
   listings: BottleListing[];

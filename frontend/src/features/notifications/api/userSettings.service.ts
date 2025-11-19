@@ -1,5 +1,5 @@
 import {apiClient} from "@/shared/lib/apiClient";
-import {UserSettings, UpdateUserSettingsDto} from "@/shared/types";
+import {UpdateUserSettingsDto, UserSettings} from "@/shared/types";
 
 interface UserSettingsResponse {
     data: UserSettings;

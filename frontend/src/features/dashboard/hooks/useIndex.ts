@@ -1,5 +1,5 @@
-import { useMemo } from "react";
-import { useBottleListingOverview } from "@/features/listings/hooks";
+import {useMemo} from "react";
+import {useBottleListingOverview} from "@/features/listings/hooks";
 
 /**
  * Custom hook for Index page

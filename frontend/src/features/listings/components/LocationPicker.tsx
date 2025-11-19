@@ -1,17 +1,13 @@
-import { useState, useEffect, useRef } from "react";
-import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
-import { Button } from "@/shared/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
-import { Input } from "@/shared/ui/input";
-import { Label } from "@/shared/ui/label";
-import { MapPin, Navigation, Search } from "lucide-react";
-import { useToast } from "@/shared/hooks/use-toast";
-import { useTranslation } from "react-i18next";
-import {
-  DEFAULT_CENTER,
-  DEFAULT_ZOOM,
-  getUserLocation,
-} from "@/shared/lib/mapUtils";
+import {useState} from "react";
+import {MapContainer, Marker, TileLayer, useMapEvents} from "react-leaflet";
+import {Button} from "@/shared/ui/button";
+import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/shared/ui/card";
+import {Input} from "@/shared/ui/input";
+import {Label} from "@/shared/ui/label";
+import {MapPin, Navigation, Search} from "lucide-react";
+import {useToast} from "@/shared/hooks/use-toast";
+import {useTranslation} from "react-i18next";
+import {DEFAULT_CENTER, DEFAULT_ZOOM, getUserLocation,} from "@/shared/lib/mapUtils";
 import L from "leaflet";
 
 interface LocationData {

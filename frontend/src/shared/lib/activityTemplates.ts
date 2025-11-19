@@ -1,5 +1,5 @@
-import { UserActivityType } from '@/shared/types';
-import { TFunction } from 'i18next';
+import {UserActivityType} from '@/shared/types';
+import {TFunction} from 'i18next';
 
 interface ActivityMessage {
   title: string;

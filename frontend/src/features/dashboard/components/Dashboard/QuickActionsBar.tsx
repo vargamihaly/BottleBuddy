@@ -1,10 +1,10 @@
-import { Button } from "@/shared/ui/button";
-import { Card, CardContent } from "@/shared/ui/card";
-import { Plus, Search, MessageCircle, MapPin, ArrowRight, Coins } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { useTotalUnreadCount } from "@/features/messaging/hooks";
-import { Badge } from "@/shared/ui/badge";
-import { useTranslation } from "react-i18next";
+import {Button} from "@/shared/ui/button";
+import {Card, CardContent} from "@/shared/ui/card";
+import {ArrowRight, Coins, MapPin, MessageCircle, Plus, Search} from "lucide-react";
+import {useNavigate} from "react-router-dom";
+import {useTotalUnreadCount} from "@/features/messaging/hooks";
+import {Badge} from "@/shared/ui/badge";
+import {useTranslation} from "react-i18next";
 
 interface QuickActionsBarProps {
   onMapClick: () => void;

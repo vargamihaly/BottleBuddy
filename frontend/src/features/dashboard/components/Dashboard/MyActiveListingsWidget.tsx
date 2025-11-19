@@ -1,10 +1,10 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
-import { Button } from "@/shared/ui/button";
-import { Badge } from "@/shared/ui/badge";
-import { ArrowRight, Package, Plus } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { useTranslation } from "react-i18next";
-import { useMyActiveListingsWidget } from "@/features/dashboard/hooks";
+import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/shared/ui/card";
+import {Button} from "@/shared/ui/button";
+import {Badge} from "@/shared/ui/badge";
+import {ArrowRight, Package, Plus} from "lucide-react";
+import {useNavigate} from "react-router-dom";
+import {useTranslation} from "react-i18next";
+import {useMyActiveListingsWidget} from "@/features/dashboard/hooks";
 
 export const MyActiveListingsWidget = () => {
   const navigate = useNavigate();

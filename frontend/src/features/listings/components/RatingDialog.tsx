@@ -1,19 +1,12 @@
-import { useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/shared/ui/dialog";
-import { Button } from "@/shared/ui/button";
-import { Textarea } from "@/shared/ui/textarea";
-import { Star } from "lucide-react";
-import { useToast } from "@/shared/hooks/use-toast";
-import { Transaction } from "@/shared/types";
-import { useCreateRating } from "@/features/dashboard/hooks";
-import { useTranslation } from "react-i18next";
+import {useState} from "react";
+import {Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,} from "@/shared/ui/dialog";
+import {Button} from "@/shared/ui/button";
+import {Textarea} from "@/shared/ui/textarea";
+import {Star} from "lucide-react";
+import {useToast} from "@/shared/hooks/use-toast";
+import {Transaction} from "@/shared/types";
+import {useCreateRating} from "@/features/dashboard/hooks";
+import {useTranslation} from "react-i18next";
 
 interface RatingDialogProps {
   open: boolean;

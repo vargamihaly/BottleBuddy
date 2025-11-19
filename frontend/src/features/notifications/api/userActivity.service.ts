@@ -1,5 +1,5 @@
 import {apiClient} from "@/shared/lib/apiClient";
-import {UserActivity, PaginationMetadata, UserActivityType, UserActivityCategory} from "@/shared/types";
+import {PaginationMetadata, UserActivity, UserActivityCategory, UserActivityType} from "@/shared/types";
 
 export interface GetUserActivitiesParams {
     page?: number;

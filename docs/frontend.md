@@ -27,116 +27,249 @@
 
 ## Project Structure
 
+BottleBuddy frontend follows a **Feature-Sliced Design (FSD)** architecture for better scalability and maintainability.
+
 ```
 frontend/
 ├── src/
-│   ├── api/
-│   │   └── services/          # API service layer (HTTP endpoints)
-│   │       ├── bottleListings.service.ts
-│   │       ├── pickupRequests.service.ts
-│   │       ├── transactions.service.ts
-│   │       ├── ratings.service.ts
-│   │       ├── messages.service.ts
-│   │       ├── statistics.service.ts
-│   │       └── index.ts       # Barrel export
+│   ├── app/                        # Application layer
+│   │   ├── pages/                  # Static pages
+│   │   │   ├── About.tsx
+│   │   │   ├── FAQ.tsx
+│   │   │   ├── TermsOfService.tsx
+│   │   │   └── NotFound.tsx
+│   │   ├── providers/
+│   │   │   └── AppProviders.tsx    # Global providers (Auth, SignalR, Query, etc.)
+│   │   ├── routes/
+│   │   │   └── AppRouter.tsx       # Route configuration
+│   │   └── queryClient.ts          # React Query client setup
 │   │
-│   ├── components/
-│   │   ├── ui/                    # shadcn/ui primitives (Radix UI)
+│   ├── features/                   # Feature modules (vertical slices)
+│   │   ├── auth/                   # Authentication feature
+│   │   │   ├── api/
+│   │   │   │   └── auth.service.ts
+│   │   │   ├── hooks/
+│   │   │   │   └── useAuth.ts
+│   │   │   ├── pages/
+│   │   │   │   └── Auth.tsx
+│   │   │   ├── types/
+│   │   │   │   └── index.ts
+│   │   │   └── index.ts            # Barrel export
+│   │   │
+│   │   ├── dashboard/              # Dashboard & home
+│   │   │   ├── api/
+│   │   │   │   ├── ratings.service.ts
+│   │   │   │   ├── statistics.service.ts
+│   │   │   │   └── transactions.service.ts
+│   │   │   ├── components/
+│   │   │   │   ├── Dashboard/      # Dashboard widgets
+│   │   │   │   │   ├── WelcomeWidget.tsx
+│   │   │   │   │   ├── QuickActionsBar.tsx
+│   │   │   │   │   ├── MyActiveListingsWidget.tsx
+│   │   │   │   │   └── EarningsWidget.tsx
+│   │   │   │   ├── HomePage/       # Marketing sections
+│   │   │   │   │   ├── Header.tsx
+│   │   │   │   │   ├── HeroSection.tsx
+│   │   │   │   │   ├── StatsSection.tsx
+│   │   │   │   │   ├── HowItWorksSection.tsx
+│   │   │   │   │   ├── AvailableBottlesSection.tsx
+│   │   │   │   │   ├── CTASection.tsx
+│   │   │   │   │   └── Footer.tsx
+│   │   │   │   ├── UserDashboard.tsx
+│   │   │   │   └── index.ts
+│   │   │   ├── hooks/
+│   │   │   │   ├── useRatings.ts
+│   │   │   │   ├── useStatistics.ts
+│   │   │   │   ├── useTransactions.ts
+│   │   │   │   └── useIndex.ts
+│   │   │   ├── pages/
+│   │   │   │   └── Index.tsx       # Home/Dashboard page
+│   │   │   ├── types/
+│   │   │   └── index.ts
+│   │   │
+│   │   ├── listings/               # Bottle listings management
+│   │   │   ├── api/
+│   │   │   │   └── bottleListings.service.ts
+│   │   │   ├── components/
+│   │   │   │   ├── BottleListingCard.tsx
+│   │   │   │   ├── BottleListingSkeleton.tsx
+│   │   │   │   ├── LocationPicker.tsx
+│   │   │   │   ├── MapView.tsx
+│   │   │   │   ├── RatingDialog.tsx
+│   │   │   │   └── index.ts
+│   │   │   ├── hooks/
+│   │   │   │   ├── useBottleListings.ts
+│   │   │   │   ├── useDeleteBottleListing.ts
+│   │   │   │   └── index.ts
+│   │   │   ├── pages/
+│   │   │   │   ├── CreateListing.tsx
+│   │   │   │   ├── MyListings.tsx
+│   │   │   │   └── index.ts
+│   │   │   ├── types/
+│   │   │   └── index.ts
+│   │   │
+│   │   ├── messaging/              # Real-time chat
+│   │   │   ├── api/
+│   │   │   │   └── messages.service.ts
+│   │   │   ├── components/
+│   │   │   │   ├── ChatBox.tsx
+│   │   │   │   ├── ChatMessage.tsx
+│   │   │   │   ├── ConversationList.tsx
+│   │   │   │   ├── ImageModal.tsx
+│   │   │   │   ├── ImagePreview.tsx
+│   │   │   │   ├── MessageInput.tsx
+│   │   │   │   ├── ReadReceipt.tsx
+│   │   │   │   ├── TypingIndicator.tsx
+│   │   │   │   └── index.ts
+│   │   │   ├── hooks/
+│   │   │   │   ├── useMessages.ts
+│   │   │   │   ├── useSignalR.ts
+│   │   │   │   ├── useTypingIndicator.ts
+│   │   │   │   └── index.ts
+│   │   │   ├── pages/
+│   │   │   │   └── Messages.tsx
+│   │   │   ├── types/
+│   │   │   └── index.ts
+│   │   │
+│   │   ├── notifications/          # Notifications & settings
+│   │   │   ├── api/
+│   │   │   │   ├── userActivities.service.ts
+│   │   │   │   ├── userSettings.service.ts
+│   │   │   │   └── index.ts
+│   │   │   ├── components/
+│   │   │   │   ├── NotificationBell.tsx
+│   │   │   │   ├── NotificationItem.tsx
+│   │   │   │   └── index.ts
+│   │   │   ├── hooks/
+│   │   │   │   ├── useUserActivities.ts
+│   │   │   │   ├── useNotificationPreferences.ts
+│   │   │   │   └── index.ts
+│   │   │   ├── pages/
+│   │   │   │   ├── Notifications.tsx
+│   │   │   │   ├── NotificationSettings.tsx
+│   │   │   │   └── index.ts
+│   │   │   ├── types/
+│   │   │   └── index.ts
+│   │   │
+│   │   └── pickup-requests/        # Pickup request management
+│   │       ├── api/
+│   │       │   └── pickupRequests.service.ts
+│   │       ├── components/
+│   │       │   ├── MyActivePickupsWidget.tsx
+│   │       │   └── index.ts
+│   │       ├── hooks/
+│   │       │   ├── usePickupRequests.ts
+│   │       │   ├── useCreatePickupRequest.ts
+│   │       │   ├── useUpdatePickupRequestStatus.ts
+│   │       │   └── index.ts
+│   │       ├── pages/
+│   │       │   └── MyPickupTasks.tsx
+│   │       ├── types/
+│   │       └── index.ts
+│   │
+│   ├── shared/                     # Shared resources
+│   │   ├── components/             # Shared components
+│   │   │   ├── ErrorBoundary.tsx
+│   │   │   ├── LanguageSwitcher.tsx
+│   │   │   ├── LanguageSyncProvider.tsx
+│   │   │   ├── LoadingSpinner.tsx
+│   │   │   ├── ProtectedRoute.tsx
+│   │   │   └── index.ts
+│   │   ├── hooks/                  # Shared hooks
+│   │   │   ├── use-mobile.tsx
+│   │   │   ├── use-toast.ts
+│   │   │   └── index.ts
+│   │   ├── lib/                    # Utilities
+│   │   │   ├── apiClient.ts
+│   │   │   ├── i18n.ts
+│   │   │   ├── mapUtils.ts
+│   │   │   ├── tokenUtils.ts
+│   │   │   └── utils.ts
+│   │   ├── types/                  # Shared TypeScript types
+│   │   │   └── index.ts
+│   │   ├── ui/                     # shadcn/ui primitives (Radix UI)
 │   │   │   ├── button.tsx
 │   │   │   ├── form.tsx
 │   │   │   ├── toaster.tsx
-│   │   │   └── ...                # generated primitives reused across views
-│   │   ├── HomePage/              # Landing page sections
-│   │   ├── Dashboard/             # Authenticated dashboard widgets
-│   │   ├── UserDashboard.tsx      # Authenticated overview shell
-│   │   ├── BottleListingCard.tsx
-│   │   ├── BottleListingSkeleton.tsx
-│   │   ├── MapView.tsx
-│   │   ├── LocationPicker.tsx
-│   │   ├── ConversationList.tsx
-│   │   ├── ChatBox.tsx
-│   │   ├── ChatMessage.tsx
-│   │   ├── MessageInput.tsx
-│   │   ├── TypingIndicator.tsx
-│   │   ├── ReadReceipt.tsx
-│   │   ├── ImagePreview.tsx
-│   │   ├── ImageModal.tsx
-│   │   ├── RatingDialog.tsx
-│   │   ├── LoadingSpinner.tsx
-│   │   ├── ProtectedRoute.tsx     # Optional route guard
-│   │   ├── LanguageSwitcher.tsx
-│   │   └── ErrorBoundary.tsx      # Error handling
+│   │   │   └── ...                 # 40+ UI components
+│   │   └── index.ts
 │   │
-│   ├── contexts/
-│   │   ├── AuthContext.tsx        # Auth state + credential flows
-│   │   └── SignalRContext.tsx     # Shared SignalR hub connection
+│   ├── contexts/                   # Global contexts
+│   │   ├── AuthContext.tsx         # Auth state + flows
+│   │   ├── SignalRContext.ts       # SignalR context definition
+│   │   └── SignalRProvider.tsx     # SignalR connection provider
 │   │
-│   ├── hooks/
-│   │   ├── api/                   # React Query custom hooks
-│   │   │   ├── useBottleListings.ts
-│   │   │   ├── usePickupRequests.ts
-│   │   │   ├── useTransactions.ts
-│   │   │   ├── useStatistics.ts
-│   │   │   ├── useRatings.ts
-│   │   │   ├── index.ts           # Barrel export
-│   │   │   └── README.md          # Hook documentation
-│   │   ├── useMessages.ts         # SignalR + React Query chat bridge
-│   │   ├── useTypingIndicator.ts  # SignalR typing events
-│   │   ├── useSignalR.ts          # SignalR context accessor
-│   │   ├── useSignalRStatus.ts    # Connection state helpers
-│   │   ├── useMapViewData.ts      # Listings + pickup request synthesis
-│   │   ├── useBottleListingOverview.ts  # Legacy composite hook
-│   │   ├── use-mobile.tsx         # Responsive breakpoint helper
-│   │   └── use-toast.ts           # Toast notifications
-│   │
-│   ├── lib/
-│   │   ├── apiClient.ts       # HTTP client + error handling
-│   │   ├── mapUtils.ts        # Leaflet map utilities
-│   │   ├── tokenUtils.ts      # JWT utilities
-│   │   ├── i18n.ts            # i18n configuration
-│   │   └── utils.ts           # General utilities (cn, etc.)
-│   │
-│   ├── pages/
-│   │   ├── Index.tsx          # Home page (dashboard/landing)
-│   │   ├── Auth.tsx           # Login/Register
-│   │   ├── About.tsx
-│   │   ├── FAQ.tsx
-│   │   ├── TermsOfService.tsx
-│   │   ├── CreateListing.tsx
-│   │   ├── MyListings.tsx
-│   │   ├── MyPickupTasks.tsx
-│   │   ├── Messages.tsx       # Real-time chat
-│   │   └── NotFound.tsx
-│   │
-│   ├── types/
-│   │   └── index.ts           # TypeScript type definitions
-│   │
-│   ├── App.tsx                # Root component + routing
-│   ├── main.tsx               # Entry point
-│   ├── config.ts              # Environment config
-│   └── index.css              # Global styles
+│   ├── App.tsx                     # Root component
+│   ├── main.tsx                    # Entry point
+│   ├── config.ts                   # Environment config
+│   └── index.css                   # Global styles
 │
-├── public/                    # Static assets
-├── docs/                      # Documentation (this file)
+├── public/                         # Static assets
 ├── package.json
 ├── tsconfig.json
 ├── vite.config.ts
 └── tailwind.config.js
 ```
 
-### Why This Structure?
+### Architecture Layers
 
-| Folder | Purpose | Ownership | Boundaries |
-|--------|---------|-----------|------------|
-| **api/services/** | Centralized HTTP endpoints. Single source of truth for all API calls. | Backend Team API contract | Never import from `hooks/`. Only uses `apiClient`. |
-| **components/ui/** | Reusable Radix UI primitives (shadcn/ui). Design system foundation. | Frontend Team | Never imports from `pages/` or `hooks/api/`. |
-| **components/** | Feature components. Stateful, domain-specific. | Feature Teams | Can import from `hooks/api/`, `ui/`, `contexts/`. |
-| **contexts/** | Auth session and SignalR connection providers. React Context API for cross-cutting concerns. | Core Team | Keep side effects inside providers; consumers must use exported hooks. |
-| **hooks/api/** | React Query hooks wrapping services. Data fetching layer. | Frontend Team | Only imports from `api/services/`. Exports to components. |
-| **hooks/** | Reusable logic (non-data). Custom hooks for side effects, state, effects. | Frontend Team | Can import from `hooks/api/`. No direct `apiClient` calls. |
-| **lib/** | Pure utilities, no side effects. | Core Team | Zero external deps (except tiny libs like `clsx`). |
-| **pages/** | Route-level components. Top-level views. | Feature Teams | Composes components. Uses hooks. No business logic. |
-| **types/** | Shared TypeScript types. | Backend + Frontend | Ideally auto-generated from backend schema. |
+The feature-sliced architecture follows a strict layering system:
+
+```
+┌─────────────────────────────────────────┐
+│           App Layer                      │  ← Routes, providers, static pages
+├─────────────────────────────────────────┤
+│           Features Layer                 │  ← Business logic (auth, listings, messaging)
+├─────────────────────────────────────────┤
+│           Shared Layer                   │  ← Reusable components, hooks, utilities
+├─────────────────────────────────────────┤
+│           Contexts Layer                 │  ← Global state (Auth, SignalR)
+└─────────────────────────────────────────┘
+```
+
+### Feature Module Structure
+
+Each feature follows a consistent internal structure:
+
+```
+feature-name/
+├── api/                # HTTP service layer
+│   ├── *.service.ts
+│   └── index.ts
+├── components/         # Feature-specific components
+│   ├── Component.tsx
+│   └── index.ts
+├── hooks/              # Feature-specific hooks (React Query)
+│   ├── useFeature.ts
+│   └── index.ts
+├── pages/              # Route-level pages
+│   ├── Page.tsx
+│   └── index.ts
+├── types/              # Feature-specific types
+│   └── index.ts
+└── index.ts            # Feature barrel export
+```
+
+### Dependency Rules
+
+| Layer | Can Import From | Cannot Import From |
+|-------|----------------|-------------------|
+| **app/** | features/, shared/, contexts/ | ❌ Nothing imports from app |
+| **features/*** | shared/, contexts/, other feature APIs only | ❌ Other feature internals |
+| **shared/** | ❌ Nothing | features/, app/, contexts/ |
+| **contexts/** | shared/ | features/, app/ |
+
+### Why Feature-Sliced Design?
+
+| Benefit | Description |
+|---------|-------------|
+| **Scalability** | Each feature is self-contained with clear boundaries |
+| **Team Collaboration** | Multiple teams can work on different features independently |
+| **Code Discovery** | Easy to locate feature-specific code (all auth code in `features/auth/`) |
+| **Reduced Coupling** | Features only communicate via public APIs (barrel exports) |
+| **Clear Dependencies** | Strict layering prevents circular dependencies |
+| **Easier Testing** | Features can be tested in isolation |
+| **Onboarding** | New developers can understand one feature at a time |
 
 ---
 
@@ -149,9 +282,9 @@ We use **React Query v5** for all server state management.
 #### Query Hook Pattern
 
 ```typescript
-// File: hooks/api/useBottleListings.ts
+// File: features/listings/hooks/useBottleListings.ts
 import { useQuery } from "@tanstack/react-query";
-import { bottleListingService } from "@/api/services";
+import { bottleListingService } from "@/features/listings/api";
 
 export const bottleListingKeys = {
   all: ['bottleListings'] as const,
@@ -181,11 +314,11 @@ export const useBottleListing = (id: string) => {
 #### Mutation Hook Pattern
 
 ```typescript
-// File: hooks/api/useBottleListings.ts (continued)
+// File: features/listings/hooks/useBottleListings.ts (continued)
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/shared/hooks/use-toast";
 import { useTranslation } from "react-i18next";
-import { ApiRequestError } from "@/lib/apiClient";
+import { ApiRequestError } from "@/shared/lib/apiClient";
 
 export const useCreateBottleListing = () => {
   const queryClient = useQueryClient();
@@ -239,7 +372,7 @@ export const useCreateBottleListing = () => {
 Errors are classified and handled via `ApiRequestError`:
 
 ```typescript
-// File: lib/apiClient.ts
+// File: shared/lib/apiClient.ts
 export class ApiRequestError extends Error {
   constructor(
     message: string,
@@ -599,17 +732,18 @@ export const useAuth = () => {
 ### Protected Routes
 
 ```typescript
-// File: components/ProtectedRoute.tsx
+// File: shared/components/ProtectedRoute.tsx
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { LoadingSpinner } from "./LoadingSpinner";
 
 export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-emerald-100">
+        <LoadingSpinner size="lg" text="Loading..." />
       </div>
     );
   }
@@ -622,24 +756,13 @@ export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 };
 ```
 
-`App.tsx` currently keeps the guard import commented so all routes render publicly until wrapped:
+Protected routes are already configured in `AppRouter.tsx` (see above). To protect a route, wrap it with `<ProtectedRoute>`:
 
 ```typescript
-// import { ProtectedRoute } from "@/components/ProtectedRoute"; // Enable when gating routes
-
-<Routes>
-  <Route path="/" element={<Index />} />
-  <Route path="/auth" element={<Auth />} />
-  <Route path="/auth/success" element={<Auth />} />
-  <Route path="/about" element={<About />} />
-  <Route path="/faq" element={<FAQ />} />
-  <Route path="/terms" element={<TermsOfService />} />
-  <Route path="/create-listing" element={<CreateListing />} />
-  <Route path="/my-listings" element={<MyListings />} />
-  <Route path="/my-pickup-tasks" element={<MyPickupTasks />} />
-  <Route path="/messages" element={<Messages />} />
-  <Route path="*" element={<NotFound />} />
-</Routes>
+<Route
+  path="/create-listing"
+  element={<ProtectedRoute><CreateListing /></ProtectedRoute>}
+/>
 ```
 
 ### Google OAuth
@@ -667,28 +790,57 @@ const handleGoogleSuccess = async (credentialResponse) => {
 ### React Router v6
 
 ```typescript
-// File: App.tsx
+// File: app/routes/AppRouter.tsx
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ProtectedRoute } from "../providers/AppProviders";
+import Index from "@/features/dashboard/pages/Index";
+import { Auth } from "@/features/auth/pages";
+import { CreateListing, MyListings } from "@/features/listings/pages";
+import { MyPickupTasks } from "@/features/pickup-requests/pages";
+import { Messages } from "@/features/messaging/pages";
+import { Notifications, NotificationSettings } from "@/features/notifications/pages";
+import About from "@/app/pages/About";
+import FAQ from "@/app/pages/FAQ";
+import TermsOfService from "@/app/pages/TermsOfService";
+import NotFound from "@/app/pages/NotFound";
 
-function App() {
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Index />} />
-        <Route path="/auth" element={<Auth />} />
-        <Route path="/auth/success" element={<Auth />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/faq" element={<FAQ />} />
-        <Route path="/terms" element={<TermsOfService />} />
-        <Route path="/create-listing" element={<CreateListing />} />
-        <Route path="/my-listings" element={<MyListings />} />
-        <Route path="/my-pickup-tasks" element={<MyPickupTasks />} />
-        <Route path="/messages" element={<Messages />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </BrowserRouter>
-  );
-}
+export const AppRouter = () => (
+  <BrowserRouter>
+    <Routes>
+      <Route path="/" element={<Index />} />
+      <Route path="/auth" element={<Auth />} />
+      <Route path="/auth/success" element={<Auth />} />
+      <Route path="/about" element={<About />} />
+      <Route path="/faq" element={<FAQ />} />
+      <Route path="/terms" element={<TermsOfService />} />
+      <Route
+        path="/create-listing"
+        element={<ProtectedRoute><CreateListing /></ProtectedRoute>}
+      />
+      <Route
+        path="/my-listings"
+        element={<ProtectedRoute><MyListings /></ProtectedRoute>}
+      />
+      <Route
+        path="/my-pickup-tasks"
+        element={<ProtectedRoute><MyPickupTasks /></ProtectedRoute>}
+      />
+      <Route
+        path="/messages"
+        element={<ProtectedRoute><Messages /></ProtectedRoute>}
+      />
+      <Route
+        path="/notifications"
+        element={<ProtectedRoute><Notifications /></ProtectedRoute>}
+      />
+      <Route
+        path="/settings/notifications"
+        element={<ProtectedRoute><NotificationSettings /></ProtectedRoute>}
+      />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  </BrowserRouter>
+);
 ```
 
 ### Navigation
@@ -734,7 +886,7 @@ const { isAuthenticated } = useAuth();
 
 ### Authentication forms (React Hook Form)
 
-`Auth.tsx` drives sign-in, sign-up, and Google OAuth flows using React Hook Form + Zod while delegating auth side effects to `AuthContext` and the toast helper:
+`features/auth/pages/Auth.tsx` drives sign-in, sign-up, and Google OAuth flows using React Hook Form + Zod while delegating auth side effects to `AuthContext` and the toast helper:
 
 ```typescript
 const signInForm = useForm<SignInFormData>({
@@ -767,7 +919,7 @@ The component maintains a parallel `signUpForm`, shares input primitives, and se
 
 ### Create Listing (controlled inputs)
 
-`CreateListing.tsx` opts for controlled inputs to handle derived totals, geolocation, and conditional validation before invoking `useCreateBottleListing`:
+`features/listings/pages/CreateListing.tsx` opts for controlled inputs to handle derived totals, geolocation, and conditional validation before invoking `useCreateBottleListing`:
 
 ```typescript
 const [formData, setFormData] = useState({
@@ -840,11 +992,11 @@ The BottleBuddy frontend uses **SignalR (@microsoft/signalr)** for real-time mes
 
 | Component | Purpose | Location |
 |-----------|---------|----------|
-| `SignalRProvider` | Maintains global WebSocket connection | `contexts/SignalRContext.tsx` |
-| `useSignalR` | Hook to access connection | `hooks/useSignalR.ts` |
-| `useMessages` | React Query + SignalR integration for messages | `hooks/useMessages.ts` |
-| `useTypingIndicator` | Real-time typing indicators | `hooks/useTypingIndicator.ts` |
-| `useSignalRStatus` | Connection status helper | `hooks/useSignalRStatus.ts` |
+| `SignalRContext` | SignalR context definition | `contexts/SignalRContext.ts` |
+| `SignalRProvider` | Maintains global WebSocket connection | `contexts/SignalRProvider.tsx` |
+| `useSignalR` | Hook to access connection | `features/messaging/hooks/useSignalR.ts` |
+| `useMessages` | React Query + SignalR integration for messages | `features/messaging/hooks/useMessages.ts` |
+| `useTypingIndicator` | Real-time typing indicators | `features/messaging/hooks/useTypingIndicator.ts` |
 
 ---
 
@@ -852,20 +1004,39 @@ The BottleBuddy frontend uses **SignalR (@microsoft/signalr)** for real-time mes
 
 The `SignalRProvider` creates and manages a **single global WebSocket connection** that all components share. This prevents multiple connections from being created when multiple components need real-time updates.
 
-```typescript
-// File: contexts/SignalRContext.tsx
-import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
-import * as signalR from "@microsoft/signalr";
-import config from "@/config";
-import { useAuth } from "@/contexts/AuthContext";
+**SignalR Context Definition:**
 
-interface SignalRContextValue {
+```typescript
+// File: contexts/SignalRContext.ts
+import { createContext, useContext } from "react";
+import * as signalR from "@microsoft/signalr";
+
+export interface SignalRContextValue {
   connection: signalR.HubConnection | null;
   isConnected: boolean;
   connectionError: string | null;
 }
 
-const SignalRContext = createContext<SignalRContextValue | undefined>(undefined);
+export const SignalRContext = createContext<SignalRContextValue | undefined>(undefined);
+
+export const useSignalRContext = () => {
+  const context = useContext(SignalRContext);
+  if (!context) {
+    throw new Error("useSignalRContext must be used within a SignalRProvider");
+  }
+  return context;
+};
+```
+
+**SignalR Provider Implementation:**
+
+```typescript
+// File: contexts/SignalRProvider.tsx
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import * as signalR from "@microsoft/signalr";
+import config from "@/config";
+import { useAuth } from "@/contexts/AuthContext";
+import { SignalRContext } from "./SignalRContext";
 
 /**
  * Creates a SignalR connection with proper configuration
@@ -1018,14 +1189,6 @@ export const SignalRProvider = ({ children }: { children: ReactNode }) => {
     </SignalRContext.Provider>
   );
 };
-
-export const useSignalRContext = () => {
-  const context = useContext(SignalRContext);
-  if (!context) {
-    throw new Error("useSignalRContext must be used within a SignalRProvider");
-  }
-  return context;
-};
 ```
 
 #### Key Features:
@@ -1042,7 +1205,7 @@ export const useSignalRContext = () => {
 Simple hook to access the global SignalR connection from any component.
 
 ```typescript
-// File: hooks/useSignalR.ts
+// File: features/messaging/hooks/useSignalR.ts
 import { useContext } from "react";
 import { SignalRContext } from "@/contexts/SignalRContext";
 
@@ -1069,14 +1232,14 @@ const { connection, isConnected, connectionError } = useSignalR();
 The `useMessages` hook combines **React Query** for HTTP requests with **SignalR** for real-time updates.
 
 ```typescript
-// File: hooks/useMessages.ts
+// File: features/messaging/hooks/useMessages.ts
 import { useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Message, CreateMessage } from "@/types";
-import { useToast } from "@/hooks/use-toast";
-import { useSignalR } from "@/hooks/useSignalR";
-import { messageService } from "@/api/services";
-import { ApiRequestError } from "@/lib/apiClient";
+import { Message, CreateMessage } from "@/shared/types";
+import { useToast } from "@/shared/hooks/use-toast";
+import { useSignalR } from "./useSignalR";
+import { messageService } from "@/features/messaging/api";
+import { ApiRequestError } from "@/shared/lib/apiClient";
 
 const messageKeys = {
   all: ['messages'] as const,
@@ -1314,9 +1477,9 @@ const { messages } = useMessages(selectedId, { enabled: !!selectedId });
 Real-time typing indicators for chat conversations.
 
 ```typescript
-// File: hooks/useTypingIndicator.ts
+// File: features/messaging/hooks/useTypingIndicator.ts
 import { useEffect, useRef, useCallback, useState } from "react";
-import { useSignalR } from "@/hooks/useSignalR";
+import { useSignalR } from "./useSignalR";
 
 interface UseTypingIndicatorOptions {
   pickupRequestId: string | null;
@@ -1523,32 +1686,27 @@ The `SignalRProvider` must wrap the entire app and be placed **inside** `AuthPro
 
 ```typescript
 // File: App.tsx
-import { AuthProvider } from "@/contexts/AuthContext";
-import { SignalRProvider } from "@/contexts/SignalRContext";
+import { AppProviders } from "@/app/providers/AppProviders";
+import { AppRouter } from "@/app/routes/AppRouter";
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <SignalRProvider>
-        <BrowserRouter>
-          <Routes>
-            {/* ... routes */}
-          </Routes>
-        </BrowserRouter>
-      </SignalRProvider>
-    </AuthProvider>
-  </QueryClientProvider>
+  <AppProviders>
+    <AppRouter />
+  </AppProviders>
 );
 ```
 
-**Provider Hierarchy:**
+**Provider Hierarchy (in AppProviders.tsx):**
 ```
 ErrorBoundary
 └── QueryClientProvider
-    └── AuthProvider (provides token)
-        └── SignalRProvider (uses token)
-            └── BrowserRouter
-                └── Routes
+    └── TooltipProvider
+        └── AuthProvider (provides token)
+            └── LanguageSyncProvider
+                └── SignalRProvider (uses token)
+                    ├── Toaster (shadcn/ui)
+                    ├── Sonner (toast notifications)
+                    └── {children} (AppRouter)
 ```
 
 ---
@@ -1732,7 +1890,8 @@ const queryClient = new QueryClient({
 ### ✅ DO
 
 ```typescript
-// Use custom hooks from hooks/api/
+// Use custom hooks from feature modules
+import { useBottleListings } from "@/features/listings/hooks";
 const { data: listings } = useBottleListings();
 
 // Check auth before invoking protected mutations
@@ -1781,16 +1940,18 @@ setState({ count: state.count + 1 }); // ✅
 
 ### Code Review Checklist
 
-- [ ] Components call APIs via hooks in `hooks/api/`
-- [ ] Cache keys follow the exported `*Keys` helpers
+- [ ] Components call APIs via hooks from feature modules (e.g., `@/features/listings/hooks`)
+- [ ] Cache keys follow the exported `*Keys` helpers in each feature
 - [ ] Mutations invalidate relevant caches and surface toasts
-- [ ] Forms use React Hook Form (e.g., `Auth.tsx`) or equivalent controlled patterns (e.g., `CreateListing.tsx`)
+- [ ] Forms use React Hook Form (e.g., `features/auth/pages/Auth.tsx`) or controlled patterns (e.g., `features/listings/pages/CreateListing.tsx`)
 - [ ] Routes requiring auth are wrapped with `<ProtectedRoute>`
-- [ ] i18n strings come from `t()` / `lib/i18n.ts`
-- [ ] TypeScript types align with `src/types`
+- [ ] i18n strings come from `t()` / `shared/lib/i18n.ts`
+- [ ] TypeScript types align with `shared/types` or feature-specific types
 - [ ] Errors surface `ApiRequestError.getUserMessage()` when possible
-- [ ] shadcn/ui primitives are applied consistently
-- [ ] Tailwind utilities leverage the shared `cn()` helper
+- [ ] shadcn/ui primitives from `shared/ui/` are applied consistently
+- [ ] Tailwind utilities leverage the shared `cn()` helper from `shared/lib/utils`
+- [ ] Features only import from `shared/`, `contexts/`, and other feature APIs (not internals)
+- [ ] No circular dependencies between features
 
 ---
 
@@ -1889,46 +2050,132 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 ---
 
-## Migration Path (Legacy → New Architecture)
+## Migration Path (Adding New Features)
 
-### Step 1: Create Service
+### Step 1: Create Feature Structure
+
+```bash
+features/
+└── my-feature/
+    ├── api/
+    │   └── myFeature.service.ts
+    ├── components/
+    │   └── MyComponent.tsx
+    ├── hooks/
+    │   └── useMyFeature.ts
+    ├── pages/
+    │   └── MyPage.tsx
+    ├── types/
+    │   └── index.ts
+    └── index.ts
+```
+
+### Step 2: Create Service
 
 ```typescript
-// api/services/myFeature.service.ts
+// features/my-feature/api/myFeature.service.ts
+import { apiClient } from "@/shared/lib/apiClient";
+import type { MyFeature } from "../types";
+
 export const myFeatureService = {
   getAll: () => apiClient.get<MyFeature[]>('/api/my-features'),
+  getById: (id: string) => apiClient.get<MyFeature>(`/api/my-features/${id}`),
+  create: (data: CreateMyFeatureRequest) =>
+    apiClient.post<MyFeature>('/api/my-features', data),
 };
 ```
 
-### Step 2: Create Hook
+### Step 3: Create Hook
 
 ```typescript
-// hooks/api/useMyFeature.ts
+// features/my-feature/hooks/useMyFeature.ts
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { myFeatureService } from "../api/myFeature.service";
+import { useToast } from "@/shared/hooks/use-toast";
+
+const myFeatureKeys = {
+  all: ['myFeatures'] as const,
+  lists: () => [...myFeatureKeys.all, 'list'] as const,
+  detail: (id: string) => [...myFeatureKeys.all, 'detail', id] as const,
+};
+
 export const useMyFeatures = () => {
   return useQuery({
-    queryKey: ['myFeatures'],
+    queryKey: myFeatureKeys.lists(),
     queryFn: myFeatureService.getAll,
+    staleTime: 30000,
+  });
+};
+
+export const useCreateMyFeature = () => {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: myFeatureService.create,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: myFeatureKeys.all });
+      toast({ title: "Success", description: "Created successfully" });
+    },
   });
 };
 ```
 
-### Step 3: Replace Component Code
+### Step 4: Create Component
 
-**Before:**
 ```typescript
-const [data, setData] = useState([]);
-const [loading, setLoading] = useState(true);
+// features/my-feature/components/MyComponent.tsx
+import { useMyFeatures } from "../hooks/useMyFeature";
 
-useEffect(() => {
-  apiClient.get('/api/my-features')
-    .then(setData)
-    .finally(() => setLoading(false));
-}, []);
+export const MyComponent = () => {
+  const { data: features, isLoading } = useMyFeatures();
+
+  if (isLoading) return <div>Loading...</div>;
+
+  return (
+    <div>
+      {features?.map(feature => (
+        <div key={feature.id}>{feature.name}</div>
+      ))}
+    </div>
+  );
+};
 ```
 
-**After:**
+### Step 5: Create Page & Export
+
 ```typescript
-const { data, isLoading } = useMyFeatures();
+// features/my-feature/pages/MyPage.tsx
+import { MyComponent } from "../components/MyComponent";
+
+const MyPage = () => {
+  return (
+    <div>
+      <h1>My Feature</h1>
+      <MyComponent />
+    </div>
+  );
+};
+
+export default MyPage;
+```
+
+```typescript
+// features/my-feature/index.ts
+export * from "./api";
+export * from "./components";
+export * from "./hooks";
+export * from "./pages";
+export * from "./types";
+```
+
+### Step 6: Add Route
+
+```typescript
+// app/routes/AppRouter.tsx
+import { MyPage } from "@/features/my-feature/pages";
+
+<Route path="/my-feature" element={<MyPage />} />
 ```
 
 ---
@@ -1942,6 +2189,7 @@ const { data, isLoading } = useMyFeatures();
 
 ---
 
-**Last Updated:** 2025-01-10
+**Last Updated:** 2025-01-19
+**Architecture:** Feature-Sliced Design (FSD)
 **Maintained by:** Frontend Architecture Team
 **Questions?** Open an issue or contact: misi@protonmail.ch

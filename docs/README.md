@@ -32,11 +32,10 @@ BottleBuddy/
 │
 ├── frontend/             # React + TypeScript + Vite SPA
 │   ├── src/
-│   │   ├── components/
-│   │   ├── contexts/
-│   │   ├── hooks/
-│   │   ├── api/
-│   │   └── pages/
+│   │   ├── app/              # Application layer (routes, providers, pages)
+│   │   ├── features/         # Feature modules (auth, listings, messaging, etc.)
+│   │   ├── shared/           # Shared resources (components, hooks, lib, types, ui)
+│   │   └── contexts/         # Global contexts (Auth, SignalR)
 │   ├── public/
 │   ├── package.json
 │   └── vite.config.ts

@@ -1,8 +1,8 @@
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import { toast } from '@/shared/hooks/use-toast';
-import { apiClient, ApiRequestError } from '@/shared/lib/apiClient';
-import { isValidToken, getUserIdFromToken } from '@/shared/lib/tokenUtils';
-import type { User, AuthResponse } from '@/shared/types';
+import React, {createContext, useCallback, useContext, useEffect, useState} from 'react';
+import {apiClient, ApiRequestError} from '@/shared/lib/apiClient';
+import {getUserIdFromToken, isValidToken} from '@/shared/lib/tokenUtils';
+import type {AuthResponse, User} from '@/shared/types';
+
 type RegisterRequestBody = {
   email: string;
   password: string;

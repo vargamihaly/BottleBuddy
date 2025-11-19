@@ -1,17 +1,16 @@
-import { Button } from "@/shared/ui/button";
-import { Globe } from "lucide-react";
-import { useTranslation } from "react-i18next";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/shared/ui/dropdown-menu";
-import { useUpdateUserSettings } from "@/features/notifications/hooks";
-import { useAuth } from "@/contexts/AuthContext";
-import { toast } from "sonner";
+import {Button} from "@/shared/ui/button";
+import {Globe} from "lucide-react";
+import {useTranslation} from "react-i18next";
+import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,} from "@/shared/ui/dropdown-menu";
+import {useUpdateUserSettings} from "@/features/notifications/hooks";
+import {useAuth} from "@/contexts/AuthContext";
+import {cn} from "@/shared/lib/utils";
 
-export const LanguageSwitcher = () => {
+interface LanguageSwitcherProps {
+  className?: string;
+}
+
+export const LanguageSwitcher = ({ className }: LanguageSwitcherProps = {}) => {
   const { i18n } = useTranslation();
   const { user } = useAuth();
   const updateSettings = useUpdateUserSettings();
@@ -45,7 +44,7 @@ export const LanguageSwitcher = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm" className="gap-2">
+        <Button variant="ghost" size="sm" className={cn("gap-2", className)}>
           <Globe className="w-4 h-4" />
           <span className="hidden sm:inline">{currentLanguage.flag} {currentLanguage.name}</span>
           <span className="sm:hidden">{currentLanguage.flag}</span>

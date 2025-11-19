@@ -1,5 +1,5 @@
-import { apiClient } from "@/shared/lib/apiClient";
-import { Transaction } from "@/shared/types";
+import {apiClient} from "@/shared/lib/apiClient";
+import {Transaction} from "@/shared/types";
 
 // Backend wraps responses in { data: ... }
 interface ApiResponse<T> {

@@ -1,5 +1,5 @@
-import { useTranslation } from "react-i18next";
-import { useGlobalStatistics } from "@/features/dashboard/hooks";
+import {useTranslation} from "react-i18next";
+import {useGlobalStatistics} from "@/features/dashboard/hooks";
 
 export const StatsSection = () => {
   const { t } = useTranslation();

@@ -1,5 +1,5 @@
 import i18n from "i18next";
-import { initReactI18next } from "react-i18next";
+import {initReactI18next} from "react-i18next";
 import activitiesEn from "@/locales/en/activities.json";
 import activitiesHu from "@/locales/hu/activities.json";
 

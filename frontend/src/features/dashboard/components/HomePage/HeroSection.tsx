@@ -1,8 +1,8 @@
-import { Button } from "@/shared/ui/button";
-import { Plus, MapPin } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
-import { useTranslation } from "react-i18next";
+import {Button} from "@/shared/ui/button";
+import {MapPin, Plus} from "lucide-react";
+import {useAuth} from "@/contexts/AuthContext";
+import {useNavigate} from "react-router-dom";
+import {useTranslation} from "react-i18next";
 
 interface HeroSectionProps {
   onMapClick: () => void;

@@ -1,19 +1,25 @@
-import { Button } from "@/shared/ui/button";
-import { Badge } from "@/shared/ui/badge";
-import { Sheet, SheetContent, SheetTrigger } from "@/shared/ui/sheet";
-import { Popover, PopoverContent, PopoverTrigger } from "@/shared/ui/popover";
-import { ScrollArea } from "@/shared/ui/scroll-area";
-import { MapPin, Users, Bell, LogOut, Info, Recycle, MessageCircle, HelpCircle, Menu, X, Check } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
-import { useToast } from "@/shared/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
-import { useTotalUnreadCount } from "@/features/messaging/hooks";
-import { useTranslation } from "react-i18next";
-import { LanguageSwitcher } from "@/shared/components/LanguageSwitcher";
-import { useState } from "react";
-import { useUnreadActivityCount, useUserActivities, useMarkActivityAsRead, useMarkAllActivitiesAsRead, useDeleteActivity } from "@/features/notifications/hooks";
-import { formatDistanceToNow } from "date-fns";
-import { getActivityMessage } from "@/shared/lib/activityTemplates";
+import {Button} from "@/shared/ui/button";
+import {Badge} from "@/shared/ui/badge";
+import {Sheet, SheetContent, SheetTrigger} from "@/shared/ui/sheet";
+import {Popover, PopoverContent, PopoverTrigger} from "@/shared/ui/popover";
+import {ScrollArea} from "@/shared/ui/scroll-area";
+import {Bell, Check, HelpCircle, Info, LogOut, MapPin, Menu, MessageCircle, Recycle, Users, X} from "lucide-react";
+import {useAuth} from "@/contexts/AuthContext";
+import {useToast} from "@/shared/hooks/use-toast";
+import {useNavigate} from "react-router-dom";
+import {useTotalUnreadCount} from "@/features/messaging/hooks";
+import {useTranslation} from "react-i18next";
+import {LanguageSwitcher} from "@/shared/components/LanguageSwitcher";
+import {useState} from "react";
+import {
+    useDeleteActivity,
+    useMarkActivityAsRead,
+    useMarkAllActivitiesAsRead,
+    useUnreadActivityCount,
+    useUserActivities
+} from "@/features/notifications/hooks";
+import {formatDistanceToNow} from "date-fns";
+import {getActivityMessage} from "@/shared/lib/activityTemplates";
 
 interface HeaderProps {
   onMapClick: () => void;

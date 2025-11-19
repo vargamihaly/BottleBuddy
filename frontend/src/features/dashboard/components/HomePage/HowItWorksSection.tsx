@@ -1,5 +1,5 @@
-import { Card, CardHeader, CardTitle, CardDescription } from "@/shared/ui/card";
-import { useTranslation } from "react-i18next";
+import {Card, CardDescription, CardHeader, CardTitle} from "@/shared/ui/card";
+import {useTranslation} from "react-i18next";
 
 export const HowItWorksSection = () => {
   const { t } = useTranslation();

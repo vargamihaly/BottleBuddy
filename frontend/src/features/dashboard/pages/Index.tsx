@@ -1,28 +1,27 @@
-import { useState } from "react";
-import { UserDashboard } from "@/features/dashboard/components";
-import { MapView } from "@/features/listings/components";
-import { FullPageLoader } from "@/shared/components";
-import { Button } from "@/shared/ui/button";
-import { BottomNav } from "@/shared/ui/bottom-nav";
-import { useIndex } from "@/features/dashboard/hooks";
-import { useAuth } from "@/contexts/AuthContext";
+import {useState} from "react";
+import {UserDashboard} from "@/features/dashboard/components";
+import {MapView} from "@/features/listings/components";
+import {FullPageLoader} from "@/shared/components";
+import {Button} from "@/shared/ui/button";
+import {BottomNav} from "@/shared/ui/bottom-nav";
+import {useIndex} from "@/features/dashboard/hooks";
+import {useAuth} from "@/contexts/AuthContext";
 import {
-  Header,
-  HeroSection,
-  StatsSection,
-  HowItWorksSection,
-  MyListingsSection,
-  AvailableBottlesSection,
-  CTASection,
-  Footer
+    AvailableBottlesSection,
+    CTASection,
+    Footer,
+    Header,
+    HeroSection,
+    HowItWorksSection,
+    StatsSection
 } from "@/features/dashboard/components/HomePage";
 import {
-  WelcomeWidget,
-  QuickActionsBar,
-  MyActiveListingsWidget,
-  EarningsWidget
+    EarningsWidget,
+    MyActiveListingsWidget,
+    QuickActionsBar,
+    WelcomeWidget
 } from "@/features/dashboard/components/Dashboard";
-import { MyActivePickupsWidget } from "@/features/pickup-requests/components";
+import {MyActivePickupsWidget} from "@/features/pickup-requests/components";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("home");

@@ -1,16 +1,9 @@
-import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import {type ReactNode, useEffect, useMemo, useRef, useState} from "react";
 import * as signalR from "@microsoft/signalr";
 
 import config from "@/config";
-import { useAuth } from "@/contexts/AuthContext";
-
-interface SignalRContextValue {
-  connection: signalR.HubConnection | null;
-  isConnected: boolean;
-  connectionError: string | null;
-}
-
-export const SignalRContext = createContext<SignalRContextValue | undefined>(undefined);
+import {useAuth} from "@/contexts/AuthContext";
+import {SignalRContext} from "./SignalRContext";
 
 const HUB_URL = `${config.api.baseUrl}/hubs/messages`;
 
@@ -166,13 +159,4 @@ export const SignalRProvider = ({ children }: { children: ReactNode }) => {
       {children}
     </SignalRContext.Provider>
   );
-};
-
-// eslint-disable-next-line react-refresh/only-export-components
-export const useSignalRContext = () => {
-  const context = useContext(SignalRContext);
-  if (!context) {
-    throw new Error("useSignalRContext must be used within a SignalRProvider");
-  }
-  return context;
 };

@@ -1,5 +1,5 @@
-import { apiClient } from "@/shared/lib/apiClient";
-import { BottleListing, ListingStatus, PaginationMetadata } from "@/shared/types";
+import {apiClient} from "@/shared/lib/apiClient";
+import {BottleListing, ListingStatus, PaginationMetadata} from "@/shared/types";
 
 export interface CreateBottleListingRequest {
   title?: string;

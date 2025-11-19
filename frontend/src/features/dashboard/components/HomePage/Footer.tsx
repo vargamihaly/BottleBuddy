@@ -1,6 +1,6 @@
-import { Recycle } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { useTranslation } from "react-i18next";
+import {Recycle} from "lucide-react";
+import {useNavigate} from "react-router-dom";
+import {useTranslation} from "react-i18next";
 
 export const Footer = () => {
   const navigate = useNavigate();

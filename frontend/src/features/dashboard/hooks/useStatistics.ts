@@ -1,5 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
-import { statisticsService } from "@/features/dashboard/api";
+import {useQuery} from "@tanstack/react-query";
+import {statisticsService} from "@/features/dashboard/api";
 
 /**
  * Query keys for statistics

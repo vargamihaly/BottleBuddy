@@ -1,5 +1,5 @@
 import config from "@/config";
-import type { ApiError } from "@/shared/types";
+import type {ApiError} from "@/shared/types";
 
 const API_BASE_URL = config.api.baseUrl;
 

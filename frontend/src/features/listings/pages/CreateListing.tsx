@@ -1,18 +1,18 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
-import { Button } from "@/shared/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
-import { Input } from "@/shared/ui/input";
-import { Label } from "@/shared/ui/label";
-import { Textarea } from "@/shared/ui/textarea";
-import { Slider } from "@/shared/ui/slider";
-import { Alert, AlertDescription } from "@/shared/ui/alert";
-import { useToast } from "@/shared/hooks/use-toast";
-import { ArrowLeft, Calendar, Info, Coins, Wallet } from "lucide-react";
-import { LocationPicker } from "@/features/listings/components";
-import { useTranslation } from "react-i18next";
-import { useCreateBottleListing } from "@/features/listings/hooks";
+import {useState} from "react";
+import {useNavigate} from "react-router-dom";
+import {useAuth} from "@/contexts/AuthContext";
+import {Button} from "@/shared/ui/button";
+import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/shared/ui/card";
+import {Input} from "@/shared/ui/input";
+import {Label} from "@/shared/ui/label";
+import {Textarea} from "@/shared/ui/textarea";
+import {Slider} from "@/shared/ui/slider";
+import {Alert, AlertDescription} from "@/shared/ui/alert";
+import {useToast} from "@/shared/hooks/use-toast";
+import {ArrowLeft, Calendar, Coins, Info, Wallet} from "lucide-react";
+import {LocationPicker} from "@/features/listings/components";
+import {useTranslation} from "react-i18next";
+import {useCreateBottleListing} from "@/features/listings/hooks";
 
 const CreateListing = () => {
   const { t } = useTranslation();

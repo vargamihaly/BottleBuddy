@@ -1,9 +1,9 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
-import { TrendingUp, Coins, Recycle, Star } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
-import { useTranslation } from "react-i18next";
-import { useMyTransactions } from "@/features/dashboard/hooks";
-import { useMemo } from "react";
+import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/shared/ui/card";
+import {Coins, Recycle, Star, TrendingUp} from "lucide-react";
+import {useAuth} from "@/contexts/AuthContext";
+import {useTranslation} from "react-i18next";
+import {useMyTransactions} from "@/features/dashboard/hooks";
+import {useMemo} from "react";
 
 interface UserStats {
   totalBottles: number;

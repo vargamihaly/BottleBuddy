@@ -1,26 +1,26 @@
-import { useState, useEffect, useRef } from "react";
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
-import { Button } from "@/shared/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
-import { Badge } from "@/shared/ui/badge";
-import { ArrowLeft, MapPin, Star, Users, Search, Filter, Navigation } from "lucide-react";
-import { Input } from "@/shared/ui/input";
-import { useToast } from "@/shared/hooks/use-toast";
-import { BottleListing } from "@/shared/types";
+import {useEffect, useRef, useState} from "react";
+import {MapContainer, Marker, Popup, TileLayer, useMap} from 'react-leaflet';
+import {Button} from "@/shared/ui/button";
+import {Card, CardContent, CardHeader, CardTitle} from "@/shared/ui/card";
+import {Badge} from "@/shared/ui/badge";
+import {ArrowLeft, MapPin, Navigation, Search} from "lucide-react";
+import {Input} from "@/shared/ui/input";
+import {useToast} from "@/shared/hooks/use-toast";
+import {BottleListing} from "@/shared/types";
 import {
-  DEFAULT_CENTER,
-  DEFAULT_ZOOM,
-  createBottleIcon,
-  createSelectedMarkerIcon,
-  createUserLocationIcon,
-  getUserLocation,
-  calculateDistance,
-  formatDistance,
+    calculateDistance,
+    createBottleIcon,
+    createSelectedMarkerIcon,
+    createUserLocationIcon,
+    DEFAULT_CENTER,
+    DEFAULT_ZOOM,
+    formatDistance,
+    getUserLocation,
 } from "@/shared/lib/mapUtils";
-import type { Map as LeafletMap } from 'leaflet';
-import { useAuth } from "@/contexts/AuthContext.tsx";
-import { useTranslation } from "react-i18next";
-import { useCreatePickupRequest, useMapViewData } from "@/features/pickup-requests/hooks";
+import type {Map as LeafletMap} from 'leaflet';
+import {useAuth} from "@/contexts/AuthContext.tsx";
+import {useTranslation} from "react-i18next";
+import {useCreatePickupRequest, useMapViewData} from "@/features/pickup-requests/hooks";
 
 
 interface BottleListingWithDistance extends BottleListing {

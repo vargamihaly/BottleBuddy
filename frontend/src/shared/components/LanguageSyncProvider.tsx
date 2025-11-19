@@ -1,7 +1,7 @@
-import { useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useAuth } from '@/contexts/AuthContext';
-import { useUserSettings } from '@/features/notifications/hooks';
+import {useEffect} from 'react';
+import {useTranslation} from 'react-i18next';
+import {useAuth} from '@/contexts/AuthContext';
+import {useUserSettings} from '@/features/notifications/hooks';
 
 /**
  * Component that synchronizes user's preferred language from the backend

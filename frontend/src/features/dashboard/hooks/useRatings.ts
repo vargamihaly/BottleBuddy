@@ -1,9 +1,9 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useToast } from "@/shared/hooks/use-toast";
-import { ratingService } from "@/features/dashboard/api";
-import { CreateRating, Rating } from "@/shared/types";
-import { ApiRequestError } from "@/shared/lib/apiClient";
-import { useTranslation } from "react-i18next";
+import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
+import {useToast} from "@/shared/hooks/use-toast";
+import {ratingService} from "@/features/dashboard/api";
+import {CreateRating, Rating} from "@/shared/types";
+import {ApiRequestError} from "@/shared/lib/apiClient";
+import {useTranslation} from "react-i18next";
 
 /**
  * Query keys for ratings

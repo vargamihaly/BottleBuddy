@@ -1,22 +1,17 @@
 /* eslint-disable react-refresh/only-export-components */
 import * as React from "react"
-import { Slot } from "@radix-ui/react-slot"
-import { VariantProps, cva } from "class-variance-authority"
-import { PanelLeft } from "lucide-react"
+import {Slot} from "@radix-ui/react-slot"
+import {cva, VariantProps} from "class-variance-authority"
+import {PanelLeft} from "lucide-react"
 
-import { useIsMobile } from "@/shared/hooks/use-mobile"
-import { cn } from "@/shared/lib/utils"
-import { Button } from "@/shared/ui/button"
-import { Input } from "@/shared/ui/input"
-import { Separator } from "@/shared/ui/separator"
-import { Sheet, SheetContent } from "@/shared/ui/sheet"
-import { Skeleton } from "@/shared/ui/skeleton"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/shared/ui/tooltip"
+import {useIsMobile} from "@/shared/hooks/use-mobile"
+import {cn} from "@/shared/lib/utils"
+import {Button} from "@/shared/ui/button"
+import {Input} from "@/shared/ui/input"
+import {Separator} from "@/shared/ui/separator"
+import {Sheet, SheetContent} from "@/shared/ui/sheet"
+import {Skeleton} from "@/shared/ui/skeleton"
+import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger,} from "@/shared/ui/tooltip"
 
 const SIDEBAR_COOKIE_NAME = "sidebar:state"
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7

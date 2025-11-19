@@ -1,5 +1,5 @@
-import { createRoot } from 'react-dom/client'
-import { GoogleOAuthProvider } from '@react-oauth/google';
+import {createRoot} from 'react-dom/client'
+import {GoogleOAuthProvider} from '@react-oauth/google';
 import App from './App.tsx'
 import './index.css'
 import './shared/lib/i18n'
@@ -9,11 +9,11 @@ import './shared/lib/i18n'
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 if (!GOOGLE_CLIENT_ID) {
-  throw new Error('VITE_GOOGLE_CLIENT_ID is not defined. Please check your .env file.');
+    throw new Error('VITE_GOOGLE_CLIENT_ID is not defined. Please check your .env file.');
 }
 
 createRoot(document.getElementById("root")!).render(
-  <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-    <App />
-  </GoogleOAuthProvider>
+    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+        <App/>
+    </GoogleOAuthProvider>
 );

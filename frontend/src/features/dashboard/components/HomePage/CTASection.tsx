@@ -1,7 +1,7 @@
-import { Button } from "@/shared/ui/button";
-import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
-import { useTranslation } from "react-i18next";
+import {Button} from "@/shared/ui/button";
+import {useAuth} from "@/contexts/AuthContext";
+import {useNavigate} from "react-router-dom";
+import {useTranslation} from "react-i18next";
 
 interface CTASectionProps {
   onDashboardClick: () => void;

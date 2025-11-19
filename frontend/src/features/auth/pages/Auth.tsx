@@ -1,20 +1,18 @@
-
-import { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import {useEffect, useState} from "react";
+import {useLocation, useNavigate} from "react-router-dom";
+import {useForm} from "react-hook-form";
+import {zodResolver} from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { GoogleLogin, CredentialResponse } from "@react-oauth/google";
-import { Button } from "@/shared/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/shared/ui/form";
-import { Input } from "@/shared/ui/input";
-import { Separator } from "@/shared/ui/separator";
-import { useAuth } from "@/contexts/AuthContext";
-import { useToast } from "@/shared/hooks/use-toast";
-import { ArrowLeft, Loader2, Recycle, Sparkles } from "lucide-react";
-import config from "@/config";
-import { useTranslation } from "react-i18next";
+import {CredentialResponse, GoogleLogin} from "@react-oauth/google";
+import {Button} from "@/shared/ui/button";
+import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/shared/ui/card";
+import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from "@/shared/ui/form";
+import {Input} from "@/shared/ui/input";
+import {Separator} from "@/shared/ui/separator";
+import {useAuth} from "@/contexts/AuthContext";
+import {useToast} from "@/shared/hooks/use-toast";
+import {ArrowLeft, Loader2, Recycle, Sparkles} from "lucide-react";
+import {useTranslation} from "react-i18next";
 
 const Auth = () => {
   const { t } = useTranslation();
@@ -125,13 +123,13 @@ const Auth = () => {
 
   const onSignUpSubmit = async (data: SignUpFormData) => {
     try {
-      await signUp({
-        email: data.email,
-        password: data.password,
-        fullName: data.fullName || undefined,
-        username: data.username || undefined,
-        phone: data.phone || undefined,
-      });
+      await signUp(
+        data.email,
+        data.password,
+        data.fullName || undefined,
+        data.username || undefined,
+        data.phone || undefined
+      );
       toast({
         title: t("auth.signUpSuccess"),
         description: t("auth.signUpSuccessDesc"),

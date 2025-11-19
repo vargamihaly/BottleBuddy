@@ -1,9 +1,9 @@
-import { useNavigate, useLocation } from "react-router-dom";
-import { Home, MapPin, MessageCircle, Package, User } from "lucide-react";
-import { useTranslation } from "react-i18next";
-import { useTotalUnreadCount } from "@/features/messaging/hooks";
-import { Badge } from "@/shared/ui/badge";
-import { cn } from "@/shared/lib/utils";
+import {useLocation, useNavigate} from "react-router-dom";
+import {Home, MapPin, MessageCircle, Package, User} from "lucide-react";
+import {useTranslation} from "react-i18next";
+import {useTotalUnreadCount} from "@/features/messaging/hooks";
+import {Badge} from "@/shared/ui/badge";
+import {cn} from "@/shared/lib/utils";
 
 interface BottomNavProps {
   onHomeClick?: () => void;

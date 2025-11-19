@@ -1,7 +1,7 @@
-import { Button } from "@/shared/ui/button";
-import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Recycle } from "lucide-react";
-import { useTranslation } from "react-i18next";
+import {Button} from "@/shared/ui/button";
+import {useNavigate} from "react-router-dom";
+import {ArrowLeft, Recycle} from "lucide-react";
+import {useTranslation} from "react-i18next";
 
 const TermsOfService = () => {
     const navigate = useNavigate();
