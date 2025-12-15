@@ -25,26 +25,25 @@ export interface BottleListing {
     id: string;
     title?: string;
     bottleCount: number;
-    locationAddress: string;
+    location: string;
     description?: string;
     latitude?: number | null;
     longitude?: number | null;
     estimatedRefund: number;
-    pickupDeadline?: string;
-    splitPercentage?: number;
-    status: 'open' | 'claimed' | 'completed';
+    deadline?: string;
+    sharePercentage: number;
+    status: ListingStatus;
     userId: string;
     createdByUserRating?: number;
     createdByUserName?: string;
     createdByUserEmail?: string;
     user?: User;
-    createdAt?: string;
+    createdAt: string;
     updatedAt?: string;
     // Computed fields for display
     distance?: string;
     distanceKm?: number;
-    // Pickup request information
-    pendingPickupRequestsCount?: number;
+    pendingRequests?: number;
 }
 
 export interface PickupRequest {
@@ -81,6 +80,13 @@ export interface Transaction {
     ownerName?: string;
     bottleCount?: number;
     listingTitle?: string;
+}
+
+export interface ListingStats {
+    totalActive: number;
+    pendingRequests: number;
+    totalEarnings: number;
+    completedPickups: number;
 }
 
 export interface Rating {

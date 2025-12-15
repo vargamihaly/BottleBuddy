@@ -430,6 +430,7 @@ const resources = {
                 signInMessage: "Please sign in to view your listings.",
                 signIn: "Sign In",
                 tabs: {
+                    all: "All",
                     active: "Active",
                     claimed: "Claimed",
                     completed: "Completed"
@@ -457,7 +458,21 @@ const resources = {
                 error: {
                     title: "Failed to load listings.",
                     button: "Try Again"
-                }
+                },
+                stats: {
+                    totalActive: "Active Listings",
+                    pendingRequests: "Pending Requests",
+                    totalEarnings: "Total Earnings",
+                    completedPickups: "Completed"
+                },
+                timeline: {
+                    created: "Created",
+                    requests: "Requests",
+                    claimed: "Claimed",
+                    complete: "Complete"
+                },
+                emptyWithFilters: "No listings match your filters",
+                viewRequests: "View Requests"
             },
             userDashboard: {
                 title: "My Dashboard",
@@ -546,6 +561,7 @@ const resources = {
                 signInMessage: "Please sign in to view your pickup tasks.",
                 signIn: "Sign In",
                 tabs: {
+                    all: "All",
                     active: "Active",
                     completed: "Completed"
                 },
@@ -1206,6 +1222,7 @@ const resources = {
                 signInMessage: "Kérjük, jelentkezz be a hirdetéseid megtekintéséhez.",
                 signIn: "Bejelentkezés",
                 tabs: {
+                    all: "Összes",
                     active: "Aktív",
                     claimed: "Lefoglalt",
                     completed: "Befejezett"
@@ -1233,7 +1250,21 @@ const resources = {
                 error: {
                     title: "A hirdetések betöltése sikertelen.",
                     button: "Próbáld újra"
-                }
+                },
+                stats: {
+                    totalActive: "Aktív hirdetések",
+                    pendingRequests: "Függőben lévő kérelmek",
+                    totalEarnings: "Összes bevétel",
+                    completedPickups: "Befejezett"
+                },
+                timeline: {
+                    created: "Létrehozva",
+                    requests: "Kérelmek",
+                    claimed: "Lefoglalt",
+                    complete: "Kész"
+                },
+                emptyWithFilters: "Nincs a szűrőknek megfelelő hirdetés",
+                viewRequests: "Kérelmek megtekintése"
             },
             userDashboard: {
                 title: "Irányítópultom",
@@ -1322,6 +1353,7 @@ const resources = {
                 signInMessage: "Kérjük, jelentkezz be az átvételi feladataid megtekintéséhez.",
                 signIn: "Bejelentkezés",
                 tabs: {
+                    all: "Összes",
                     active: "Aktív",
                     completed: "Befejezett"
                 },

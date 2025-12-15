@@ -1,4 +1,4 @@
-import {useState} from "react";
+import {useState, useMemo} from "react";
 import {useNavigate} from "react-router-dom";
 import {useTranslation} from "react-i18next";
 import {Button} from "@/shared/ui/button";
@@ -7,36 +7,138 @@ import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/shared/ui/tabs";
 import {Badge} from "@/shared/ui/badge";
 import {BottomNav} from "@/shared/ui/bottom-nav";
 import {ArrowLeft, Plus} from "lucide-react";
-import {BottleListingCard, BottleListingsGridSkeleton} from "@/features/listings/components";
+import {BottleListingsGridSkeleton} from "@/features/listings/components";
+import {ListingStats} from "@/features/listings/components/ListingStats";
+import {ListingFilters, FilterState} from "@/features/listings/components/ListingFilters";
+import {CompactListingCard} from "@/features/listings/components/CompactListingCard";
 import {useAuth} from "@/contexts/AuthContext";
-import {useMyBottleListings} from "@/features/listings/hooks";
+import {useMyListingsEnhanced} from "@/features/listings/hooks/useMyListingsEnhanced";
+import {useDeleteBottleListing} from "@/features/listings/hooks";
+import {ListingStatus} from "@/shared/types";
 
 const MyListings = () => {
   const navigate = useNavigate();
-  const { t } = useTranslation();
-  const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState("active");
+  const {t} = useTranslation();
+  const {user} = useAuth();
+  const [activeTab, setActiveTab] = useState<ListingStatus | "all">("all");
 
-  const {
-    data: bottleListings = [],
-    isLoading,
-    isError,
-  } = useMyBottleListings({ enabled: !!user });
+  // Filter state
+  const [filters, setFilters] = useState<FilterState>({
+    sortBy: "date",
+    sortDesc: true,
+    bottleRange: "all",
+    hasRequests: null,
+    deadlineFilter: "all",
+  });
 
-  // Filter user's own listings
-  const myListings = bottleListings.filter(listing => listing.createdByUserEmail === user?.email);
+  // Fetch enhanced data (listings + stats)
+  const {listings, stats, isLoading, isError} = useMyListingsEnhanced();
 
-  // Categorize listings by status
-  const activeListings = myListings.filter(listing => listing.status === 'open');
-  const claimedListings = myListings.filter(listing => listing.status === 'claimed');
-  const completedListings = myListings.filter(listing => listing.status === 'completed');
+  // Delete mutation
+  const deleteMutation = useDeleteBottleListing();
+
+  // Client-side filtering and sorting
+  const filteredListings = useMemo(() => {
+    let result = [...listings];
+
+    // Filter by tab (status)
+    if (activeTab !== "all") {
+      result = result.filter((l) => l.status === activeTab);
+    }
+
+    // Filter by bottle range
+    if (filters.bottleRange !== "all") {
+      result = result.filter((l) => {
+        if (filters.bottleRange === "1-10") return l.bottleCount >= 1 && l.bottleCount <= 10;
+        if (filters.bottleRange === "11-50") return l.bottleCount >= 11 && l.bottleCount <= 50;
+        if (filters.bottleRange === "50+") return l.bottleCount > 50;
+        return true;
+      });
+    }
+
+    // Filter by has requests
+    if (filters.hasRequests !== null) {
+      result = result.filter((l) =>
+        filters.hasRequests ? l.pendingRequests > 0 : l.pendingRequests === 0
+      );
+    }
+
+    // Filter by deadline
+    if (filters.deadlineFilter !== "all") {
+      result = result.filter((l) => {
+        if (filters.deadlineFilter === "past") {
+          return l.deadline && new Date(l.deadline) < new Date();
+        }
+        if (filters.deadlineFilter === "upcoming") {
+          return l.deadline && new Date(l.deadline) > new Date();
+        }
+        return true;
+      });
+    }
+
+    // Sort
+    switch (filters.sortBy) {
+      case "date":
+        result.sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+        break;
+      case "bottles":
+        result.sort((a, b) => b.bottleCount - a.bottleCount);
+        break;
+      case "refund":
+        result.sort((a, b) => b.estimatedRefund - a.estimatedRefund);
+        break;
+      case "deadline":
+        result.sort((a, b) => {
+          if (!a.deadline) return 1;
+          if (!b.deadline) return -1;
+          return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
+        });
+        break;
+    }
+
+    // Apply sort direction
+    if (!filters.sortDesc) {
+      result.reverse();
+    }
+
+    return result;
+  }, [listings, filters, activeTab]);
+
+  // Count by status
+  const counts = useMemo(
+    () => ({
+      all: listings.length,
+      open: listings.filter((l) => l.status === "open").length,
+      claimed: listings.filter((l) => l.status === "claimed").length,
+      completed: listings.filter((l) => l.status === "completed").length,
+    }),
+    [listings]
+  );
+
+  // Action handlers
+  const handleDelete = (id: string) => {
+    if (confirm(t("listing.deleteConfirm"))) {
+      deleteMutation.mutate(id);
+    }
+  };
+
+  const handleViewRequests = (id: string) => {
+    // TODO: Navigate to listing detail page or open dialog
+    // For now, scroll to top and show info
+    console.log("View requests for listing:", id);
+  };
 
   if (!user) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center">
         <Card className="max-w-md w-full mx-4">
           <CardContent className="pt-6 text-center">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">{t("myListingsPage.signInRequired")}</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">
+              {t("myListingsPage.signInRequired")}
+            </h2>
             <p className="text-gray-600 mb-6">{t("myListingsPage.signInMessage")}</p>
             <Button onClick={() => navigate("/auth")} className="w-full">
               {t("myListingsPage.signIn")}
@@ -52,146 +154,138 @@ const MyListings = () => {
       {/* Header */}
       <header className="bg-white/90 backdrop-blur-md shadow-sm border-b border-green-100 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Button variant="ghost" onClick={() => navigate("/")} className="p-2">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => navigate("/")}
+                className="lg:hidden"
+              >
                 <ArrowLeft className="w-5 h-5" />
               </Button>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">{t("myListingsPage.title")}</h1>
-                <p className="text-sm text-gray-600">{t("myListingsPage.subtitle")}</p>
+                <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">
+                  {t("myListingsPage.title")}
+                </h1>
+                <p className="text-sm text-gray-600 mt-0.5">
+                  {t("myListingsPage.subtitle")}
+                </p>
               </div>
             </div>
             <Button
               onClick={() => navigate("/create-listing")}
-              className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+              className="gap-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-lg hover:shadow-xl transition-shadow"
             >
-              <Plus className="w-4 h-4 mr-2" />
-              {t("myListingsPage.newListing")}
+              <Plus className="w-4 h-4" />
+              <span className="hidden sm:inline">{t("myListingsPage.newListing")}</span>
             </Button>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-20 md:pb-8">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-8">
-            <TabsTrigger value="active" className="relative">
-              {t("myListingsPage.tabs.active")}
-              {activeListings.length > 0 && (
-                <Badge variant="secondary" className="ml-2 bg-green-100 text-green-700">
-                  {activeListings.length}
-                </Badge>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="claimed" className="relative">
-              {t("myListingsPage.tabs.claimed")}
-              {claimedListings.length > 0 && (
-                <Badge variant="secondary" className="ml-2 bg-blue-100 text-blue-700">
-                  {claimedListings.length}
-                </Badge>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="completed" className="relative">
-              {t("myListingsPage.tabs.completed")}
-              {completedListings.length > 0 && (
-                <Badge variant="secondary" className="ml-2 bg-gray-100 text-gray-700">
-                  {completedListings.length}
-                </Badge>
-              )}
-            </TabsTrigger>
-          </TabsList>
+      <div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8 pb-20 md:pb-8 space-y-6">
+        {/* Stats Section */}
+        <ListingStats stats={stats} isLoading={isLoading} />
 
-          <TabsContent value="active" className="space-y-4">
-            <div className="flex items-center justify-between mb-4">
-              <p className="text-sm text-gray-600">
-                {t("myListingsPage.descriptions.active")}
-              </p>
-            </div>
-            {isLoading ? (
-              <BottleListingsGridSkeleton count={6} />
-            ) : isError ? (
-              <div className="text-center py-12">
-                <p className="text-red-600 mb-4">{t("myListingsPage.error.title")}</p>
-                <Button onClick={() => window.location.reload()} variant="outline">
-                  {t("myListingsPage.error.button")}
-                </Button>
-              </div>
-            ) : activeListings.length === 0 ? (
-              <Card>
-                <CardContent className="py-12 text-center">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{t("myListingsPage.empty.active.title")}</h3>
-                  <p className="text-gray-600 mb-4">{t("myListingsPage.empty.active.message")}</p>
-                  <Button
-                    onClick={() => navigate("/create-listing")}
-                    className="bg-gradient-to-r from-green-600 to-emerald-600"
+        {/* Tabs + Filters */}
+        <Tabs
+          value={activeTab}
+          onValueChange={(v) => setActiveTab(v as ListingStatus | "all")}
+          className="space-y-4"
+        >
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            {/* Tabs on the left */}
+            <TabsList className="bg-card/80 backdrop-blur-sm border border-border p-1 h-auto">
+              {(["all", "open", "claimed", "completed"] as const).map((tab) => (
+                <TabsTrigger
+                  key={tab}
+                  value={tab}
+                  className="capitalize gap-1.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                >
+                  {tab === "all"
+                    ? t("myListingsPage.tabs.all")
+                    : tab === "open"
+                    ? t("myListingsPage.tabs.active")
+                    : t(`myListingsPage.tabs.${tab}`)}
+                  <Badge
+                    variant="secondary"
+                    className="h-5 px-1.5 text-xs data-[state=active]:bg-primary-foreground/20"
                   >
-                    <Plus className="w-4 h-4 mr-2" />
-                    {t("myListingsPage.empty.active.button")}
+                    {counts[tab]}
+                  </Badge>
+                </TabsTrigger>
+              ))}
+            </TabsList>
+
+            {/* Filters on the right */}
+            <ListingFilters filters={filters} onFiltersChange={setFilters} />
+          </div>
+
+          {/* Tab Contents */}
+          {(["all", "open", "claimed", "completed"] as const).map((tab) => (
+            <TabsContent key={tab} value={tab} className="mt-0">
+              {isLoading ? (
+                <BottleListingsGridSkeleton count={6} />
+              ) : isError ? (
+                <div className="text-center py-12">
+                  <p className="text-red-600 mb-4">{t("myListingsPage.error.title")}</p>
+                  <Button onClick={() => window.location.reload()} variant="outline">
+                    {t("myListingsPage.error.button")}
                   </Button>
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {activeListings.map((listing) => (
-                  <BottleListingCard key={listing.id} listing={listing} isOwnListing={true} />
-                ))}
-              </div>
-            )}
-          </TabsContent>
-
-          <TabsContent value="claimed" className="space-y-4">
-            <div className="flex items-center justify-between mb-4">
-              <p className="text-sm text-gray-600">
-                {t("myListingsPage.descriptions.claimed")}
-              </p>
-            </div>
-            {isLoading ? (
-              <BottleListingsGridSkeleton count={6} />
-            ) : claimedListings.length === 0 ? (
-              <Card>
-                <CardContent className="py-12 text-center">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{t("myListingsPage.empty.claimed.title")}</h3>
-                  <p className="text-gray-600">
-                    {t("myListingsPage.empty.claimed.message")}
+                </div>
+              ) : filteredListings.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-16 text-center">
+                  <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
+                    <Plus className="w-8 h-8 text-muted-foreground" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-foreground mb-1">
+                    {filters.bottleRange !== "all" ||
+                    filters.hasRequests !== null ||
+                    filters.deadlineFilter !== "all"
+                      ? t("myListingsPage.emptyWithFilters")
+                      : tab === "all"
+                      ? "No listings found"
+                      : t(`myListingsPage.empty.${tab === "open" ? "active" : tab}.title`)}
+                  </h3>
+                  <p className="text-sm text-muted-foreground max-w-xs">
+                    {filters.bottleRange !== "all" ||
+                    filters.hasRequests !== null ||
+                    filters.deadlineFilter !== "all"
+                      ? "Try adjusting your filters"
+                      : tab === "all"
+                      ? "Create your first listing to start collecting bottles"
+                      : `No ${tab} listings match your filters`}
                   </p>
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {claimedListings.map((listing) => (
-                  <BottleListingCard key={listing.id} listing={listing} isOwnListing={true} />
-                ))}
-              </div>
-            )}
-          </TabsContent>
-
-          <TabsContent value="completed" className="space-y-4">
-            <div className="flex items-center justify-between mb-4">
-              <p className="text-sm text-gray-600">
-                {t("myListingsPage.descriptions.completed")}
-              </p>
-            </div>
-            {isLoading ? (
-              <BottleListingsGridSkeleton count={6} />
-            ) : completedListings.length === 0 ? (
-              <Card>
-                <CardContent className="py-12 text-center">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{t("myListingsPage.empty.completed.title")}</h3>
-                  <p className="text-gray-600">
-                    {t("myListingsPage.empty.completed.message")}
-                  </p>
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {completedListings.map((listing) => (
-                  <BottleListingCard key={listing.id} listing={listing} isOwnListing={true} />
-                ))}
-              </div>
-            )}
-          </TabsContent>
+                  {tab === "all" &&
+                    filters.bottleRange === "all" &&
+                    filters.hasRequests === null &&
+                    filters.deadlineFilter === "all" && (
+                      <Button
+                        onClick={() => navigate("/create-listing")}
+                        className="mt-4 gap-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
+                      >
+                        <Plus className="w-4 h-4" />
+                        {t("myListingsPage.empty.active.button")}
+                      </Button>
+                    )}
+                </div>
+              ) : (
+                <div className="grid gap-4 lg:gap-5 md:grid-cols-2 lg:grid-cols-3">
+                  {filteredListings.map((listing, index) => (
+                    <CompactListingCard
+                      key={listing.id}
+                      listing={listing}
+                      onDelete={handleDelete}
+                      onViewRequests={handleViewRequests}
+                      className={`animate-slide-up stagger-${(index % 4) + 1}`}
+                    />
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+          ))}
         </Tabs>
       </div>
       <BottomNav />

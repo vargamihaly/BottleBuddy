@@ -66,7 +66,7 @@ const PickupCard = ({pickup, listing, statusColor, onComplete, isUpdating}: Pick
                     </div>
                     <div className="flex items-center gap-1 text-xs text-gray-600 mb-1">
                         <MapPin className="w-3 h-3"/>
-                        <span className="truncate">{listing.locationAddress}</span>
+                        <span className="truncate">{listing.location}</span>
                     </div>
                     <p className="text-xs text-gray-500 line-clamp-1">
                         {pickup.message || t("dashboard.activePickups.noMessage")}
@@ -142,22 +142,17 @@ export const MyActivePickupsWidget = ({pickupRequests, listings}: MyActivePickup
         <Card>
             <CardHeader>
                 <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg flex items-center gap-2">
-                        <Calendar className="w-5 h-5 text-green-600"/>
-                        {t("dashboard.activePickups.title")}
-                        <Badge variant="secondary" className="ml-2">{activePickups.length}</Badge>
-                    </CardTitle>
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => navigate("/my-pickup-tasks")}
-                        className="text-green-600 hover:text-green-700"
-                    >
-                        {t("dashboard.activePickups.viewAll")}
-                        <ArrowRight className="w-4 h-4 ml-1"/>
-                    </Button>
+                    <div>
+                        <CardTitle className="text-lg flex items-center gap-2">
+                            <Calendar className="w-5 h-5 text-green-600"/>
+                            {t("dashboard.activePickups.title")}
+                        </CardTitle>
+                        <CardDescription>{t("dashboard.activePickups.description")}</CardDescription>
+                    </div>
+                    <Badge variant="secondary" className="bg-green-100 text-green-700">
+                        {activePickups.length}
+                    </Badge>
                 </div>
-                <CardDescription>{t("dashboard.activePickups.description")}</CardDescription>
             </CardHeader>
             <CardContent>
                 <div className="space-y-3">
@@ -176,6 +171,17 @@ export const MyActivePickupsWidget = ({pickupRequests, listings}: MyActivePickup
                             />
                         );
                     })}
+                </div>
+                <div className="mt-4">
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => navigate("/my-pickup-tasks")}
+                        className="w-full text-green-600 hover:text-green-700"
+                    >
+                        {t("dashboard.activePickups.viewAll")} ({activePickups.length})
+                        <ArrowRight className="w-4 h-4 ml-2"/>
+                    </Button>
                 </div>
             </CardContent>
         </Card>

@@ -2,264 +2,228 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. */
+/* BottleBuddy Design System - Green/Emerald Theme */
 
 @layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    :root {
+        --background: 140 30% 97%;
+        --foreground: 160 30% 10%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+        --card: 0 0% 100%;
+        --card-foreground: 160 30% 10%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+        --popover: 0 0% 100%;
+        --popover-foreground: 160 30% 10%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+        --primary: 152 60% 40%;
+        --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+        --secondary: 140 25% 94%;
+        --secondary-foreground: 160 30% 15%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+        --muted: 140 15% 92%;
+        --muted-foreground: 160 10% 45%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+        --accent: 160 70% 45%;
+        --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+        --destructive: 0 84% 60%;
+        --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+        --border: 140 20% 88%;
+        --input: 140 20% 88%;
+        --ring: 152 60% 40%;
 
-    --radius: 0.5rem;
+        --radius: 0.75rem;
 
-    --sidebar-background: 0 0% 98%;
+        /* BottleBuddy Custom Tokens */
+        --success: 152 60% 40%;
+        --success-foreground: 0 0% 100%;
 
-    --sidebar-foreground: 240 5.3% 26.1%;
+        --warning: 38 92% 50%;
+        --warning-foreground: 0 0% 100%;
 
-    --sidebar-primary: 240 5.9% 10%;
+        --info: 210 80% 55%;
+        --info-foreground: 0 0% 100%;
 
-    --sidebar-primary-foreground: 0 0% 98%;
+        /* Gradient tokens */
+        --gradient-start: 140 40% 96%;
+        --gradient-end: 160 50% 92%;
 
-    --sidebar-accent: 240 4.8% 95.9%;
+        /* Status colors */
+        --status-active: 152 60% 40%;
+        --status-claimed: 210 80% 55%;
+        --status-completed: 160 10% 45%;
+        --status-pending: 38 92% 50%;
+        --status-urgent: 0 84% 60%;
 
-    --sidebar-accent-foreground: 240 5.9% 10%;
+        --sidebar-background: 0 0% 98%;
+        --sidebar-foreground: 240 5.3% 26.1%;
+        --sidebar-primary: 152 60% 40%;
+        --sidebar-primary-foreground: 0 0% 100%;
+        --sidebar-accent: 140 25% 94%;
+        --sidebar-accent-foreground: 160 30% 15%;
+        --sidebar-border: 140 20% 88%;
+        --sidebar-ring: 152 60% 40%;
+    }
 
-    --sidebar-border: 220 13% 91%;
+    .dark {
+        --background: 160 30% 8%;
+        --foreground: 140 20% 95%;
 
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
+        --card: 160 25% 12%;
+        --card-foreground: 140 20% 95%;
 
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+        --popover: 160 25% 12%;
+        --popover-foreground: 140 20% 95%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+        --primary: 152 55% 50%;
+        --primary-foreground: 160 30% 8%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+        --secondary: 160 20% 18%;
+        --secondary-foreground: 140 20% 95%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+        --muted: 160 15% 20%;
+        --muted-foreground: 140 10% 60%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+        --accent: 160 60% 50%;
+        --accent-foreground: 160 30% 8%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+        --destructive: 0 62% 40%;
+        --destructive-foreground: 0 0% 100%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+        --border: 160 15% 22%;
+        --input: 160 15% 22%;
+        --ring: 152 55% 50%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+        /* Dark mode custom tokens */
+        --success: 152 55% 50%;
+        --success-foreground: 160 30% 8%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
+        --warning: 38 85% 55%;
+        --warning-foreground: 160 30% 8%;
+
+        --info: 210 75% 60%;
+        --info-foreground: 160 30% 8%;
+
+        --gradient-start: 160 25% 10%;
+        --gradient-end: 160 30% 14%;
+
+        --status-active: 152 55% 50%;
+        --status-claimed: 210 75% 60%;
+        --status-completed: 140 10% 50%;
+        --status-pending: 38 85% 55%;
+        --status-urgent: 0 70% 55%;
+
+        --sidebar-background: 160 25% 10%;
+        --sidebar-foreground: 140 20% 95%;
+        --sidebar-primary: 152 55% 50%;
+        --sidebar-primary-foreground: 160 30% 8%;
+        --sidebar-accent: 160 20% 18%;
+        --sidebar-accent-foreground: 140 20% 95%;
+        --sidebar-border: 160 15% 22%;
+        --sidebar-ring: 152 55% 50%;
+    }
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
+    * {
+        @apply border-border;
+    }
 
-  body {
-    @apply bg-background text-foreground;
-  }
+    body {
+        @apply bg-background text-foreground antialiased;
+    }
 }
 
-/* Leaflet Map Styles */
-.leaflet-container {
-  height: 100%;
-  width: 100%;
-  z-index: 0;
+@layer utilities {
+    .gradient-background {
+        background: linear-gradient(
+                135deg,
+                hsl(var(--gradient-start)) 0%,
+                hsl(var(--gradient-end)) 100%
+        );
+    }
+
+    .gradient-primary {
+        background: linear-gradient(
+                135deg,
+                hsl(var(--primary)) 0%,
+                hsl(var(--accent)) 100%
+        );
+    }
+
+    .animate-fade-in {
+        animation: fadeIn 0.4s ease-out forwards;
+    }
+
+    .animate-slide-up {
+        animation: slideUp 0.4s ease-out forwards;
+    }
+
+    .animate-scale-in {
+        animation: scaleIn 0.3s ease-out forwards;
+    }
+
+    .animate-pulse-soft {
+        animation: pulseSoft 2s ease-in-out infinite;
+    }
+
+    .stagger-1 {
+        animation-delay: 0.05s;
+    }
+
+    .stagger-2 {
+        animation-delay: 0.1s;
+    }
+
+    .stagger-3 {
+        animation-delay: 0.15s;
+    }
+
+    .stagger-4 {
+        animation-delay: 0.2s;
+    }
 }
 
-/* Custom Marker Styles */
-.custom-div-icon {
-  background: transparent !important;
-  border: none !important;
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-.custom-marker-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-.custom-marker {
-  position: relative;
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50% 50% 50% 0;
-  transform: rotate(-45deg);
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  transition: all 0.3s ease;
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
-.custom-marker:hover {
-  transform: rotate(-45deg) scale(1.1);
-}
-
-.marker-content {
-  transform: rotate(45deg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.marker-count {
-  font-size: 14px;
-  font-weight: 700;
-  color: white;
-}
-
-/* Bottle Marker */
-.bottle-marker {
-  width: 40px;
-  height: 40px;
-  background: linear-gradient(135deg, #16a34a 0%, #059669 100%);
-  border: 3px solid white;
-}
-
-/* Selected Marker */
-.selected-marker {
-  width: 48px;
-  height: 48px;
-  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
-  border: 3px solid white;
-  animation: bounce 0.5s ease;
-}
-
-.selected-marker .marker-count {
-  font-size: 16px;
-}
-
-/* User Location Marker */
-.user-location-marker {
-  width: 24px;
-  height: 24px;
-  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
-  border: 3px solid white;
-  border-radius: 50%;
-  transform: none;
-}
-
-.marker-inner-circle {
-  width: 8px;
-  height: 8px;
-  background: white;
-  border-radius: 50%;
-}
-
-/* Marker Pulse Animation */
-.marker-pulse {
-  position: absolute;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: rgba(22, 163, 74, 0.3);
-  animation: pulse 2s infinite;
-  z-index: 1;
-}
-
-.marker-pulse.active {
-  background: rgba(124, 58, 237, 0.3);
-  animation: pulse 1s infinite;
-}
-
-@keyframes pulse {
-  0% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(2);
-    opacity: 0;
-  }
-}
-
-@keyframes bounce {
-  0%, 100% {
-    transform: rotate(-45deg) translateY(0);
-  }
-  50% {
-    transform: rotate(-45deg) translateY(-10px);
-  }
-}
-
-/* Leaflet Popup Customization */
-.leaflet-popup-content-wrapper {
-  border-radius: 12px;
-  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-}
-
-.leaflet-popup-content {
-  margin: 12px;
-  min-width: 200px;
-}
-
-/* Animated Blob Backgrounds */
-@keyframes blob {
-  0% {
-    transform: translate(0px, 0px) scale(1);
-  }
-  33% {
-    transform: translate(30px, -50px) scale(1.1);
-  }
-  66% {
-    transform: translate(-20px, 20px) scale(0.9);
-  }
-  100% {
-    transform: translate(0px, 0px) scale(1);
-  }
-}
-
-.animate-blob {
-  animation: blob 7s infinite;
-}
-
-.animation-delay-2000 {
-  animation-delay: 2s;
-}
-
-.animation-delay-4000 {
-  animation-delay: 4s;
+@keyframes pulseSoft {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
 }
