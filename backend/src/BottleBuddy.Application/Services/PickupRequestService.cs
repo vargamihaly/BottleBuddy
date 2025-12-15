@@ -117,7 +117,7 @@ public class PickupRequestService(
             }
         });
 
-        // Send email notification to owner
+// Send email notification to owner
         try
         {
             var settings = await settingsService.GetOrCreateSettingsAsync(listing.OwnerId);
