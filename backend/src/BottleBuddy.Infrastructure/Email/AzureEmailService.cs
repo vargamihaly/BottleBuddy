@@ -9,22 +9,48 @@ using Microsoft.Extensions.Logging;
 
 namespace BottleBuddy.Infrastructure.Email;
 
-public class AzureEmailService(
-    IConfiguration configuration,
-    ILogger<AzureEmailService> logger,
-    UserManager<User> userManager)
-    : IEmailService
+public class AzureEmailService : IEmailService
 {
-    private readonly string? _connectionString = configuration["AzureCommunicationServices:Email:ConnectionString"];
+    private readonly IConfiguration _configuration;
+    private readonly ILogger<AzureEmailService> _logger;
+    private readonly UserManager<User> _userManager;
 
-    private readonly string _fromEmail = configuration["AzureCommunicationServices:Email:FromEmail"]
-                                         ?? "DoNotReply@bottlebuddy.azurecomm.net";
+    private readonly string? _connectionString;
+    private readonly string _fromEmail;
+    private readonly string _fromName;
+    private readonly string _frontendBaseUrl;
 
-    private readonly string _fromName = configuration["AzureCommunicationServices:Email:FromName"]
-                                        ?? "BottleBuddy";
+    public AzureEmailService(
+        IConfiguration configuration,
+        ILogger<AzureEmailService> logger,
+        UserManager<User> userManager)
+    {
+        _configuration = configuration;
+        _logger = logger;
+        _userManager = userManager;
 
-    private readonly string _frontendBaseUrl = configuration["Frontend:BaseUrl"]
-                                               ?? "http://localhost:5173";
+        _connectionString = configuration["AzureCommunicationServices:Email:ConnectionString"];
+        _fromEmail = configuration["AzureCommunicationServices:Email:FromEmail"]
+                     ?? "DoNotReply@bottlebuddy.azurecomm.net";
+        _fromName = configuration["AzureCommunicationServices:Email:FromName"]
+                    ?? "BottleBuddy";
+        _frontendBaseUrl = configuration["Frontend:BaseUrl"]
+                           ?? "http://localhost:5173";
+
+        // Debug logging for configuration
+        logger.LogInformation("=== Azure Email Service Configuration ===");
+        logger.LogInformation("Connection String Configured: {IsConfigured}", !string.IsNullOrEmpty(_connectionString));
+        if (!string.IsNullOrEmpty(_connectionString))
+        {
+            // Log only the endpoint part (not the access key for security)
+            var endpointPart = _connectionString.Split(';')[0];
+            logger.LogInformation("Connection String Endpoint: {Endpoint}", endpointPart);
+        }
+        logger.LogInformation("From Email: {FromEmail}", _fromEmail);
+        logger.LogInformation("From Name: {FromName}", _fromName);
+        logger.LogInformation("Frontend Base URL: {FrontendBaseUrl}", _frontendBaseUrl);
+        logger.LogInformation("==========================================");
+    }
 
     public async Task SendPickupRequestReceivedEmailAsync(
         string ownerUserId,
@@ -34,35 +60,35 @@ public class AzureEmailService(
         Guid listingId,
         Guid pickupRequestId)
     {
-        logger.LogInformation(
+        _logger.LogInformation(
             "Sending pickup request received email to owner {OwnerId} for listing {ListingId}",
             ownerUserId,
             listingId);
 
         try
         {
-            var owner = await userManager.FindByIdAsync(ownerUserId);
+            var owner = await _userManager.FindByIdAsync(ownerUserId);
             if (owner == null)
             {
-                logger.LogWarning("User {UserId} not found, cannot send email", ownerUserId);
+                _logger.LogWarning("User {UserId} not found, cannot send email", ownerUserId);
                 return;
             }
 
             if (!owner.EmailConfirmed)
             {
-                logger.LogInformation("User {UserId} email not confirmed, skipping email", ownerUserId);
+                _logger.LogInformation("User {UserId} email not confirmed, skipping email", ownerUserId);
                 return;
             }
 
             if (string.IsNullOrEmpty(owner.Email))
             {
-                logger.LogWarning("User {UserId} has no email address, cannot send email", ownerUserId);
+                _logger.LogWarning("User {UserId} has no email address, cannot send email", ownerUserId);
                 return;
             }
 
             if (string.IsNullOrEmpty(_connectionString))
             {
-                logger.LogWarning("Azure Communication Services connection string not configured, skipping email");
+                _logger.LogWarning("Azure Communication Services connection string not configured, skipping email");
                 return;
             }
 
@@ -85,13 +111,13 @@ public class AzureEmailService(
 
             await SendEmailAsync(owner.Email, subject, htmlContent, textContent);
 
-            logger.LogInformation(
+            _logger.LogInformation(
                 "Successfully sent pickup request received email to {Email}",
                 owner.Email);
         }
         catch (Exception ex)
         {
-            logger.LogError(
+            _logger.LogError(
                 ex,
                 "Error sending pickup request received email to user {UserId}",
                 ownerUserId);
@@ -106,35 +132,35 @@ public class AzureEmailService(
         Guid listingId,
         Guid pickupRequestId)
     {
-        logger.LogInformation(
+        _logger.LogInformation(
             "Sending pickup request accepted email to volunteer {VolunteerId} for listing {ListingId}",
             volunteerUserId,
             listingId);
 
         try
         {
-            var volunteer = await userManager.FindByIdAsync(volunteerUserId);
+            var volunteer = await _userManager.FindByIdAsync(volunteerUserId);
             if (volunteer == null)
             {
-                logger.LogWarning("User {UserId} not found, cannot send email", volunteerUserId);
+                _logger.LogWarning("User {UserId} not found, cannot send email", volunteerUserId);
                 return;
             }
 
             if (!volunteer.EmailConfirmed)
             {
-                logger.LogInformation("User {UserId} email not confirmed, skipping email", volunteerUserId);
+                _logger.LogInformation("User {UserId} email not confirmed, skipping email", volunteerUserId);
                 return;
             }
 
             if (string.IsNullOrEmpty(volunteer.Email))
             {
-                logger.LogWarning("User {UserId} has no email address, cannot send email", volunteerUserId);
+                _logger.LogWarning("User {UserId} has no email address, cannot send email", volunteerUserId);
                 return;
             }
 
             if (string.IsNullOrEmpty(_connectionString))
             {
-                logger.LogWarning("Azure Communication Services connection string not configured, skipping email");
+                _logger.LogWarning("Azure Communication Services connection string not configured, skipping email");
                 return;
             }
 
@@ -155,13 +181,13 @@ public class AzureEmailService(
 
             await SendEmailAsync(volunteer.Email, subject, htmlContent, textContent);
 
-            logger.LogInformation(
+            _logger.LogInformation(
                 "Successfully sent pickup request accepted email to {Email}",
                 volunteer.Email);
         }
         catch (Exception ex)
         {
-            logger.LogError(
+            _logger.LogError(
                 ex,
                 "Error sending pickup request accepted email to user {UserId}",
                 volunteerUserId);
@@ -177,35 +203,35 @@ public class AzureEmailService(
         Guid transactionId,
         bool isOwner)
     {
-        logger.LogInformation(
+        _logger.LogInformation(
             "Sending transaction completed email to user {UserId} for transaction {TransactionId}",
             userId,
             transactionId);
 
         try
         {
-            var user = await userManager.FindByIdAsync(userId);
+            var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
             {
-                logger.LogWarning("User {UserId} not found, cannot send email", userId);
+                _logger.LogWarning("User {UserId} not found, cannot send email", userId);
                 return;
             }
 
             if (!user.EmailConfirmed)
             {
-                logger.LogInformation("User {UserId} email not confirmed, skipping email", userId);
+                _logger.LogInformation("User {UserId} email not confirmed, skipping email", userId);
                 return;
             }
 
             if (string.IsNullOrEmpty(user.Email))
             {
-                logger.LogWarning("User {UserId} has no email address, cannot send email", userId);
+                _logger.LogWarning("User {UserId} has no email address, cannot send email", userId);
                 return;
             }
 
             if (string.IsNullOrEmpty(_connectionString))
             {
-                logger.LogWarning("Azure Communication Services connection string not configured, skipping email");
+                _logger.LogWarning("Azure Communication Services connection string not configured, skipping email");
                 return;
             }
 
@@ -232,13 +258,13 @@ public class AzureEmailService(
 
             await SendEmailAsync(user.Email, subject, htmlContent, textContent);
 
-            logger.LogInformation(
+            _logger.LogInformation(
                 "Successfully sent transaction completed email to {Email}",
                 user.Email);
         }
         catch (Exception ex)
         {
-            logger.LogError(
+            _logger.LogError(
                 ex,
                 "Error sending transaction completed email to user {UserId}",
                 userId);
@@ -250,12 +276,19 @@ public class AzureEmailService(
     {
         if (string.IsNullOrEmpty(_connectionString))
         {
-            logger.LogWarning("Azure Communication Services connection string not configured, cannot send email");
+            _logger.LogWarning("Azure Communication Services connection string not configured, cannot send email");
             return;
         }
 
         try
         {
+            _logger.LogDebug("=== Email Send Debug Info ===");
+            _logger.LogDebug("Recipient: {ToEmail}", toEmail);
+            _logger.LogDebug("Sender: {FromEmail}", _fromEmail);
+            _logger.LogDebug("Subject: {Subject}", subject);
+            _logger.LogDebug("Connection String Endpoint: {Endpoint}", _connectionString.Split(';')[0]);
+            _logger.LogDebug("============================");
+
             var emailClient = new EmailClient(_connectionString);
 
             var emailMessage = new EmailMessage(
@@ -267,7 +300,7 @@ public class AzureEmailService(
                     Html = htmlContent
                 });
 
-            logger.LogInformation(
+            _logger.LogInformation(
                 "Sending email to {Email} with subject '{Subject}' from {FromEmail}",
                 toEmail,
                 subject,
@@ -281,14 +314,14 @@ public class AzureEmailService(
             if (emailSendOperation.HasCompleted)
             {
                 var operationId = emailSendOperation.Id;
-                logger.LogInformation(
+                _logger.LogInformation(
                     "Email sent successfully to {Email} with operation ID {OperationId}",
                     toEmail,
                     operationId);
             }
             else
             {
-                logger.LogWarning(
+                _logger.LogWarning(
                     "Email sending to {Email} did not complete immediately, operation ID: {OperationId}",
                     toEmail,
                     emailSendOperation.Id);
@@ -296,19 +329,25 @@ public class AzureEmailService(
         }
         catch (RequestFailedException ex)
         {
-            logger.LogError(
+            _logger.LogError(
                 ex,
-                "Azure Communication Services request failed when sending to {Email}. Status: {Status}, ErrorCode: {ErrorCode}",
+                "Azure Communication Services request failed when sending to {Email}. Status: {Status}, ErrorCode: {ErrorCode}, Message: {Message}",
                 toEmail,
                 ex.Status,
-                ex.ErrorCode);
+                ex.ErrorCode,
+                ex.Message);
+
+            _logger.LogDebug("=== Full Request Failed Exception ===");
+            _logger.LogDebug("Response Body: {ResponseBody}", ex.Message);
+            _logger.LogDebug("====================================");
+
             throw new InvalidOperationException(
                 $"Failed to send email via Azure Communication Services. Status: {ex.Status}, Error: {ex.ErrorCode}",
                 ex);
         }
         catch (Exception ex)
         {
-            logger.LogError(
+            _logger.LogError(
                 ex,
                 "Unexpected error sending email to {Email}",
                 toEmail);

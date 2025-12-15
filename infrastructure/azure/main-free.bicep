@@ -4,6 +4,8 @@
 // Database: Azure SQL Free (32MB)
 // Estimated cost: $0/month (completely free!)
 
+//TODO ACS and the app setting to this file to keep infrastructure fully IaC-based
+
 @description('The location for all resources')
 param location string = resourceGroup().location
 

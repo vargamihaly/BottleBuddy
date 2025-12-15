@@ -297,14 +297,6 @@ You can manage your email preferences in your account settings.";
                                 Thank you for being part of the BottleBuddy community and helping the environment!
                             </p>
 
-                            <!-- CTA Button -->
-                            <table width=""100%"" cellpadding=""0"" cellspacing=""0"" style=""margin: 30px 0;"">
-                                <tr>
-                                    <td align=""center"">
-                                        <a href=""{viewDetailsUrl}"" style=""display: inline-block; background-color: {PrimaryColor}; color: #ffffff; text-decoration: none; padding: 14px 40px; border-radius: 6px; font-size: 16px; font-weight: 600; transition: background-color 0.3s;"">View Transaction Details</a>
-                                    </td>
-                                </tr>
-                            </table>
                         </td>
                     </tr>
 

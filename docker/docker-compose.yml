@@ -58,6 +58,11 @@ services:
       Authentication__Google__ClientId: ${GOOGLE_CLIENT_ID:-}
       Authentication__Google__ClientSecret: ${GOOGLE_CLIENT_SECRET:-}
 
+      # Azure Communication Services Email
+      AzureCommunicationServices__Email__ConnectionString: ${ACS_EMAIL_CONNECTION_STRING:-}
+      AzureCommunicationServices__Email__FromEmail: ${ACS_FROM_EMAIL:-DoNotReply@bottlebuddy.azurecomm.net}
+      AzureCommunicationServices__Email__FromName: ${ACS_FROM_NAME:-BottleBuddy}
+
       # SendGrid Email Notifications (optional)
       SendGrid__ApiKey: ${SENDGRID_API_KEY:-}
       SendGrid__FromEmail: ${SENDGRID_FROM_EMAIL:-noreply@bottlebuddy.com}
