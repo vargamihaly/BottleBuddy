@@ -249,7 +249,7 @@ export const UserDashboard = ({onBackToHome}: UserDashboardProps) => {
                             </div>
                         ) : recentActivity.length === 0 ? (
                             <div className="text-center py-8 text-gray-500">
-                                <p>No recent activity yet. Start by creating a listing or picking up bottles!</p>
+                                <p>{t('userDashboard.recentActivity.noRecentActivityYet')}</p>
                             </div>
                         ) : (
                             <div className="space-y-4">
