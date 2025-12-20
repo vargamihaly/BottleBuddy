@@ -28,7 +28,19 @@ const createLocationIcon = () => {
       <div class="custom-marker-wrapper">
         <div class="custom-marker selected-marker">
           <div class="marker-content">
-            <span class="marker-icon">📍</span>
+            <span class="marker-icon" style="
+              display: inline-block;
+              background: white;
+              font-size: 24px;
+              width: 40px;
+              height: 40px;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4), 0 0 0 4px #f87171, 0 0 0 6px white;
+              border: 3px solid #dc2626;
+            ">📍</span>
           </div>
         </div>
         <div class="marker-pulse active"></div>
