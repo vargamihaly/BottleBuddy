@@ -36,20 +36,6 @@ public class AzureEmailService : IEmailService
                     ?? "BottleBuddy";
         _frontendBaseUrl = configuration["Frontend:BaseUrl"]
                            ?? "http://localhost:5173";
-
-        // Debug logging for configuration
-        logger.LogInformation("=== Azure Email Service Configuration ===");
-        logger.LogInformation("Connection String Configured: {IsConfigured}", !string.IsNullOrEmpty(_connectionString));
-        if (!string.IsNullOrEmpty(_connectionString))
-        {
-            // Log only the endpoint part (not the access key for security)
-            var endpointPart = _connectionString.Split(';')[0];
-            logger.LogInformation("Connection String Endpoint: {Endpoint}", endpointPart);
-        }
-        logger.LogInformation("From Email: {FromEmail}", _fromEmail);
-        logger.LogInformation("From Name: {FromName}", _fromName);
-        logger.LogInformation("Frontend Base URL: {FrontendBaseUrl}", _frontendBaseUrl);
-        logger.LogInformation("==========================================");
     }
 
     public async Task SendPickupRequestReceivedEmailAsync(
@@ -282,13 +268,6 @@ public class AzureEmailService : IEmailService
 
         try
         {
-            _logger.LogDebug("=== Email Send Debug Info ===");
-            _logger.LogDebug("Recipient: {ToEmail}", toEmail);
-            _logger.LogDebug("Sender: {FromEmail}", _fromEmail);
-            _logger.LogDebug("Subject: {Subject}", subject);
-            _logger.LogDebug("Connection String Endpoint: {Endpoint}", _connectionString.Split(';')[0]);
-            _logger.LogDebug("============================");
-
             var emailClient = new EmailClient(_connectionString);
 
             var emailMessage = new EmailMessage(

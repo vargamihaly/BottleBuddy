@@ -46,21 +46,8 @@ public class MessagesController(IMessageService messageService, ILogger<Messages
 
         try
         {
-            logger.LogInformation(
-                "User {UserId} sending message to pickup request {PickupRequestId} (hasContent: {HasContent}, hasImage: {HasImage})",
-                userId,
-                pickupRequestId,
-                !string.IsNullOrWhiteSpace(content),
-                image != null);
-
             var dto = new CreateMessageDto { Content = content };
             var message = await messageService.SendMessageAsync(pickupRequestId, dto, userId, image);
-
-            logger.LogInformation(
-                "Message {MessageId} sent to pickup request {PickupRequestId} by user {UserId}",
-                message.Id,
-                pickupRequestId,
-                userId);
 
             return CreatedAtAction(
                 nameof(GetMessages),
@@ -102,17 +89,7 @@ public class MessagesController(IMessageService messageService, ILogger<Messages
 
         try
         {
-            logger.LogInformation(
-                "User {UserId} retrieving messages for pickup request {PickupRequestId}",
-                userId,
-                pickupRequestId);
-
             var messages = await messageService.GetMessagesAsync(pickupRequestId, userId);
-
-            logger.LogInformation(
-                "Retrieved {MessageCount} messages for pickup request {PickupRequestId}",
-                messages.Count,
-                pickupRequestId);
 
             return Ok(messages);
         }
@@ -146,17 +123,7 @@ public class MessagesController(IMessageService messageService, ILogger<Messages
 
         try
         {
-            logger.LogInformation(
-                "User {UserId} marking all messages as read for pickup request {PickupRequestId}",
-                userId,
-                pickupRequestId);
-
             await messageService.MarkAllAsReadAsync(pickupRequestId, userId);
-
-            logger.LogInformation(
-                "All messages marked as read for pickup request {PickupRequestId} by user {UserId}",
-                pickupRequestId,
-                userId);
 
             return NoContent();
         }
@@ -187,18 +154,7 @@ public class MessagesController(IMessageService messageService, ILogger<Messages
             return Unauthorized(new { error = "User not authenticated" });
         }
 
-        logger.LogInformation(
-            "User {UserId} retrieving unread count for pickup request {PickupRequestId}",
-            userId,
-            pickupRequestId);
-
         var count = await messageService.GetUnreadCountAsync(pickupRequestId, userId);
-
-        logger.LogInformation(
-            "Unread count {UnreadCount} for pickup request {PickupRequestId} retrieved by user {UserId}",
-            count,
-            pickupRequestId,
-            userId);
 
         return Ok(count);
     }
@@ -227,16 +183,7 @@ public class UserMessagesController(IMessageService messageService, ILogger<User
             return Unauthorized(new { error = "User not authenticated" });
         }
 
-        logger.LogInformation(
-            "User {UserId} retrieving total unread message count",
-            userId);
-
         var count = await messageService.GetTotalUnreadCountAsync(userId);
-
-        logger.LogInformation(
-            "Total unread count {TotalUnreadCount} retrieved for user {UserId}",
-            count,
-            userId);
 
         return Ok(count);
     }
@@ -260,17 +207,7 @@ public class UserMessagesController(IMessageService messageService, ILogger<User
 
         try
         {
-            logger.LogInformation(
-                "User {UserId} marking message {MessageId} as read",
-                userId,
-                messageId);
-
             await messageService.MarkAsReadAsync(messageId, userId);
-
-            logger.LogInformation(
-                "Message {MessageId} marked as read by user {UserId}",
-                messageId,
-                userId);
 
             return NoContent();
         }

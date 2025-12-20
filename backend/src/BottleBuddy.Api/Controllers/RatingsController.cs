@@ -26,12 +26,8 @@ public class RatingsController(IRatingService ratingService, ILogger<RatingsCont
 
         try
         {
-            logger.LogInformation("User {UserId} creating rating for transaction {TransactionId}", userId, dto.TransactionId);
-            
             var rating = await ratingService.CreateRatingAsync(dto, userId);
-            
-            logger.LogInformation("Rating {RatingId} created for transaction {TransactionId} by user {UserId}", rating.Id, dto.TransactionId, userId);
-            
+
             return CreatedAtAction(
                 nameof(GetMyRatingForTransaction),
                 new { transactionId = dto.TransactionId },
@@ -63,12 +59,8 @@ public class RatingsController(IRatingService ratingService, ILogger<RatingsCont
     [HttpGet("user/{userId}")]
     public async Task<ActionResult<List<RatingResponseDto>>> GetRatingsForUser(string userId)
     {
-        logger.LogInformation("Retrieving ratings for user {RatedUserId}", userId);
-        
         var ratings = await ratingService.GetRatingsForUserAsync(userId);
-        
-        logger.LogInformation("Retrieved {RatingCount} ratings for user {RatedUserId}", ratings.Count, userId);
-        
+
         return Ok(ratings);
     }
 
@@ -87,18 +79,12 @@ public class RatingsController(IRatingService ratingService, ILogger<RatingsCont
             return Unauthorized(new { error = "User not authenticated" });
         }
 
-        logger.LogInformation("Retrieving rating for transaction {TransactionId} by user {UserId}", transactionId, userId);
-        
         var rating = await ratingService.GetMyRatingForTransactionAsync(transactionId, userId);
         if (rating is null)
         {
-            logger.LogInformation("No rating found for transaction {TransactionId} by user {UserId}", transactionId, userId);
-            
             return NotFound(new { error = "Rating not found" });
         }
 
-        logger.LogInformation("Rating {RatingId} retrieved for transaction {TransactionId} by user {UserId}", rating.Id, transactionId, userId);
-        
         return Ok(rating);
     }
 }

@@ -19,12 +19,6 @@ public class BottleListingService(
         int pageSize,
         ListingStatus? status)
     {
-        logger.LogInformation(
-            "Listing retrieval requested for page {Page} with size {PageSize} and status {Status}",
-            page,
-            pageSize,
-            status?.ToString() ?? "any");
-
         // Validate pagination parameters
         if (page < 1) page = 1;
         if (pageSize is < 1 or > 100) pageSize = 50;
@@ -76,21 +70,17 @@ public class BottleListingService(
         };
 
         logger.LogInformation(
-            "Returning {ListingCount} listings for page {Page} of {TotalPages}",
+            "Retrieved {ListingCount} listings (page {Page}/{TotalPages}, status: {Status})",
             listings.Count,
             metadata.Page,
-            metadata.TotalPages);
+            metadata.TotalPages,
+            status?.ToString() ?? "any");
 
         return (listings, metadata);
     }
 
     public async Task<BottleListingResponseDto> CreateListingAsync(string userId, CreateBottleListingRequest request)
     {
-        logger.LogInformation(
-            "Creating listing for user {UserId} with title {Title}",
-            userId,
-            request.Title ?? string.Empty);
-
         var user = await userManager.FindByIdAsync(userId);
         if (user == null)
         {
@@ -135,9 +125,11 @@ public class BottleListingService(
         });
 
         logger.LogInformation(
-            "Listing {ListingId} created for user {UserId}",
+            "Listing created: {ListingId} by {UserId}, title: {Title}, bottles: {BottleCount}",
             listing.Id,
-            userId);
+            userId,
+            listing.Title,
+            listing.BottleCount);
 
         return new BottleListingResponseDto
         {
@@ -162,11 +154,6 @@ public class BottleListingService(
 
     public async Task DeleteListingAsync(string userId, Guid listingId)
     {
-        logger.LogInformation(
-            "Deleting listing {ListingId} for user {UserId}",
-            listingId,
-            userId);
-
         var listing = await context.BottleListings.FindAsync(listingId);
 
         if (listing == null)
@@ -209,9 +196,10 @@ public class BottleListingService(
         });
 
         logger.LogInformation(
-            "Listing {ListingId} deleted for user {UserId}",
+            "Listing deleted: {ListingId} by {UserId}, bottles: {BottleCount}",
             listingId,
-            userId);
+            userId,
+            bottleCount);
     }
 
 }

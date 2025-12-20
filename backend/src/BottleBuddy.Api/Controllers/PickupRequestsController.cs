@@ -28,16 +28,8 @@ public class PickupRequestsController(
                 return Unauthorized(new { error = "User not authenticated" });
             }
 
-            logger.LogInformation("Creating pickup request for listing {ListingId} by volunteer {VolunteerId}", dto.ListingId, userId);
-            
             var pickupRequest = await pickupRequestService.CreatePickupRequestAsync(dto, userId);
-            
-            logger.LogInformation(
-                "Pickup request {PickupRequestId} created for listing {ListingId} by volunteer {VolunteerId}",
-                pickupRequest.Id,
-                dto.ListingId,
-                userId);
-            
+
             return CreatedAtAction(nameof(CreatePickupRequest), new { id = pickupRequest.Id }, pickupRequest);
         }
         catch (InvalidOperationException ex)
@@ -69,16 +61,8 @@ public class PickupRequestsController(
                 return Unauthorized(new { error = "User not authenticated" });
             }
 
-            logger.LogInformation("Retrieving pickup requests for listing {ListingId} by user {UserId}", listingId, userId);
-            
             var pickupRequests = await pickupRequestService.GetPickupRequestsForListingAsync(listingId, userId);
-            
-            logger.LogInformation(
-                "Retrieved {PickupRequestCount} pickup requests for listing {ListingId} by user {UserId}",
-                pickupRequests.Count,
-                listingId,
-                userId);
-            
+
             return Ok(pickupRequests);
         }
         catch (UnauthorizedAccessException ex)
@@ -114,11 +98,8 @@ public class PickupRequestsController(
                 return Unauthorized(new { error = "User not authenticated" });
             }
 
-            logger.LogInformation("Retrieving pickup requests for volunteer {VolunteerId}", userId);
-            
             var pickupRequests = await pickupRequestService.GetMyPickupRequestsAsync(userId);
-            
-            logger.LogInformation("Retrieved {PickupRequestCount} pickup requests for volunteer {VolunteerId}", pickupRequests.Count, userId);
+
             return Ok(pickupRequests);
         }
         catch (Exception ex)
@@ -150,16 +131,8 @@ public class PickupRequestsController(
                 return Unauthorized(new { error = "User not authenticated" });
             }
 
-            logger.LogInformation(
-                "Updating pickup request {PickupRequestId} to status {Status} by user {UserId}",
-                id,
-                dto.Status,
-                userId);
-            
             var pickupRequest = await pickupRequestService.UpdatePickupRequestStatusAsync(id, dto.Status, userId);
-            
-            logger.LogInformation("Pickup request {PickupRequestId} updated to status {Status} by user {UserId}", id, pickupRequest.Status, userId);
-            
+
             return Ok(pickupRequest);
         }
         catch (InvalidOperationException ex)

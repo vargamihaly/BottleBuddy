@@ -25,12 +25,8 @@ public class TransactionsController(ITransactionService transactionService, ILog
             return Unauthorized(new { error = "User not authenticated" });
         }
 
-        logger.LogInformation("Retrieving transactions for user {UserId}", userId);
-        
         var transactions = await transactionService.GetTransactionsForUserAsync(userId);
-        
-        logger.LogInformation("Retrieved {TransactionCount} transactions for user {UserId}", transactions.Count, userId);
-        
+
         return Ok(transactions);
     }
 
@@ -52,22 +48,12 @@ public class TransactionsController(ITransactionService transactionService, ILog
 
         try
         {
-            logger.LogInformation("Retrieving transaction for pickup request {PickupRequestId} by user {UserId}", pickupRequestId, userId);
-            
             var transaction = await transactionService.GetTransactionByPickupRequestIdAsync(pickupRequestId, userId);
             if (transaction is null)
             {
-                logger.LogInformation("No transaction found for pickup request {PickupRequestId} by user {UserId}", pickupRequestId, userId);
-                
                 return NotFound(new { error = "Transaction not found" });
             }
 
-            logger.LogInformation(
-                "Transaction {TransactionId} retrieved for pickup request {PickupRequestId} by user {UserId}",
-                transaction.Id,
-                pickupRequestId,
-                userId);
-            
             return Ok(transaction);
         }
         catch (UnauthorizedAccessException ex)

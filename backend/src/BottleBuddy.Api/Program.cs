@@ -69,6 +69,8 @@ try
     
     // Register infrastructure services
     builder.Services.AddScoped<IEmailService, AzureEmailService>();
+    var emailConfig = builder.Configuration["AzureCommunicationServices:Email:FromEmail"];
+    Log.Information("Email service configured: {FromEmail}", emailConfig ?? "DoNotReply@bottlebuddy.azurecomm.net");
 
     // SignalR
     builder.Services.AddSignalR();

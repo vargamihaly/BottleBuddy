@@ -17,11 +17,6 @@ public class PickupRequestService(
 {
     public async Task<PickupRequestResponseDto> CreatePickupRequestAsync(CreatePickupRequestDto dto, string volunteerId)
     {
-        logger.LogInformation(
-            "Volunteer {VolunteerId} creating pickup request for listing {ListingId}",
-            volunteerId,
-            dto.ListingId);
-
         // Check if listing exists and is open
         var listing = await context.BottleListings
             .FirstOrDefaultAsync(l => l.Id == dto.ListingId);
@@ -130,9 +125,6 @@ public class PickupRequestService(
                     listing.LocationAddress,
                     listing.Id,
                     pickupRequest.Id);
-                logger.LogInformation(
-                    "Email sent for PickupRequestReceived to user {UserId}",
-                    listing.OwnerId);
             }
         }
         catch (Exception ex)
@@ -145,10 +137,11 @@ public class PickupRequestService(
         }
 
         logger.LogInformation(
-            "Pickup request {PickupRequestId} created for listing {ListingId} by volunteer {VolunteerId}",
+            "Pickup request created: {PickupRequestId} for listing {ListingId} by volunteer {VolunteerId}, bottles: {BottleCount}",
             pickupRequest.Id,
             pickupRequest.ListingId,
-            volunteerId);
+            volunteerId,
+            listing.BottleCount);
 
         return new PickupRequestResponseDto
         {
@@ -167,11 +160,6 @@ public class PickupRequestService(
 
     public async Task<List<PickupRequestResponseDto>> GetPickupRequestsForListingAsync(Guid listingId, string userId)
     {
-        logger.LogInformation(
-            "User {UserId} retrieving pickup requests for listing {ListingId}",
-            userId,
-            listingId);
-
         // Verify that the user owns this listing
         var listing = await context.BottleListings
             .FirstOrDefaultAsync(l => l.Id == listingId && l.OwnerId == userId);
@@ -205,8 +193,7 @@ public class PickupRequestService(
             .ToListAsync();
 
         logger.LogInformation(
-            "User {UserId} retrieved {PickupRequestCount} pickup requests for listing {ListingId}",
-            userId,
+            "Retrieved {PickupRequestCount} pickup requests for listing {ListingId}",
             pickupRequests.Count,
             listingId);
 
@@ -215,10 +202,6 @@ public class PickupRequestService(
 
     public async Task<List<PickupRequestResponseDto>> GetMyPickupRequestsAsync(string volunteerId)
     {
-        logger.LogInformation(
-            "Retrieving pickup requests for volunteer {VolunteerId}",
-            volunteerId);
-
         var pickupRequests = await context.PickupRequests
             .Include(pr => pr.Listing)
             .Where(pr => pr.VolunteerId == volunteerId)
@@ -237,21 +220,14 @@ public class PickupRequestService(
             .ToListAsync();
 
         logger.LogInformation(
-            "Retrieved {PickupRequestCount} pickup requests for volunteer {VolunteerId}",
-            pickupRequests.Count,
-            volunteerId);
+            "Retrieved {PickupRequestCount} pickup requests for volunteer",
+            pickupRequests.Count);
 
         return pickupRequests;
     }
 
     public async Task<PickupRequestResponseDto> UpdatePickupRequestStatusAsync(Guid requestId, string status, string userId)
     {
-        logger.LogInformation(
-            "User {UserId} updating pickup request {PickupRequestId} to status {Status}",
-            userId,
-            requestId,
-            status);
-
         var pickupRequest = await context.PickupRequests
             .Include(pr => pr.Listing)
             .Include(pr => pr.Volunteer)
@@ -373,9 +349,6 @@ public class PickupRequestService(
                         pickupRequest.Listing.LocationAddress,
                         pickupRequest.ListingId,
                         pickupRequest.Id);
-                    logger.LogInformation(
-                        "Email sent for PickupRequestAccepted to user {UserId}",
-                        pickupRequest.VolunteerId);
                 }
             }
             catch (Exception ex)
@@ -445,10 +418,10 @@ public class PickupRequestService(
         }
 
         logger.LogInformation(
-            "Pickup request {PickupRequestId} updated to status {Status} by user {UserId}",
+            "Pickup request status updated: {PickupRequestId} → {Status}, listing: {ListingId}",
             pickupRequest.Id,
             pickupRequest.Status,
-            userId);
+            pickupRequest.ListingId);
 
         // If completed, automatically create a transaction
         if (statusEnum == PickupRequestStatus.Completed)
@@ -456,9 +429,6 @@ public class PickupRequestService(
             try
             {
                 await transactionService.CreateTransactionAsync(requestId, userId);
-                logger.LogInformation(
-                    "Transaction creation triggered for completed pickup request {PickupRequestId}",
-                    requestId);
             }
             catch (Exception ex)
             {

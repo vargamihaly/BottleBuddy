@@ -25,11 +25,7 @@ public class BottleListingsController(IBottleListingService bottleListingService
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> GetListings([FromQuery] int page = 1, [FromQuery] int pageSize = 50, [FromQuery] ListingStatus? status = null)
     {
-        logger.LogInformation("Fetching bottle listings for page {Page} with size {PageSize} and status {Status}", page, pageSize, status?.ToString() ?? "any");
-
         var (listings, metadata) = await bottleListingService.GetListingsAsync(page, pageSize, status);
-
-        logger.LogInformation("Retrieved {ListingCount} listings for page {Page}", listings.Count(), metadata.Page);
 
         return Ok(new
         {
@@ -57,9 +53,7 @@ public class BottleListingsController(IBottleListingService bottleListingService
 
         try
         {
-            logger.LogInformation("Creating bottle listing for user {UserId}", userId);
             var listing = await bottleListingService.CreateListingAsync(userId, request);
-            logger.LogInformation("Bottle listing {ListingId} created for user {UserId}", listing.Id, userId);
             return CreatedAtAction(nameof(GetListings), new { id = listing.Id }, listing);
         }
         catch (UnauthorizedAccessException ex)
@@ -90,9 +84,7 @@ public class BottleListingsController(IBottleListingService bottleListingService
 
         try
         {
-            logger.LogInformation("Deleting bottle listing {ListingId} for user {UserId}", id, userId);
             await bottleListingService.DeleteListingAsync(userId, id);
-            logger.LogInformation("Bottle listing {ListingId} deleted for user {UserId}", id, userId);
             return NoContent();
         }
         catch (KeyNotFoundException ex)
