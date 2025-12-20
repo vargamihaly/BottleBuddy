@@ -422,6 +422,12 @@ const resources = {
                 confirmReject: "Reject this pickup request?",
                 confirmComplete: "Mark this pickup as completed? This confirms the bottles were successfully exchanged."
             },
+            pickupRequests: {
+                statusUpdateSuccessTitle: "Request Updated",
+                statusUpdateSuccessDescription: "The pickup request has been {{status}}.",
+                statusUpdateErrorTitle: "Update Failed",
+                statusUpdateErrorDescription: "Could not update the pickup request status."
+            },
             myListingsPage: {
                 title: "My Listings",
                 subtitle: "Manage all your bottle listings",
@@ -1213,6 +1219,12 @@ const resources = {
                 confirmAccept: "Elfogadod ezt az átvételi kérelmet? Ez lefoglaltként jelöli meg a hirdetést.",
                 confirmReject: "Elutasítod ezt az átvételi kérelmet?",
                 confirmComplete: "Befejezettként jelölöd meg ezt az átvételt? Ez megerősíti, hogy a palackok sikeresen cserélődtek."
+            },
+            pickupRequests: {
+                statusUpdateSuccessTitle: "Kérelem frissítve",
+                statusUpdateSuccessDescription: "Az átvételi kérelem állapota: {{status}}.",
+                statusUpdateErrorTitle: "Frissítés sikertelen",
+                statusUpdateErrorDescription: "Az átvételi kérelem állapotának frissítése nem sikerült."
             },
             myListingsPage: {
                 title: "Hirdetéseim",

@@ -3,19 +3,20 @@ import {useAuth} from "@/contexts/AuthContext";
 import {useMyBottleListings} from "@/features/listings/hooks";
 import {useQuery} from "@tanstack/react-query";
 import {pickupRequestService} from "@/features/pickup-requests/api";
-import {BottleListing, ListingStats} from "@/shared/types";
+import {BottleListing, ListingStats, PickupRequest} from "@/shared/types";
 import {useMyTransactions} from "@/features/dashboard/hooks";
 
 /**
- * Extended bottle listing with pending pickup request count
+ * Extended bottle listing with pickup requests
  */
 export interface BottleListingWithRequests extends BottleListing {
+    pickupRequests: PickupRequest[];
     pendingRequests: number;
 }
 
 /**
  * Custom hook for MyListings page
- * Fetches user's listings, enriches them with pending pickup request counts, and calculates stats
+ * Fetches user's listings, enriches them with pickup requests, and calculates stats
  */
 export const useMyListingsEnhanced = () => {
     const {user} = useAuth();
@@ -65,16 +66,17 @@ export const useMyListingsEnhanced = () => {
     // 5. Fetch transactions for earnings calculation
     const {data: transactions = []} = useMyTransactions();
 
-    // 6. Enrich listings with pendingRequests count
+    // 6. Enrich listings with pickupRequests
     const listingsWithRequests: BottleListingWithRequests[] = useMemo(() => {
         return myListings.map((listing) => {
-            const pickupRequests = allPickupRequests.filter(
+            const pickupRequestsForListing = allPickupRequests.filter(
                 (req: any) => req.listingId === listing.id
             );
-            const pendingCount = pickupRequests.filter((req: any) => req.status === "pending").length;
+            const pendingCount = pickupRequestsForListing.filter((req: any) => req.status === "pending").length;
 
             return {
                 ...listing,
+                pickupRequests: pickupRequestsForListing,
                 pendingRequests: pendingCount,
             };
         });

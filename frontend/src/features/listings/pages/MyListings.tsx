@@ -125,12 +125,6 @@ const MyListings = () => {
     }
   };
 
-  const handleViewRequests = (id: string) => {
-    // TODO: Navigate to listing detail page or open dialog
-    // For now, scroll to top and show info
-    console.log("View requests for listing:", id);
-  };
-
   if (!user) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center">
@@ -273,13 +267,11 @@ const MyListings = () => {
                 </div>
               ) : (
                 <div className="grid gap-4 lg:gap-5 md:grid-cols-2 lg:grid-cols-3">
-                  {filteredListings.map((listing, index) => (
+                  {filteredListings.map((listing) => (
                     <CompactListingCard
                       key={listing.id}
                       listing={listing}
                       onDelete={handleDelete}
-                      onViewRequests={handleViewRequests}
-                      className={`animate-slide-up stagger-${(index % 4) + 1}`}
                     />
                   ))}
                 </div>

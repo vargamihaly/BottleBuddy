@@ -1,15 +1,17 @@
-import {MapPin, Coins, Calendar, Clock, Bell, Eye, Trash2} from "lucide-react";
+import {MapPin, Coins, Calendar, Clock, Trash2} from "lucide-react";
 import {Card, CardHeader, CardTitle, CardContent} from "@/shared/ui/card";
 import {Button} from "@/shared/ui/button";
 import {Badge} from "@/shared/ui/badge";
 import {StatusTimeline} from "./StatusTimeline";
 import {BottleListingWithRequests} from "@/features/listings/hooks/useMyListingsEnhanced";
 import {useTranslation} from "react-i18next";
+import {useUpdatePickupRequestStatus} from "@/features/pickup-requests/hooks";
+import {PickupRequestItem} from "./PickupRequestItem";
+import {Separator} from "@/shared/ui/separator";
 
 interface CompactListingCardProps {
   listing: BottleListingWithRequests;
   onDelete: (id: string) => void;
-  onViewRequests?: (id: string) => void;
 }
 
 function formatDate(dateStr: string): string {
@@ -43,9 +45,23 @@ function getDeadlineColor(deadline?: string): string {
 export const CompactListingCard = ({
   listing,
   onDelete,
-  onViewRequests,
 }: CompactListingCardProps) => {
   const {t} = useTranslation();
+  const updateStatusMutation = useUpdatePickupRequestStatus();
+
+  const handleAccept = (requestId: string) => {
+    if (window.confirm(t('listing.confirmAccept'))) {
+      updateStatusMutation.mutate({ requestId, status: "accepted" });
+    }
+  };
+
+  const handleReject = (requestId: string) => {
+    if (window.confirm(t('listing.confirmReject'))) {
+      updateStatusMutation.mutate({ requestId, status: "rejected" });
+    }
+  };
+  
+  const pendingPickupRequests = listing.pickupRequests.filter(req => req.status === 'pending');
 
   const statusVariant: Record<string, "default" | "secondary" | "outline"> = {
     open: "default",
@@ -79,7 +95,7 @@ export const CompactListingCard = ({
         {/* StatusTimeline */}
         <StatusTimeline
           status={listing.status}
-          pendingRequests={listing.pendingRequests}
+          pendingRequests={pendingPickupRequests.length}
           className="py-2"
         />
 
@@ -103,38 +119,35 @@ export const CompactListingCard = ({
           )}
         </div>
 
-        {/* Pending Requests Badge */}
-        {listing.status === "open" && listing.pendingRequests > 0 && (
-          <Badge
-            variant="secondary"
-            className="w-full justify-center bg-orange-100 text-orange-700 cursor-pointer hover:bg-orange-200 transition-colors"
-            onClick={() => onViewRequests?.(listing.id)}
-          >
-            <Bell className="w-3 h-3 mr-1" />
-            {listing.pendingRequests} pending request{listing.pendingRequests > 1 ? "s" : ""}
-          </Badge>
+        {/* Pending Requests Section */}
+        {listing.status === "open" && pendingPickupRequests.length > 0 && (
+            <div className="space-y-2 pt-2">
+              <Separator />
+              <h4 className="text-sm font-semibold text-gray-700 pt-2">
+                {t('listing.pickupRequests')}
+              </h4>
+              {pendingPickupRequests.map((request) => (
+                <PickupRequestItem
+                  key={request.id}
+                  request={request}
+                  onAccept={handleAccept}
+                  onReject={handleReject}
+                  isUpdating={updateStatusMutation.isPending}
+                />
+              ))}
+            </div>
         )}
 
         {/* Actions */}
         <div className="flex gap-2 pt-2 border-t border-gray-100">
-          {listing.status === "open" && listing.pendingRequests > 0 && onViewRequests && (
-            <Button
-              onClick={() => onViewRequests(listing.id)}
-              className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
-              size="sm"
-            >
-              <Eye className="w-4 h-4 mr-1" />
-              {t("myListingsPage.viewRequests")}
-            </Button>
-          )}
           <Button
             onClick={() => onDelete(listing.id)}
             variant="destructive"
             size="sm"
-            className={listing.pendingRequests > 0 ? "shrink-0" : "flex-1"}
+            className="flex-1"
           >
-            <Trash2 className="w-4 h-4" />
-            {listing.pendingRequests === 0 && <span className="ml-1">Delete</span>}
+            <Trash2 className="w-4 h-4 mr-1" />
+            <span>Delete</span>
           </Button>
         </div>
       </CardContent>
