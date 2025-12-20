@@ -1,7 +1,5 @@
-import {
-  Button,
-  Badge,
-} from '@/shared/ui';
+import { Button } from '@/shared/ui/button';
+import { Badge } from '@/shared/ui/badge';
 import {
   CheckCircle,
   Users,
