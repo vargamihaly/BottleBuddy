@@ -176,6 +176,20 @@ public class BottleListingService(
             throw new UnauthorizedAccessException("You can only delete your own listings.");
         }
 
+        // Check if listing has any transactions (financial records that must be preserved)
+        var hasTransactions = await context.Transactions
+            .AnyAsync(t => t.ListingId == listingId);
+
+        if (hasTransactions)
+        {
+            logger.LogWarning(
+                "User {UserId} attempted to delete listing {ListingId} with completed transactions",
+                userId,
+                listingId);
+            throw new InvalidOperationException(
+                "Cannot delete listing with completed transactions. Completed transactions represent financial records that must be preserved.");
+        }
+
         var bottleCount = listing.BottleCount;
         var locationAddress = listing.LocationAddress;
 

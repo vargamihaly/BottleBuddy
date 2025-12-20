@@ -138,6 +138,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             entity.HasIndex(m => m.PickupRequestId);
 
             // Index for ordering messages by creation time
+            
             entity.HasIndex(m => m.CreatedAtUtc);
 
             // Default value for CreatedAtUtc

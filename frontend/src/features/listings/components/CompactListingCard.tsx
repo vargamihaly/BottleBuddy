@@ -1,4 +1,5 @@
-import {MapPin, Coins, Calendar, Clock, Trash2} from "lucide-react";
+import {useState} from "react";
+import {MapPin, Coins, Calendar, Clock, Trash2, Star, Users} from "lucide-react";
 import {Card, CardHeader, CardTitle, CardContent} from "@/shared/ui/card";
 import {Button} from "@/shared/ui/button";
 import {Badge} from "@/shared/ui/badge";
@@ -8,6 +9,12 @@ import {useTranslation} from "react-i18next";
 import {useUpdatePickupRequestStatus} from "@/features/pickup-requests/hooks";
 import {PickupRequestItem} from "./PickupRequestItem";
 import {Separator} from "@/shared/ui/separator";
+import {RatingDialog} from "@/features/listings/components";
+import {
+  useRatingByTransaction,
+  useTransactionByPickupRequest
+} from "@/features/dashboard/hooks";
+import type {Transaction} from "@/shared/types";
 
 interface CompactListingCardProps {
   listing: BottleListingWithRequests;
@@ -49,6 +56,10 @@ export const CompactListingCard = ({
   const {t} = useTranslation();
   const updateStatusMutation = useUpdatePickupRequestStatus();
 
+  // Rating dialog state
+  const [showRatingDialog, setShowRatingDialog] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+
   const handleAccept = (requestId: string) => {
     if (window.confirm(t('listing.confirmAccept'))) {
       updateStatusMutation.mutate({ requestId, status: "accepted" });
@@ -60,8 +71,9 @@ export const CompactListingCard = ({
       updateStatusMutation.mutate({ requestId, status: "rejected" });
     }
   };
-  
+
   const pendingPickupRequests = listing.pickupRequests.filter(req => req.status === 'pending');
+  const completedPickupRequests = listing.pickupRequests.filter(req => req.status === 'completed');
 
   const statusVariant: Record<string, "default" | "secondary" | "outline"> = {
     open: "default",
@@ -69,7 +81,92 @@ export const CompactListingCard = ({
     completed: "outline",
   };
 
+  // Sub-component for rating completed requests
+  const CompletedRequestRating = ({
+    requestId,
+    volunteerName,
+  }: {
+    requestId: string;
+    volunteerName: string;
+  }) => {
+    const {data: transaction, isLoading: isLoadingTransaction} =
+      useTransactionByPickupRequest(requestId);
+
+    const transactionId = transaction?.id ?? '';
+    const {data: myRating, isLoading: isLoadingRating} =
+      useRatingByTransaction(transactionId, !!transactionId);
+
+    if (isLoadingTransaction || isLoadingRating) {
+      return <div className="text-xs text-gray-500">{t('listing.loadingRequests')}</div>;
+    }
+
+    if (!transaction) {
+      return (
+        <div className="text-xs text-gray-500">
+          {t('listing.transactionPending')}
+        </div>
+      );
+    }
+
+    return (
+      <div className="bg-gray-50 rounded-lg p-3 space-y-2">
+        {/* Volunteer Info */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <Users className="w-4 h-4 text-gray-500" />
+            <span className="text-sm font-medium text-gray-900">{volunteerName}</span>
+          </div>
+          <Badge variant="outline" className="bg-green-100 text-green-800">
+            {t('listing.completed')}
+          </Badge>
+        </div>
+
+        {/* Transaction Amount */}
+        <div className="flex items-center gap-2 text-sm">
+          <Coins className="w-4 h-4 text-green-600" />
+          <span className="text-gray-700">
+            {t('listing.earned')}: <span className="font-semibold text-green-700">
+              {transaction.ownerAmount} HUF
+            </span>
+          </span>
+        </div>
+
+        {/* Rating Section */}
+        {myRating ? (
+          <div className="flex items-center gap-2 pt-2 border-t border-gray-200">
+            <span className="text-xs text-gray-600">{t('listing.yourRating')}:</span>
+            <div className="flex gap-0.5">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <Star
+                  key={star}
+                  className={`w-4 h-4 ${
+                    star <= myRating.value
+                      ? 'fill-yellow-400 text-yellow-400'
+                      : 'text-gray-300'
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
+        ) : (
+          <Button
+            size="sm"
+            className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+            onClick={() => {
+              setSelectedTransaction(transaction);
+              setShowRatingDialog(true);
+            }}
+          >
+            <Star className="w-3 h-3 mr-1" />
+            {t('listing.rateVolunteer')}
+          </Button>
+        )}
+      </div>
+    );
+  };
+
   return (
+    <>
     <Card className="hover:shadow-lg transition-all duration-300 hover:scale-[1.01]">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-3">
@@ -138,19 +235,55 @@ export const CompactListingCard = ({
             </div>
         )}
 
+        {/* Completed Requests Section */}
+        {(listing.status === "completed" || listing.status === "claimed") &&
+          completedPickupRequests.length > 0 && (
+            <div className="space-y-2 pt-2">
+              <Separator />
+              <h4 className="text-sm font-semibold text-gray-700 pt-2">
+                {t('listing.completedPickups')}
+              </h4>
+              {completedPickupRequests.map((request) => (
+                <CompletedRequestRating
+                  key={request.id}
+                  requestId={request.id}
+                  volunteerName={request.volunteerName || request.volunteerEmail || 'Volunteer'}
+                />
+              ))}
+            </div>
+          )}
+
         {/* Actions */}
-        <div className="flex gap-2 pt-2 border-t border-gray-100">
-          <Button
-            onClick={() => onDelete(listing.id)}
-            variant="destructive"
-            size="sm"
-            className="flex-1"
-          >
-            <Trash2 className="w-4 h-4 mr-1" />
-            <span>Delete</span>
-          </Button>
-        </div>
+        {listing.status !== "completed" && (
+          <div className="flex gap-2 pt-2 border-t border-gray-100">
+            <Button
+              onClick={() => onDelete(listing.id)}
+              variant="destructive"
+              size="sm"
+              className="flex-1"
+            >
+              <Trash2 className="w-4 h-4 mr-1" />
+              <span>Delete</span>
+            </Button>
+          </div>
+        )}
       </CardContent>
     </Card>
+    {/* Rating Dialog */}
+    {selectedTransaction && (
+      <RatingDialog
+        open={showRatingDialog}
+        onOpenChange={setShowRatingDialog}
+        transaction={selectedTransaction}
+        otherPartyName={
+          completedPickupRequests.find(r => r.id === selectedTransaction.pickupRequestId)
+            ?.volunteerName ||
+          completedPickupRequests.find(r => r.id === selectedTransaction.pickupRequestId)
+            ?.volunteerEmail ||
+          'Volunteer'
+        }
+      />
+    )}
+    </>
   );
 };

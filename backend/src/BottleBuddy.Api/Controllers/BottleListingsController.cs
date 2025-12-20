@@ -87,6 +87,11 @@ public class BottleListingsController(IBottleListingService bottleListingService
             await bottleListingService.DeleteListingAsync(userId, id);
             return NoContent();
         }
+        catch (InvalidOperationException ex)
+        {
+            logger.LogWarning(ex, "Invalid operation deleting listing {ListingId}", id);
+            return BadRequest(new { error = ex.Message });
+        }
         catch (KeyNotFoundException ex)
         {
             logger.LogWarning(ex, "Bottle listing {ListingId} not found for user {UserId}", id, userId);

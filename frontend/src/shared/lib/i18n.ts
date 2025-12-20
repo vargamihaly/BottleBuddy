@@ -420,7 +420,12 @@ const resources = {
                 confirmOffer: "Are you sure you want to offer to pick up {{count}} bottles from {{location}}?",
                 confirmAccept: "Accept this pickup request? This will mark the listing as claimed.",
                 confirmReject: "Reject this pickup request?",
-                confirmComplete: "Mark this pickup as completed? This confirms the bottles were successfully exchanged."
+                confirmComplete: "Mark this pickup as completed? This confirms the bottles were successfully exchanged.",
+                completedPickups: "Completed Pickups",
+                transactionPending: "Transaction pending...",
+                earned: "Earned",
+                yourRating: "Your rating",
+                rateVolunteer: "Rate Volunteer"
             },
             myListingsPage: {
                 title: "My Listings",
@@ -1212,7 +1217,12 @@ const resources = {
                 confirmOffer: "Biztosan fel szeretnéd ajánlani {{count}} palack átvételét innen: {{location}}?",
                 confirmAccept: "Elfogadod ezt az átvételi kérelmet? Ez lefoglaltként jelöli meg a hirdetést.",
                 confirmReject: "Elutasítod ezt az átvételi kérelmet?",
-                confirmComplete: "Befejezettként jelölöd meg ezt az átvételt? Ez megerősíti, hogy a palackok sikeresen cserélődtek."
+                confirmComplete: "Befejezettként jelölöd meg ezt az átvételt? Ez megerősíti, hogy a palackok sikeresen cserélődtek.",
+                completedPickups: "Teljesített átvételek",
+                transactionPending: "Tranzakció függőben...",
+                earned: "Kerestél",
+                yourRating: "Értékelésed",
+                rateVolunteer: "Önkéntes értékelése"
             },
             myListingsPage: {
                 title: "Hirdetéseim",
