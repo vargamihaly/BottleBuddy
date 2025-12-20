@@ -117,10 +117,12 @@ public class RatingService(
         });
 
         logger.LogInformation(
-            "Rating {RatingId} created for transaction {TransactionId} by user {RaterId}",
+            "RatingCreated: Id {RatingId} for transaction {TransactionId}. Rater {RaterId} rated user {RatedUserId} with {RatingValue} stars.",
             rating.Id,
             dto.TransactionId,
-            raterId);
+            raterId,
+            ratedUserId,
+            dto.Value);
 
         return await MapToResponseDto(rating);
     }

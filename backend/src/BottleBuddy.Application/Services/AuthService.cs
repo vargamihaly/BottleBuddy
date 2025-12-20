@@ -74,7 +74,7 @@ public class AuthService(
         await context.SaveChangesAsync();
 
         var token = GenerateJwtToken(user);
-        logger.LogInformation("Registration succeeded for email {Email}", request.Email);
+        logger.LogInformation("UserRegistered: UserId {UserId} with email {Email}", user.Id, request.Email);
         return new AuthResponseDto { Token = token };
     }
 
@@ -124,7 +124,7 @@ public class AuthService(
         }
 
         var token = GenerateJwtToken(user);
-        logger.LogInformation("Login succeeded for email {Email}", request.Email);
+        logger.LogInformation("UserLoggedIn: UserId {UserId} with email {Email}", user.Id, request.Email);
         return new AuthResponseDto { Token = token };
     }
 

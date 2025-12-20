@@ -125,7 +125,7 @@ public class BottleListingService(
         });
 
         logger.LogInformation(
-            "Listing created: {ListingId} by {UserId}, title: {Title}, bottles: {BottleCount}",
+            "BottleListingCreated: Id {ListingId} by user {UserId}, title: {Title}, bottles: {BottleCount}",
             listing.Id,
             userId,
             listing.Title,
@@ -196,7 +196,7 @@ public class BottleListingService(
         });
 
         logger.LogInformation(
-            "Listing deleted: {ListingId} by {UserId}, bottles: {BottleCount}",
+            "BottleListingDeleted: Id {ListingId} by user {UserId}, bottles: {BottleCount}",
             listingId,
             userId,
             bottleCount);

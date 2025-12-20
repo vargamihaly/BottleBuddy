@@ -137,7 +137,7 @@ public class PickupRequestService(
         }
 
         logger.LogInformation(
-            "Pickup request created: {PickupRequestId} for listing {ListingId} by volunteer {VolunteerId}, bottles: {BottleCount}",
+            "PickupRequestCreated: Id {PickupRequestId} for listing {ListingId} by volunteer {VolunteerId}, bottles: {BottleCount}",
             pickupRequest.Id,
             pickupRequest.ListingId,
             volunteerId,
@@ -309,6 +309,13 @@ public class PickupRequestService(
         // Create activities based on status change
         if (statusEnum == PickupRequestStatus.Accepted)
         {
+            logger.LogInformation(
+                "PickupRequestStatusUpdated: Id {PickupRequestId} to {Status} by owner {OwnerId}. Listing {ListingId} is now Claimed.",
+                pickupRequest.Id,
+                statusEnum,
+                userId,
+                pickupRequest.ListingId);
+            
             // Notify owner
             await userActivityService.CreateActivityAsync(new ActivityCreationData
             {
@@ -362,6 +369,12 @@ public class PickupRequestService(
         }
         else if (statusEnum == PickupRequestStatus.Rejected)
         {
+            logger.LogInformation(
+                "PickupRequestStatusUpdated: Id {PickupRequestId} to {Status} by owner {OwnerId}.",
+                pickupRequest.Id,
+                statusEnum,
+                userId);
+            
             // Notify owner
             await userActivityService.CreateActivityAsync(new ActivityCreationData
             {
@@ -390,6 +403,13 @@ public class PickupRequestService(
         }
         else if (statusEnum == PickupRequestStatus.Completed)
         {
+            logger.LogInformation(
+                "PickupRequestStatusUpdated: Id {PickupRequestId} to {Status} by user {UserId}. Listing {ListingId} is now Completed.",
+                pickupRequest.Id,
+                statusEnum,
+                userId,
+                pickupRequest.ListingId);
+            
             // Notify both parties
             await userActivityService.CreateActivityAsync(new ActivityCreationData
             {
@@ -416,12 +436,6 @@ public class PickupRequestService(
                 }
             });
         }
-
-        logger.LogInformation(
-            "Pickup request status updated: {PickupRequestId} → {Status}, listing: {ListingId}",
-            pickupRequest.Id,
-            pickupRequest.Status,
-            pickupRequest.ListingId);
 
         // If completed, automatically create a transaction
         if (statusEnum == PickupRequestStatus.Completed)

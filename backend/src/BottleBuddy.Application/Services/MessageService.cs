@@ -88,10 +88,11 @@ public class MessageService(
         await context.SaveChangesAsync();
 
         logger.LogInformation(
-            "Message {MessageId} created for pickup request {PickupRequestId} by user {SenderId}",
+            "MessageSent: Id {MessageId} in pickup request {PickupRequestId} by user {SenderId}. HasImage: {HasImage}",
             message.Id,
             pickupRequestId,
-            senderId);
+            senderId,
+            message.ImageUrl != null);
 
         var messageDto = await MapToResponseDto(message);
 
@@ -271,7 +272,7 @@ public class MessageService(
         await context.SaveChangesAsync();
 
         logger.LogInformation(
-            "Marked {MessageCount} messages as read for pickup request {PickupRequestId} by user {UserId}",
+            "MessagesMarkedAsRead: {MessageCount} messages in pickup request {PickupRequestId} by user {UserId}",
             messagesToUpdate.Count,
             pickupRequestId,
             userId);

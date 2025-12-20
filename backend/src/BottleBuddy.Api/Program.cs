@@ -10,6 +10,7 @@ using BottleBuddy.Infrastructure.Email;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Formatting.Compact;
+using Serilog.Sinks.ApplicationInsights.TelemetryConverters;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Async(writeTo => writeTo.Console(new RenderedCompactJsonFormatter()))
@@ -34,6 +35,14 @@ try
             .Enrich.WithProcessId()
             .Enrich.WithThreadId()
             .WriteTo.Async(writeTo => writeTo.Console(new RenderedCompactJsonFormatter()));
+        
+        var connectionString = context.Configuration["ApplicationInsights:ConnectionString"];
+        if (!string.IsNullOrEmpty(connectionString))
+        {
+            loggerConfiguration.WriteTo.ApplicationInsights(
+                connectionString,
+                new TraceTelemetryConverter());
+        }
     });
 
     // Add services to the container

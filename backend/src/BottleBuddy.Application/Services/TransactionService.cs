@@ -195,9 +195,14 @@ public class TransactionService(
         }
 
         logger.LogInformation(
-            "Transaction {TransactionId} created for pickup request {PickupRequestId}",
+            "TransactionCreated: Id {TransactionId} for pickup request {PickupRequestId}. Owner {OwnerId} received {OwnerAmount}, volunteer {VolunteerId} received {VolunteerAmount}. Total refund: {TotalRefund}",
             transaction.Id,
-            pickupRequestId);
+            pickupRequestId,
+            listing.OwnerId,
+            ownerAmount,
+            pickupRequest.VolunteerId,
+            volunteerAmount,
+            totalRefund);
 
         return await MapToResponseDto(transaction);
     }
